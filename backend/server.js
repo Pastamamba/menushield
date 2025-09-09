@@ -25,8 +25,10 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "supersecret";
 // Health check endpoint
 app.get('/health', async (req, res) => {
   try {
+    console.log('Health check requested');
     // Test database connection
     await prisma.$queryRaw`SELECT 1`;
+    console.log('Database connection OK');
     res.status(200).json({ 
       status: 'ok', 
       timestamp: new Date().toISOString(),
@@ -42,6 +44,16 @@ app.get('/health', async (req, res) => {
       error: error.message
     });
   }
+});
+
+// Simple test endpoint that doesn't need database
+app.get('/ping', (req, res) => {
+  console.log('Ping received');
+  res.status(200).json({ 
+    message: 'pong', 
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV 
+  });
 });
 
 app.use(
