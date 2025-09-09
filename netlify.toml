@@ -6,15 +6,15 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# Redirect all routes to index.html for SPA
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
-# API proxy to backend (Railway URL)
+# API proxy to backend (Railway URL) - must come BEFORE SPA redirect!
 [[redirects]]
   from = "/api/*"
   to = "https://menushield-production.up.railway.app/api/:splat"
   status = 200
   force = true
+
+# Redirect all routes to index.html for SPA
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

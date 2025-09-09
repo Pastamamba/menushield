@@ -61,51 +61,121 @@ app.post('/api/seed', async (req, res) => {
   try {
     console.log('Manual seed requested');
     
-    // Check if data exists
-    const existingDishes = await prisma.dish.count();
-    if (existingDishes > 0) {
-      return res.json({ message: `Database already has ${existingDishes} dishes`, seeded: false });
-    }
+    // Check if categories exist
+    const existingCategories = await prisma.category.count();
+    if (existingCategories === 0) {
+      // Create categories
+      const categories = [
+        { name: 'Appetizers', description: 'Start your meal with these delicious appetizers' },
+        { name: 'Salads', description: 'Fresh and healthy salad options' },
+        { name: 'Main Course', description: 'Hearty main dishes' },
+        { name: 'Pizza', description: 'Wood-fired pizzas' },
+        { name: 'Bowls', description: 'Healthy bowl options' },
+        { name: 'Desserts', description: 'Sweet treats to end your meal' },
+        { name: 'Beverages', description: 'Drinks and refreshments' }
+      ];
 
-    // Create sample dishes
-    const sampleDishes = [
-      {
-        name: 'Margherita Pizza',
-        description: 'Classic tomato sauce, mozzarella, fresh basil',
-        price: 12.90,
-        category: 'Pizza',
-        allergenTags: JSON.stringify(['dairy', 'gluten']),
-        isModifiable: true,
-        modificationNote: 'Can be made vegan with dairy-free cheese'
-      },
-      {
-        name: 'Caesar Salad',
-        description: 'Romaine lettuce, parmesan, croutons, caesar dressing',
-        price: 10.50,
-        category: 'Salads',
-        allergenTags: JSON.stringify(['dairy', 'eggs', 'gluten']),
-        isModifiable: true,
-        modificationNote: 'Can be made without croutons for gluten-free'
-      },
-      {
-        name: 'Grilled Salmon',
-        description: 'Fresh Atlantic salmon with lemon herb butter',
-        price: 18.90,
-        category: 'Main Course',
-        allergenTags: JSON.stringify(['fish']),
-        isModifiable: false
+      for (const category of categories) {
+        await prisma.category.create({ data: category });
       }
-    ];
-
-    for (const dish of sampleDishes) {
-      await prisma.dish.create({ data: dish });
+      console.log(`✅ Created ${categories.length} categories`);
     }
 
-    console.log(`✅ Created ${sampleDishes.length} sample dishes`);
+    // Check if ingredients exist
+    const existingIngredients = await prisma.ingredient.count();
+    if (existingIngredients === 0) {
+      // Create ingredients
+      const ingredients = [
+        { name: 'Chicken Breast', allergens: JSON.stringify([]) },
+        { name: 'Salmon', allergens: JSON.stringify(['fish']) },
+        { name: 'Mozzarella', allergens: JSON.stringify(['dairy']) },
+        { name: 'Spinach', allergens: JSON.stringify([]) },
+        { name: 'Tomatoes', allergens: JSON.stringify([]) },
+        { name: 'Quinoa', allergens: JSON.stringify([]) },
+        { name: 'Avocado', allergens: JSON.stringify([]) },
+        { name: 'Eggs', allergens: JSON.stringify(['eggs']) },
+        { name: 'Wheat Flour', allergens: JSON.stringify(['gluten']) },
+        { name: 'Basil', allergens: JSON.stringify([]) }
+      ];
+
+      for (const ingredient of ingredients) {
+        await prisma.ingredient.create({ data: ingredient });
+      }
+      console.log(`✅ Created ${ingredients.length} ingredients`);
+    }
+
+    // Check if admin user exists
+    const existingUsers = await prisma.user.count();
+    if (existingUsers === 0) {
+      // Create admin user
+      const adminUser = {
+        email: process.env.ADMIN_EMAIL || 'admin@menushield.com',
+        password: process.env.ADMIN_PASSWORD || 'admin123',
+        role: 'ADMIN',
+        name: 'Administrator'
+      };
+
+      await prisma.user.create({ data: adminUser });
+      console.log('✅ Created admin user');
+    }
+
+    // Check if more dishes are needed
+    const existingDishes = await prisma.dish.count();
+    if (existingDishes < 5) {
+      // Create additional sample dishes
+      const sampleDishes = [
+        {
+          name: 'Margherita Pizza',
+          description: 'Classic tomato sauce, mozzarella, fresh basil',
+          price: 12.90,
+          category: 'Pizza',
+          allergenTags: JSON.stringify(['dairy', 'gluten']),
+          isModifiable: true,
+          modificationNote: 'Can be made vegan with dairy-free cheese'
+        },
+        {
+          name: 'Caesar Salad',
+          description: 'Romaine lettuce, parmesan, croutons, caesar dressing',
+          price: 10.50,
+          category: 'Salads',
+          allergenTags: JSON.stringify(['dairy', 'eggs', 'gluten']),
+          isModifiable: true,
+          modificationNote: 'Can be made without croutons for gluten-free'
+        },
+        {
+          name: 'Chicken Teriyaki Bowl',
+          description: 'Grilled chicken with teriyaki sauce, rice, and vegetables',
+          price: 15.90,
+          category: 'Bowls',
+          allergenTags: JSON.stringify(['soy']),
+          isModifiable: true,
+          modificationNote: 'Can substitute chicken with tofu'
+        }
+      ];
+
+      for (const dish of sampleDishes) {
+        // Check if dish already exists
+        const existing = await prisma.dish.findFirst({
+          where: { name: dish.name }
+        });
+        if (!existing) {
+          await prisma.dish.create({ data: dish });
+        }
+      }
+      console.log(`✅ Added sample dishes`);
+    }
+
+    const stats = {
+      categories: await prisma.category.count(),
+      ingredients: await prisma.ingredient.count(),
+      dishes: await prisma.dish.count(),
+      users: await prisma.user.count()
+    };
+
     res.json({ 
-      message: `Successfully seeded ${sampleDishes.length} dishes`, 
-      seeded: true,
-      dishes: sampleDishes.length
+      message: 'Database seeded successfully', 
+      stats,
+      seeded: true
     });
   } catch (error) {
     console.error('Seed error:', error);
