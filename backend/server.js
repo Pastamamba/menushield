@@ -66,13 +66,13 @@ app.post('/api/seed', async (req, res) => {
     if (existingCategories === 0) {
       // Create categories
       const categories = [
-        { name: 'Appetizers', description: 'Start your meal with these delicious appetizers' },
-        { name: 'Salads', description: 'Fresh and healthy salad options' },
-        { name: 'Main Course', description: 'Hearty main dishes' },
-        { name: 'Pizza', description: 'Wood-fired pizzas' },
-        { name: 'Bowls', description: 'Healthy bowl options' },
-        { name: 'Desserts', description: 'Sweet treats to end your meal' },
-        { name: 'Beverages', description: 'Drinks and refreshments' }
+        { name: 'Appetizers', description: 'Start your meal with these delicious appetizers', color: '#ff6b6b' },
+        { name: 'Salads', description: 'Fresh and healthy salad options', color: '#4ecdc4' },
+        { name: 'Main Course', description: 'Hearty main dishes', color: '#45b7d1' },
+        { name: 'Pizza', description: 'Wood-fired pizzas', color: '#feca57' },
+        { name: 'Bowls', description: 'Healthy bowl options', color: '#ff9ff3' },
+        { name: 'Desserts', description: 'Sweet treats to end your meal', color: '#54a0ff' },
+        { name: 'Beverages', description: 'Drinks and refreshments', color: '#5f27cd' }
       ];
 
       for (const category of categories) {
@@ -86,16 +86,16 @@ app.post('/api/seed', async (req, res) => {
     if (existingIngredients === 0) {
       // Create ingredients
       const ingredients = [
-        { name: 'Chicken Breast', allergens: JSON.stringify([]) },
-        { name: 'Salmon', allergens: JSON.stringify(['fish']) },
-        { name: 'Mozzarella', allergens: JSON.stringify(['dairy']) },
-        { name: 'Spinach', allergens: JSON.stringify([]) },
-        { name: 'Tomatoes', allergens: JSON.stringify([]) },
-        { name: 'Quinoa', allergens: JSON.stringify([]) },
-        { name: 'Avocado', allergens: JSON.stringify([]) },
-        { name: 'Eggs', allergens: JSON.stringify(['eggs']) },
-        { name: 'Wheat Flour', allergens: JSON.stringify(['gluten']) },
-        { name: 'Basil', allergens: JSON.stringify([]) }
+        { name: 'Chicken Breast', allergenTags: JSON.stringify([]) },
+        { name: 'Salmon', allergenTags: JSON.stringify(['fish']) },
+        { name: 'Mozzarella', allergenTags: JSON.stringify(['dairy']) },
+        { name: 'Spinach', allergenTags: JSON.stringify([]) },
+        { name: 'Tomatoes', allergenTags: JSON.stringify([]) },
+        { name: 'Quinoa', allergenTags: JSON.stringify([]) },
+        { name: 'Avocado', allergenTags: JSON.stringify([]) },
+        { name: 'Eggs', allergenTags: JSON.stringify(['eggs']) },
+        { name: 'Wheat Flour', allergenTags: JSON.stringify(['gluten']) },
+        { name: 'Basil', allergenTags: JSON.stringify([]) }
       ];
 
       for (const ingredient of ingredients) {
@@ -110,9 +110,8 @@ app.post('/api/seed', async (req, res) => {
       // Create admin user
       const adminUser = {
         email: process.env.ADMIN_EMAIL || 'admin@menushield.com',
-        password: process.env.ADMIN_PASSWORD || 'admin123',
-        role: 'ADMIN',
-        name: 'Administrator'
+        passwordHash: process.env.ADMIN_PASSWORD || 'admin123',
+        restaurantName: 'MenuShield Demo Restaurant'
       };
 
       await prisma.user.create({ data: adminUser });
