@@ -26,8 +26,8 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "supersecret";
 app.get('/health', async (req, res) => {
   try {
     console.log('Health check requested');
-    // Test database connection
-    await prisma.$queryRaw`SELECT 1`;
+    // Test database connection with MongoDB
+    await prisma.$connect();
     console.log('Database connection OK');
     res.status(200).json({ 
       status: 'ok', 
@@ -59,7 +59,7 @@ app.get('/ping', (req, res) => {
 app.use(
   cors({
     origin: process.env.NODE_ENV === 'production' 
-      ? ['https://your-app-name.netlify.app'] // Update this after deploying to Netlify
+      ? ['https://menushield.netlify.app', 'https://menushield-production.netlify.app'] // Päivitetään Netlify URL:llä
       : [
         "http://localhost:3000",
         "http://localhost:5173",
