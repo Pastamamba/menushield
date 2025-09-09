@@ -1,39 +1,37 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { VitePWA } from "vite-plugin-pwa";
-
 import tailwindcss from "@tailwindcss/vite";
 
-export default defineConfig({
-  plugins: [
-    react(),
-    tailwindcss(),
-    VitePWA({
-      registerType: "autoUpdate",
-      manifest: {
-        name: "MenuShield",
-        short_name: "MenuShield",
-        start_url: "/",
-        display: "standalone",
-        background_color: "#ffffff",
-        icons: [
-          { src: "/pwa-192.png", sizes: "192x192", type: "image/png" },
-          { src: "/pwa-512.png", sizes: "512x512", type: "image/png" },
-        ],
-      },
-    }),
-  ],
+export default defineConfig(({ mode }) => ({
+  plugins: [react(), tailwindcss()],
   server: {
+    port: 5176,
+    host: "127.0.0.1",
     hmr: {
-      port: 5174,
+      port: 5176,
     },
     proxy: {
-      // any request to /api/* will be piped to http://localhost:4000/api/*
       "/api": {
-        target: "http://localhost:4000",
+        target:
+          mode === "production"
+            ? "http://backend:4000"
+            : "http://localhost:4000",
         changeOrigin: true,
         secure: false,
       },
     },
   },
-});
+  build: {
+    outDir: "dist",
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom"],
+          router: ["react-router-dom"],
+        },
+      },
+    },
+  },
+  clearScreen: false,
+}));

@@ -1,5 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
+import {
+  useAdminDishes,
+  useCreateDish,
+  useUpdateDish,
+  useDeleteDish,
+} from "../utils/dishApi";
 import type { Dish, CreateDishRequest, AllergenTag } from "../types";
 
 // Common allergen tags with colors
@@ -24,11 +30,20 @@ const CATEGORIES = [
 ];
 
 export default function DishManager() {
-  const { token } = useAuth();
-  const [dishes, setDishes] = useState<Dish[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingDish, setEditingDish] = useState<Dish | null>(null);
-  const [loading, setLoading] = useState(false);
+
+  // TanStack Query hooks
+  const {
+    data: dishes = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useAdminDishes();
+
+  const createDishMutation = useCreateDish();
+  const updateDishMutation = useUpdateDish();
+  const deleteDishMutation = useDeleteDish();
 
   // Form state
   const [formData, setFormData] = useState<CreateDishRequest>({
@@ -42,23 +57,6 @@ export default function DishManager() {
     is_modifiable: false,
   });
   const [currentIngredient, setCurrentIngredient] = useState("");
-
-  const fetchDishes = async () => {
-    try {
-      const res = await fetch("http://localhost:4000/api/admin/menu", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setDishes(data);
-    } catch (error) {
-      console.error("Failed to fetch dishes:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchDishes();
-  }, [token]);
-
   const resetForm = () => {
     setFormData({
       name: "",
@@ -77,35 +75,20 @@ export default function DishManager() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
 
     try {
-      const url = editingDish
-        ? `http://localhost:4000/api/admin/menu/${editingDish.id}`
-        : "http://localhost:4000/api/admin/menu";
-
-      const method = editingDish ? "PUT" : "POST";
-
-      const res = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (res.ok) {
-        await fetchDishes();
-        resetForm();
+      if (editingDish) {
+        await updateDishMutation.mutateAsync({
+          id: editingDish.id,
+          dish: formData,
+        });
       } else {
-        alert("Failed to save dish");
+        await createDishMutation.mutateAsync(formData);
       }
+      resetForm();
     } catch (error) {
       console.error("Failed to save dish:", error);
       alert("Failed to save dish");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -128,19 +111,7 @@ export default function DishManager() {
     if (!confirm("Are you sure you want to delete this dish?")) return;
 
     try {
-      const res = await fetch(
-        `http://localhost:4000/api/admin/menu/${dishId}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (res.ok) {
-        await fetchDishes();
-      } else {
-        alert("Failed to delete dish");
-      }
+      await deleteDishMutation.mutateAsync(dishId);
     } catch (error) {
       console.error("Failed to delete dish:", error);
       alert("Failed to delete dish");
@@ -182,7 +153,10 @@ export default function DishManager() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Dish Management</h2>
+        <div>
+          <h2 className="text-2xl font-bold">Dish Management</h2>
+          <p className="text-gray-600">Found {dishes.length} dishes</p>
+        </div>
         <button
           onClick={() => setIsFormOpen(true)}
           className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
@@ -190,6 +164,26 @@ export default function DishManager() {
           Add New Dish
         </button>
       </div>
+
+      {/* Loading State */}
+      {loading && (
+        <div className="text-center py-8">
+          <div className="text-gray-500">Loading dishes...</div>
+        </div>
+      )}
+
+      {/* No Dishes State */}
+      {!loading && dishes.length === 0 && (
+        <div className="text-center py-8 bg-gray-50 rounded-lg">
+          <div className="text-gray-500 mb-4">No dishes found</div>
+          <button
+            onClick={() => setIsFormOpen(true)}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          >
+            Add Your First Dish
+          </button>
+        </div>
+      )}
 
       {/* Dish List */}
       <div className="grid gap-4">
@@ -485,10 +479,14 @@ export default function DishManager() {
                 <div className="flex gap-3 pt-4">
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={
+                      createDishMutation.isPending ||
+                      updateDishMutation.isPending
+                    }
                     className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:opacity-50"
                   >
-                    {loading
+                    {createDishMutation.isPending ||
+                    updateDishMutation.isPending
                       ? "Saving..."
                       : editingDish
                       ? "Update Dish"

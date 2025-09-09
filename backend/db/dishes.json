@@ -1,0 +1,203 @@
+[
+  {
+    "id": "1",
+    "name": "Margherita Pizza",
+    "description": "Classic pizza with fresh mozzarella, tomato sauce, and basil",
+    "price": 16.2,
+    "category": "Main Course",
+    "ingredients": [
+      "pizza dough",
+      "tomato sauce",
+      "mozzarella cheese",
+      "fresh basil",
+      "olive oil"
+    ],
+    "allergen_tags": [
+      "gluten",
+      "dairy"
+    ],
+    "modification_note": "Can be made dairy-free by removing cheese",
+    "is_modifiable": true,
+    "components": [
+      {
+        "id": "1-base",
+        "name": "Pizza Base",
+        "type": "base",
+        "ingredients": [
+          "pizza dough",
+          "olive oil"
+        ],
+        "allergen_tags": [
+          "gluten"
+        ],
+        "is_required": true
+      },
+      {
+        "id": "1-sauce",
+        "name": "Tomato Sauce",
+        "type": "sauce",
+        "ingredients": [
+          "crushed tomatoes",
+          "garlic",
+          "herbs"
+        ],
+        "allergen_tags": [],
+        "is_required": false
+      },
+      {
+        "id": "1-protein",
+        "name": "Mozzarella Cheese",
+        "type": "protein",
+        "ingredients": [
+          "mozzarella cheese"
+        ],
+        "allergen_tags": [
+          "dairy"
+        ],
+        "is_required": false
+      },
+      {
+        "id": "1-garnish",
+        "name": "Fresh Basil",
+        "type": "garnish",
+        "ingredients": [
+          "fresh basil"
+        ],
+        "allergen_tags": [],
+        "is_required": false
+      }
+    ],
+    "created_at": "2025-08-19T13:02:49.842Z",
+    "updated_at": "2025-08-19T13:05:00.496Z"
+  },
+  {
+    "id": "2",
+    "name": "Garden Salad",
+    "description": "Fresh mixed greens with cherry tomatoes, cucumber, and walnuts",
+    "price": 12.99,
+    "category": "Appetizers",
+    "ingredients": [
+      "mixed greens",
+      "cherry tomatoes",
+      "cucumber",
+      "red onion",
+      "walnuts",
+      "olive oil",
+      "balsamic vinegar"
+    ],
+    "allergen_tags": [
+      "nuts",
+      "mustard"
+    ],
+    "modification_note": "Can remove nuts upon request",
+    "is_modifiable": true,
+    "components": [
+      {
+        "id": "2-base",
+        "name": "Mixed Greens",
+        "type": "base",
+        "ingredients": [
+          "mixed greens",
+          "cherry tomatoes",
+          "cucumber",
+          "red onion"
+        ],
+        "allergen_tags": [],
+        "is_required": true
+      },
+      {
+        "id": "2-garnish",
+        "name": "Walnuts",
+        "type": "garnish",
+        "ingredients": [
+          "walnuts"
+        ],
+        "allergen_tags": [
+          "nuts"
+        ],
+        "is_required": false
+      },
+      {
+        "id": "2-sauce",
+        "name": "Vinaigrette",
+        "type": "sauce",
+        "ingredients": [
+          "olive oil",
+          "balsamic vinegar",
+          "dijon mustard"
+        ],
+        "allergen_tags": [
+          "mustard"
+        ],
+        "is_required": false
+      }
+    ],
+    "created_at": "2025-08-19T13:02:49.845Z",
+    "updated_at": "2025-08-19T13:02:49.845Z"
+  },
+  {
+    "id": "3",
+    "name": "Grilled Salmon",
+    "description": "Atlantic salmon with lemon herb butter and seasonal vegetables",
+    "price": 24.99,
+    "category": "Main Course",
+    "ingredients": [
+      "atlantic salmon",
+      "butter",
+      "lemon juice",
+      "fresh herbs",
+      "broccoli",
+      "carrots"
+    ],
+    "allergen_tags": [
+      "fish",
+      "dairy"
+    ],
+    "modification_note": "Can be prepared without butter (olive oil instead)",
+    "is_modifiable": true,
+    "components": [
+      {
+        "id": "4-protein",
+        "name": "Grilled Salmon",
+        "type": "protein",
+        "ingredients": [
+          "atlantic salmon",
+          "salt",
+          "pepper"
+        ],
+        "allergen_tags": [
+          "fish"
+        ],
+        "is_required": true
+      },
+      {
+        "id": "4-sauce",
+        "name": "Lemon Herb Butter",
+        "type": "sauce",
+        "ingredients": [
+          "butter",
+          "lemon juice",
+          "fresh herbs"
+        ],
+        "allergen_tags": [
+          "dairy"
+        ],
+        "is_required": false
+      },
+      {
+        "id": "4-side",
+        "name": "Seasonal Vegetables",
+        "type": "side",
+        "ingredients": [
+          "broccoli",
+          "carrots",
+          "zucchini"
+        ],
+        "allergen_tags": [],
+        "is_required": false
+      }
+    ],
+    "created_at": "2025-08-19T13:02:49.845Z",
+    "updated_at": "2025-08-19T13:02:49.845Z"
+  }
+]

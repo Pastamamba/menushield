@@ -1,54 +1,151 @@
-# React + TypeScript + Vite
+# MenuShield - Production Ready
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+MenuShield is a comprehensive restaurant menu management system with allergen filtering capabilities. Built with React, Express.js, Prisma ORM, and MySQL, containerized with Docker.
 
-Currently, two official plugins are available:
+## 🚀 Quick Start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Prerequisites
 
-## Expanding the ESLint configuration
+- Docker & Docker Compose
+- Node.js 18+ (for local development)
+- pnpm (for local development)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Production Deployment with Docker
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+1. Clone and start all services:
+
+```bash
+git clone <your-repo>
+cd menushield
+docker-compose up -d
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. The application will be available at:
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:4000
+   - MySQL: localhost:3306
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Local Development
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
+1. Start database only:
+
+```bash
+docker-compose up -d mysql
+```
+
+2. Install dependencies:
+
+```bash
+# Frontend
+pnpm install
+
+# Backend
+cd backend
+pnpm install
+```
+
+3. Setup database:
+
+```bash
+cd backend
+npx prisma migrate dev
+npx prisma generate
+pnpm run db:seed
+```
+
+4. Start development servers:
+
+```bash
+# Terminal 1: Backend
+cd backend
+pnpm run dev
+
+# Terminal 2: Frontend
+pnpm run dev
+```
+
+## 🏗️ Architecture
+
+### Tech Stack
+
+- **Frontend**: React 18, TypeScript, Tailwind CSS, Vite
+- **Backend**: Express.js, Prisma ORM, JWT Authentication
+- **Database**: MySQL 8.0
+- **Container**: Docker & Docker Compose
+- **Web Server**: Nginx (for production frontend)
+
+### Project Structure
+
+```
+menushield/
+├── src/                    # Frontend React app
+├── backend/
+│   ├── server.js          # Express server with Prisma
+│   ├── prisma/
+│   │   ├── schema.prisma  # Database schema
+│   │   └── seed.js        # Sample data
+│   └── Dockerfile         # Backend container
+├── docker-compose.yml     # Multi-service setup
+├── Dockerfile.frontend    # Frontend container
+├── nginx.conf            # Nginx configuration
+└── Makefile              # Development commands
+```
+
+## 🔧 Available Commands
+
+Use the Makefile for easy development:
+
+```bash
+make help          # Show all available commands
+make install       # Install all dependencies
+make dev           # Instructions for development setup
+make build         # Build for production
+make up            # Start all Docker services
+make down          # Stop all Docker services
+make seed          # Seed database with sample data
+make migrate       # Run database migrations
+make studio        # Open Prisma Studio
+```
+
+## 🌐 API Endpoints
+
+### Public Endpoints
+
+- `GET /api/menu` - Get menu for guests (filtered)
+- `GET /api/restaurant` - Get restaurant information
+- `POST /api/login` - Admin login
+- `POST /api/signup` - Admin registration
+
+### Admin Endpoints (require JWT token)
+
+- `GET /api/admin/menu` - Get full menu with admin details
+- `POST /api/admin/menu` - Create new dish
+- `PUT /api/admin/menu/:id` - Update dish
+- `DELETE /api/admin/menu/:id` - Delete dish
+
+## 🔐 Authentication
+
+Default admin credentials:
+
+- Email: `admin@example.com`
+- Password: `supersecret`
+
+## 📊 Database Management
+
+```bash
+# Open Prisma Studio
+make studio
+
+# Seed with sample data
+make seed
+
+# Reset and reseed
+make reset-db
+```
+
+},
 })
+
+```
+
 ```

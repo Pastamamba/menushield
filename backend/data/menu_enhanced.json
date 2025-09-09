@@ -1,0 +1,282 @@
+[
+  {
+    "id": "1",
+    "name": "Margherita Pizza",
+    "description": "Classic pizza with fresh mozzarella, tomato sauce, and basil",
+    "price": 16.99,
+    "category": "Main Course",
+    "components": [
+      {
+        "id": "1-base",
+        "name": "Pizza Base",
+        "type": "base",
+        "ingredients": ["pizza dough", "olive oil"],
+        "allergen_tags": ["gluten"],
+        "is_required": true
+      },
+      {
+        "id": "1-sauce",
+        "name": "Tomato Sauce",
+        "type": "sauce",
+        "ingredients": ["crushed tomatoes", "garlic", "herbs"],
+        "allergen_tags": [],
+        "is_required": false
+      },
+      {
+        "id": "1-protein",
+        "name": "Mozzarella Cheese",
+        "type": "protein",
+        "ingredients": ["mozzarella cheese"],
+        "allergen_tags": ["dairy"],
+        "is_required": false
+      },
+      {
+        "id": "1-garnish",
+        "name": "Fresh Basil",
+        "type": "garnish",
+        "ingredients": ["fresh basil"],
+        "allergen_tags": [],
+        "is_required": false
+      }
+    ],
+    "ingredients": [
+      "pizza dough",
+      "tomato sauce",
+      "mozzarella cheese",
+      "fresh basil",
+      "olive oil"
+    ],
+    "allergen_tags": ["gluten", "dairy"],
+    "modification_note": "Can be made dairy-free by removing cheese",
+    "is_modifiable": true,
+    "created_at": "2025-06-17T10:00:00Z",
+    "updated_at": "2025-06-17T10:00:00Z"
+  },
+  {
+    "id": "2",
+    "name": "Garden Salad",
+    "description": "Fresh mixed greens with cherry tomatoes, cucumber, and walnuts",
+    "price": 12.99,
+    "category": "Appetizers",
+    "components": [
+      {
+        "id": "2-base",
+        "name": "Mixed Greens",
+        "type": "base",
+        "ingredients": [
+          "mixed greens",
+          "cherry tomatoes",
+          "cucumber",
+          "red onion"
+        ],
+        "allergen_tags": [],
+        "is_required": true
+      },
+      {
+        "id": "2-garnish",
+        "name": "Walnuts",
+        "type": "garnish",
+        "ingredients": ["walnuts"],
+        "allergen_tags": ["nuts"],
+        "is_required": false
+      },
+      {
+        "id": "2-sauce",
+        "name": "Vinaigrette",
+        "type": "sauce",
+        "ingredients": ["olive oil", "balsamic vinegar", "dijon mustard"],
+        "allergen_tags": ["mustard"],
+        "is_required": false
+      }
+    ],
+    "ingredients": [
+      "mixed greens",
+      "cherry tomatoes",
+      "cucumber",
+      "red onion",
+      "walnuts",
+      "olive oil",
+      "balsamic vinegar"
+    ],
+    "allergen_tags": ["nuts", "mustard"],
+    "modification_note": "Can remove nuts upon request",
+    "is_modifiable": true,
+    "created_at": "2025-06-17T10:00:00Z",
+    "updated_at": "2025-06-17T10:00:00Z"
+  },
+  {
+    "id": "3",
+    "name": "Fresh Fruit Plate",
+    "description": "Seasonal fresh fruit selection",
+    "price": 8.99,
+    "category": "Desserts",
+    "components": [
+      {
+        "id": "3-base",
+        "name": "Fresh Fruits",
+        "type": "base",
+        "ingredients": ["strawberries", "blueberries", "grapes", "melon"],
+        "allergen_tags": [],
+        "is_required": true
+      }
+    ],
+    "ingredients": ["strawberries", "blueberries", "grapes", "melon"],
+    "allergen_tags": [],
+    "modification_note": null,
+    "is_modifiable": false,
+    "created_at": "2025-06-17T10:00:00Z",
+    "updated_at": "2025-06-17T10:00:00Z"
+  },
+  {
+    "id": "4",
+    "name": "Grilled Salmon",
+    "description": "Atlantic salmon with lemon herb butter and seasonal vegetables",
+    "price": 24.99,
+    "category": "Main Course",
+    "components": [
+      {
+        "id": "4-protein",
+        "name": "Grilled Salmon",
+        "type": "protein",
+        "ingredients": ["atlantic salmon", "salt", "pepper"],
+        "allergen_tags": ["fish"],
+        "is_required": true
+      },
+      {
+        "id": "4-sauce",
+        "name": "Lemon Herb Butter",
+        "type": "sauce",
+        "ingredients": ["butter", "lemon juice", "fresh herbs"],
+        "allergen_tags": ["dairy"],
+        "is_required": false
+      },
+      {
+        "id": "4-side",
+        "name": "Seasonal Vegetables",
+        "type": "side",
+        "ingredients": ["broccoli", "carrots", "zucchini"],
+        "allergen_tags": [],
+        "is_required": false
+      }
+    ],
+    "ingredients": [
+      "atlantic salmon",
+      "butter",
+      "lemon juice",
+      "fresh herbs",
+      "broccoli",
+      "carrots"
+    ],
+    "allergen_tags": ["fish", "dairy"],
+    "modification_note": "Can be prepared without butter (olive oil instead)",
+    "is_modifiable": true,
+    "created_at": "2025-06-17T10:00:00Z",
+    "updated_at": "2025-06-17T10:00:00Z"
+  },
+  {
+    "id": "5",
+    "name": "Peanut Pad Thai",
+    "description": "Traditional Thai noodles with peanut sauce and vegetables",
+    "price": 18.99,
+    "category": "Main Course",
+    "components": [
+      {
+        "id": "5-base",
+        "name": "Rice Noodles",
+        "type": "base",
+        "ingredients": ["rice noodles", "soy sauce", "fish sauce"],
+        "allergen_tags": ["soy", "fish"],
+        "is_required": true
+      },
+      {
+        "id": "5-sauce",
+        "name": "Peanut Sauce",
+        "type": "sauce",
+        "ingredients": ["peanut butter", "coconut milk", "lime juice", "chili"],
+        "allergen_tags": ["peanuts"],
+        "is_required": true,
+        "is_locked": true
+      },
+      {
+        "id": "5-protein",
+        "name": "Tofu",
+        "type": "protein",
+        "ingredients": ["tofu"],
+        "allergen_tags": ["soy"],
+        "is_required": false
+      },
+      {
+        "id": "5-garnish",
+        "name": "Peanuts and Herbs",
+        "type": "garnish",
+        "ingredients": ["crushed peanuts", "cilantro", "lime wedge"],
+        "allergen_tags": ["peanuts"],
+        "is_required": false
+      }
+    ],
+    "ingredients": [
+      "rice noodles",
+      "peanut sauce",
+      "tofu",
+      "vegetables",
+      "peanuts"
+    ],
+    "allergen_tags": ["soy", "fish", "peanuts"],
+    "modification_note": null,
+    "is_modifiable": false,
+    "created_at": "2025-06-17T10:00:00Z",
+    "updated_at": "2025-06-17T10:00:00Z"
+  },
+  {
+    "id": "6",
+    "name": "Caesar Salad",
+    "description": "Crisp romaine lettuce with Caesar dressing and parmesan",
+    "price": 14.99,
+    "category": "Appetizers",
+    "components": [
+      {
+        "id": "6-base",
+        "name": "Romaine Lettuce",
+        "type": "base",
+        "ingredients": ["romaine lettuce"],
+        "allergen_tags": [],
+        "is_required": true
+      },
+      {
+        "id": "6-sauce",
+        "name": "Caesar Dressing",
+        "type": "sauce",
+        "ingredients": ["mayo", "anchovies", "garlic", "lemon juice"],
+        "allergen_tags": ["eggs", "fish"],
+        "is_required": false
+      },
+      {
+        "id": "6-garnish",
+        "name": "Parmesan Cheese",
+        "type": "garnish",
+        "ingredients": ["parmesan cheese"],
+        "allergen_tags": ["dairy"],
+        "is_required": false
+      },
+      {
+        "id": "6-side",
+        "name": "Croutons",
+        "type": "side",
+        "ingredients": ["bread", "olive oil", "garlic"],
+        "allergen_tags": ["gluten"],
+        "is_required": false
+      }
+    ],
+    "ingredients": [
+      "romaine lettuce",
+      "caesar dressing",
+      "parmesan cheese",
+      "croutons"
+    ],
+    "allergen_tags": ["eggs", "fish", "dairy", "gluten"],
+    "modification_note": "Can be made without dressing, cheese, or croutons",
+    "is_modifiable": true,
+    "created_at": "2025-06-17T10:00:00Z",
+    "updated_at": "2025-06-17T10:00:00Z"
+  }
+]

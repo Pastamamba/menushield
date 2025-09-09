@@ -1,0 +1,9 @@
+[
+  {
+    "id": 1,
+    "email": "admin@example.com",
+    "password_hash": "supersecret",
+    "restaurant_name": "Demo Restaurant",
+    "created_at": "2025-08-19T13:02:49.850Z"
+  }
+]

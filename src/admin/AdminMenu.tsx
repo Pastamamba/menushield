@@ -4,15 +4,17 @@ import { useAuth } from "../auth/AuthContext";
 import DishManager from "./DishManager";
 import QRCodeManager from "./QRCodeManager";
 import CacheManager from "./CacheManager";
+import IngredientManager from "./IngredientManager";
 
-type TabType = "dishes" | "qr-code" | "settings";
+type TabType = "dishes" | "ingredients" | "qr-code" | "settings";
 
 export default function AdminMenu() {
-  const { logout } = useAuth();
+  const { token, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>("dishes");
 
   const tabs: { id: TabType; label: string; icon: string }[] = [
     { id: "dishes", label: "Manage Dishes", icon: "🍽️" },
+    { id: "ingredients", label: "Ingredients", icon: "🥄" },
     { id: "qr-code", label: "QR Code & Sharing", icon: "📱" },
     { id: "settings", label: "Settings", icon: "⚙️" },
   ];
@@ -57,8 +59,14 @@ export default function AdminMenu() {
           <div className="bg-white p-6 rounded-lg shadow">
             <DishManager />
           </div>
-        )}{" "}
-        {activeTab === "qr-code" && <QRCodeManager />}{" "}
+        )}
+
+        {activeTab === "ingredients" && token && (
+          <IngredientManager token={token} />
+        )}
+
+        {activeTab === "qr-code" && <QRCodeManager />}
+
         {activeTab === "settings" && (
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-lg shadow">

@@ -1,5 +1,3 @@
-// No React import needed for modern React
-
 export function LoadingShimmer() {
   return (
     <div className="animate-pulse space-y-4">
@@ -30,6 +28,7 @@ export function MenuItemShimmer() {
   );
 }
 
+// Export the MenuLoadingState component
 export function MenuLoadingState() {
   return (
     <div className="min-h-screen bg-gray-50">

@@ -95,6 +95,33 @@ export class OfflineManager {
     }
   }
 
+  public async invalidateMenuCache() {
+    if ("caches" in window) {
+      try {
+        const cache = await caches.open("menushield-menu-v1");
+        const requests = await cache.keys();
+
+        // Delete all menu-related cache entries
+        await Promise.all(
+          requests
+            .filter((req) => req.url.includes("/api/menu"))
+            .map((req) => cache.delete(req))
+        );
+
+        console.log("MenuShield: Menu cache invalidated");
+
+        // Notify service worker to refresh menu data
+        if (this.swRegistration?.active) {
+          this.swRegistration.active.postMessage({
+            type: "INVALIDATE_MENU_CACHE",
+          });
+        }
+      } catch (error) {
+        console.error("MenuShield: Menu cache invalidation failed:", error);
+      }
+    }
+  }
+
   public async clearCache() {
     if ("caches" in window) {
       try {

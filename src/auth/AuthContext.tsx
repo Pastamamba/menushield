@@ -1,41 +1,61 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext } from "react";
 
 interface AuthContextType {
-    token: string | null;
-    login: (email: string, password: string) => Promise<boolean>;
-    logout: () => void;
+  token: string | null;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>(null!);
 
-export const AuthProvider: React.FC = ({ children }) => {
-    const [token, setToken] = useState<string | null>(null);
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [token, setToken] = useState<string | null>(() => {
+    // Initialize from localStorage if available
+    return localStorage.getItem("authToken");
+  });
 
-    const login = async (email: string, password: string) => {
-        try {
-            const res = await fetch('http://localhost:4000/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
-            });
-            if (!res.ok) return false;
-            const data = await res.json();
-            setToken(data.token);
-            return true;
-        } catch {
-            return false;
-        }
-    };
+  const login = async (email: string, password: string) => {
+    try {
+      console.log("Attempting login with:", email); // Debug log
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const logout = () => {
-        setToken(null);
-    };
+      console.log("Login response status:", res.status); // Debug log
 
-    return (
-        <AuthContext.Provider value={{ token, login, logout }}>
-            {children}
-        </AuthContext.Provider>
-    );
+      if (!res.ok) {
+        console.error("Login failed with status:", res.status); // Debug log
+        return false;
+      }
+
+      const data = await res.json();
+      console.log(
+        "Login successful, token received:",
+        data.token?.substring(0, 20) + "..."
+      ); // Debug log
+      setToken(data.token);
+      localStorage.setItem("authToken", data.token);
+      return true;
+    } catch (error) {
+      console.error("Login error:", error); // Debug log
+      return false;
+    }
+  };
+
+  const logout = () => {
+    setToken(null);
+    localStorage.removeItem("authToken");
+  };
+
+  return (
+    <AuthContext.Provider value={{ token, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => useContext(AuthContext);

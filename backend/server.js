@@ -1,157 +1,188 @@
-// server.js
 import express from "express";
 import cors from "cors";
 import jwt from "jsonwebtoken";
-import { readFileSync, writeFileSync } from "fs";
-import { fileURLToPath } from "url";
-import path from "path";
+import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
+import { PrismaClient } from "@prisma/client";
 
-// Hard-coded admin credentials:
-const ADMIN_EMAIL = "admin@example.com";
-const ADMIN_PASSWORD = "supersecret";
+// Load environment variables
+dotenv.config();
+
+const prisma = new PrismaClient();
+const app = express();
 
 const JWT_SECRET = process.env.JWT_SECRET || "replace_with_strong_secret";
 const PORT = process.env.PORT || 4000;
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@example.com";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "supersecret";
 
-const app = express();
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.NODE_ENV === 'production' 
+      ? ['https://your-app-name.netlify.app'] // Update this after deploying to Netlify
+      : [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:5175",
+        "http://localhost:5176",
+        /^http:\/\/localhost:\d+$/,
+      ],
     credentials: true,
   })
 );
 app.use(express.json());
 
-// File paths
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const menuPath = path.join(__dirname, "data", "menu.json");
-
-// Helper functions
-function readMenu() {
+// Database connection test
+async function testConnection() {
   try {
-    return JSON.parse(readFileSync(menuPath, "utf-8"));
+    await prisma.$connect();
+    console.log("Database connected successfully");
   } catch (error) {
-    console.error("Error reading menu:", error);
-    return [];
+    console.error("Database connection failed:", error);
+    process.exit(1);
   }
 }
 
-function writeMenu(menu) {
-  try {
-    writeFileSync(menuPath, JSON.stringify(menu, null, 2));
-    return true;
-  } catch (error) {
-    console.error("Error writing menu:", error);
-    return false;
-  }
-}
-
-function generateId() {
-  return Date.now().toString() + Math.random().toString(36).substr(2, 9);
-}
-
-// Short URL redirect handler - must be before API routes
+// Short URL redirect handler
 app.get("/m/:restaurantId", (req, res) => {
   const { restaurantId } = req.params;
-  // Redirect to the full menu URL
   res.redirect(`/menu?rid=${restaurantId}`);
 });
 
 // Public: fetch menu (filtered for guest view)
-app.get("/api/menu", (req, res) => {
-  const restaurantId = req.query.rid || req.query.r;
-  const menu = readMenu();
+app.get("/api/menu", async (req, res) => {
+  try {
+    const restaurantId = req.query.rid || req.query.r;
 
-  // For guests, we don't expose ingredients - only allergen tags and safe/unsafe status
-  const guestMenu = menu.map((dish) => ({
-    id: dish.id,
-    name: dish.name,
-    description: dish.description,
-    price: dish.price,
-    category: dish.category,
-    allergen_tags: dish.allergen_tags,
-    modification_note: dish.modification_note,
-    is_modifiable: dish.is_modifiable,
-    // Note: we don't include 'ingredients' for guest privacy
-  }));
-  res.json(guestMenu);
+    const dishes = await prisma.dish.findMany({
+      include: {
+        ingredients: {
+          include: {
+            ingredient: true,
+          },
+        },
+      },
+    });
+
+    // Transform for guest view
+    const guestMenu = dishes.map((dish) => ({
+      id: dish.id,
+      name: dish.name,
+      description: dish.description,
+      price: dish.price,
+      category: dish.category,
+      allergen_tags: JSON.parse(dish.allergenTags || "[]"),
+      modification_note: dish.modificationNote,
+      is_modifiable: dish.isModifiable,
+      components: JSON.parse(dish.components || "[]"),
+      ingredients: dish.ingredients.map((di) => di.ingredient.name),
+    }));
+
+    res.json(guestMenu);
+  } catch (error) {
+    console.error("Error fetching menu:", error);
+    res.status(500).json({ error: "Failed to fetch menu" });
+  }
 });
 
 // Public: fetch restaurant info
-app.get("/api/restaurant", (req, res) => {
-  const restaurantId = req.query.rid || req.query.r;
-
-  // Mock restaurant data - in real app this would come from database
-  const restaurant = {
-    name: "Demo Restaurant",
-    description:
-      "A family-friendly restaurant committed to safe dining for all",
-    contact: "(555) 123-4567",
-  };
-
-  res.json(restaurant);
+app.get("/api/restaurant", async (req, res) => {
+  try {
+    const restaurant = await prisma.restaurant.findFirst();
+    res.json(
+      restaurant || {
+        name: "MenuShield Restaurant",
+        description: "Welcome to our restaurant",
+      }
+    );
+  } catch (error) {
+    console.error("Error fetching restaurant info:", error);
+    res.status(500).json({ error: "Failed to fetch restaurant info" });
+  }
 });
 
-// Admin: login, no hashing
-app.post("/api/login", (req, res) => {
-  const { email, password } = req.body;
-  if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-    const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: "1h" });
-    return res.json({ token });
+// Admin: login
+app.post("/api/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Check demo credentials
+    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: "1h" });
+      return res.json({ token });
+    }
+
+    // Check database users
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (user && (await bcrypt.compare(password, user.passwordHash))) {
+      const token = jwt.sign({ email: user.email }, JWT_SECRET, {
+        expiresIn: "1h",
+      });
+      return res.json({ token });
+    }
+
+    res.status(401).json({ error: "Invalid credentials" });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ error: "Login failed" });
   }
-  res.status(401).json({ error: "Invalid credentials" });
 });
 
-// Admin: signup (for demo purposes, just accepts any registration)
-app.post("/api/signup", (req, res) => {
-  const { restaurantName, email, password } = req.body;
+// Admin: signup
+app.post("/api/signup", async (req, res) => {
+  try {
+    const { restaurantName, email, password } = req.body;
 
-  if (!restaurantName || !email || !password) {
-    return res.status(400).json({ error: "All fields are required" });
+    if (!restaurantName || !email || !password) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    if (password.length < 6) {
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 6 characters" });
+    }
+
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ error: "Email already registered" });
+    }
+
+    // Hash password and create user
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    await prisma.user.create({
+      data: {
+        email,
+        passwordHash,
+        restaurantName,
+      },
+    });
+
+    console.log(`New restaurant signup: ${restaurantName} (${email})`);
+
+    res.status(201).json({
+      message: "Account created successfully",
+      restaurantName,
+      email,
+    });
+  } catch (error) {
+    console.error("Signup error:", error);
+    res.status(500).json({ error: "Signup failed" });
   }
-
-  if (password.length < 6) {
-    return res
-      .status(400)
-      .json({ error: "Password must be at least 6 characters" });
-  }
-
-  // For demo purposes, we'll just accept the signup and return success
-  // In a real app, you'd save to database and hash the password
-  console.log(`New restaurant signup: ${restaurantName} (${email})`);
-
-  res.status(201).json({
-    message: "Account created successfully",
-    restaurantName,
-    email,
-  });
-});
-
-// Admin: signup (for demo purposes, just accepts any registration)
-app.post("/api/signup", (req, res) => {
-  const { restaurantName, email, password } = req.body;
-
-  if (!restaurantName || !email || !password) {
-    return res.status(400).json({ error: "All fields are required" });
-  }
-
-  if (password.length < 6) {
-    return res
-      .status(400)
-      .json({ error: "Password must be at least 6 characters" });
-  }
-
-  // For demo purposes, we'll just accept the signup and return success
-  // In a real app, you'd save to database and hash the password
-  console.log(`New restaurant signup: ${restaurantName} (${email})`);
-
-  res.status(201).json({
-    message: "Account created successfully",
-    restaurantName,
-    email,
-  });
 });
 
 // Middleware to protect admin routes
@@ -171,122 +202,398 @@ function requireAuth(req, res, next) {
   }
 }
 
-// Admin: list all dishes (with full details including ingredients)
-app.get("/api/admin/menu", requireAuth, (_req, res) => {
-  const menu = readMenu();
-  res.json(menu);
+// Admin: list all dishes
+app.get("/api/admin/menu", requireAuth, async (req, res) => {
+  try {
+    const dishes = await prisma.dish.findMany({
+      include: {
+        ingredients: {
+          include: {
+            ingredient: true,
+          },
+        },
+      },
+    });
+
+    const formattedDishes = dishes.map((dish) => ({
+      ...dish,
+      allergen_tags: JSON.parse(dish.allergenTags || "[]"),
+      components: JSON.parse(dish.components || "[]"),
+      ingredients: dish.ingredients.map((di) => di.ingredient.name),
+    }));
+
+    res.json(formattedDishes);
+  } catch (error) {
+    console.error("Error fetching admin menu:", error);
+    res.status(500).json({ error: "Failed to fetch menu" });
+  }
 });
 
 // Admin: create new dish
-app.post("/api/admin/menu", requireAuth, (req, res) => {
-  const {
-    name,
-    description,
-    price,
-    category,
-    ingredients,
-    allergen_tags,
-    modification_note,
-    is_modifiable,
-  } = req.body;
+app.post("/api/admin/menu", requireAuth, async (req, res) => {
+  try {
+    const {
+      name,
+      description,
+      price,
+      category,
+      ingredients,
+      allergen_tags,
+      modification_note,
+      is_modifiable,
+      components,
+    } = req.body;
 
-  if (
-    !name ||
-    !ingredients ||
-    !Array.isArray(ingredients) ||
-    !Array.isArray(allergen_tags)
-  ) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
+    if (!name || !Array.isArray(ingredients) || !Array.isArray(allergen_tags)) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
 
-  const menu = readMenu();
-  const newDish = {
-    id: generateId(),
-    name,
-    description: description || "",
-    price: price || 0,
-    category: category || "",
-    ingredients,
-    allergen_tags,
-    modification_note: modification_note || null,
-    is_modifiable: is_modifiable || false,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+    const newDish = await prisma.dish.create({
+      data: {
+        name,
+        description: description || "",
+        price: price || 0,
+        category: category || "",
+        allergenTags: JSON.stringify(allergen_tags),
+        modificationNote: modification_note || null,
+        isModifiable: is_modifiable || false,
+        components: JSON.stringify(components || []),
+      },
+    });
 
-  menu.push(newDish);
-
-  if (writeMenu(menu)) {
-    res.status(201).json(newDish);
-  } else {
-    res.status(500).json({ error: "Failed to save dish" });
+    res.status(201).json({
+      ...newDish,
+      allergen_tags: JSON.parse(newDish.allergenTags),
+      components: JSON.parse(newDish.components || "[]"),
+      ingredients: ingredients,
+    });
+  } catch (error) {
+    console.error("Error creating dish:", error);
+    res.status(500).json({ error: "Failed to create dish" });
   }
 });
 
 // Admin: update existing dish
-app.put("/api/admin/menu/:id", requireAuth, (req, res) => {
-  const { id } = req.params;
-  const {
-    name,
-    description,
-    price,
-    category,
-    ingredients,
-    allergen_tags,
-    modification_note,
-    is_modifiable,
-  } = req.body;
+app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
 
-  const menu = readMenu();
-  const dishIndex = menu.findIndex((dish) => dish.id === id);
+    // Transform data for Prisma
+    const prismaData = {
+      name: updateData.name,
+      description: updateData.description,
+      price: updateData.price,
+      category: updateData.category,
+      allergenTags: JSON.stringify(updateData.allergen_tags || []),
+      modificationNote: updateData.modification_note,
+      isModifiable: updateData.is_modifiable,
+      components: JSON.stringify(updateData.components || []),
+    };
 
-  if (dishIndex === -1) {
-    return res.status(404).json({ error: "Dish not found" });
-  }
+    const updatedDish = await prisma.dish.update({
+      where: { id },
+      data: prismaData,
+    });
 
-  // Update dish with provided fields
-  const updatedDish = {
-    ...menu[dishIndex],
-    ...(name !== undefined && { name }),
-    ...(description !== undefined && { description }),
-    ...(price !== undefined && { price }),
-    ...(category !== undefined && { category }),
-    ...(ingredients !== undefined && { ingredients }),
-    ...(allergen_tags !== undefined && { allergen_tags }),
-    ...(modification_note !== undefined && { modification_note }),
-    ...(is_modifiable !== undefined && { is_modifiable }),
-    updated_at: new Date().toISOString(),
-  };
+    if (!updatedDish) {
+      return res.status(404).json({ error: "Dish not found" });
+    }
 
-  menu[dishIndex] = updatedDish;
-
-  if (writeMenu(menu)) {
-    res.json(updatedDish);
-  } else {
+    res.json({
+      ...updatedDish,
+      allergen_tags: JSON.parse(updatedDish.allergenTags),
+      components: JSON.parse(updatedDish.components || "[]"),
+      ingredients: updateData.ingredients || [],
+    });
+  } catch (error) {
+    console.error("Error updating dish:", error);
     res.status(500).json({ error: "Failed to update dish" });
   }
 });
 
 // Admin: delete dish
-app.delete("/api/admin/menu/:id", requireAuth, (req, res) => {
-  const { id } = req.params;
+app.delete("/api/admin/menu/:id", requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
 
-  const menu = readMenu();
-  const dishIndex = menu.findIndex((dish) => dish.id === id);
+    await prisma.dish.delete({
+      where: { id },
+    });
 
-  if (dishIndex === -1) {
-    return res.status(404).json({ error: "Dish not found" });
-  }
-
-  menu.splice(dishIndex, 1);
-
-  if (writeMenu(menu)) {
     res.json({ message: "Dish deleted successfully" });
-  } else {
+  } catch (error) {
+    if (error.code === "P2025") {
+      return res.status(404).json({ error: "Dish not found" });
+    }
+    console.error("Error deleting dish:", error);
     res.status(500).json({ error: "Failed to delete dish" });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+// GET /api/admin/ingredients - Get all ingredients
+app.get("/api/admin/ingredients", requireAuth, async (req, res) => {
+  try {
+    const ingredients = await prisma.ingredient.findMany({
+      include: {
+        category: true,
+        parent: true,
+        children: true,
+      },
+      orderBy: [{ name: "asc" }],
+    });
+
+    // Transform to match frontend expectations
+    const transformedIngredients = ingredients.map((ingredient) => ({
+      id: ingredient.id,
+      name: ingredient.name,
+      category: ingredient.category?.name?.toLowerCase() || "other",
+      parentId: ingredient.parentId,
+      allergen_tags: JSON.parse(ingredient.allergenTags || "[]"),
+      createdAt: ingredient.createdAt,
+      updatedAt: ingredient.updatedAt,
+    }));
+
+    res.json(transformedIngredients);
+  } catch (error) {
+    console.error("Error fetching ingredients:", error);
+    res.status(500).json({ error: "Failed to fetch ingredients" });
+  }
 });
+
+// POST /api/admin/ingredients - Create new ingredient
+app.post("/api/admin/ingredients", requireAuth, async (req, res) => {
+  try {
+    const { name, category, parentId, allergen_tags } = req.body;
+
+    // Find category by name
+    let categoryId = null;
+    if (category) {
+      const categoryRecord = await prisma.category.findFirst({
+        where: { name: { contains: category, mode: "insensitive" } },
+      });
+      categoryId = categoryRecord?.id;
+    }
+
+    const ingredient = await prisma.ingredient.create({
+      data: {
+        name,
+        categoryId,
+        parentId: parentId || null,
+        allergenTags: JSON.stringify(allergen_tags || []),
+      },
+      include: {
+        category: true,
+      },
+    });
+
+    // Transform response
+    const transformedIngredient = {
+      id: ingredient.id,
+      name: ingredient.name,
+      category: ingredient.category?.name?.toLowerCase() || "other",
+      parentId: ingredient.parentId,
+      allergen_tags: JSON.parse(ingredient.allergenTags || "[]"),
+      createdAt: ingredient.createdAt,
+      updatedAt: ingredient.updatedAt,
+    };
+
+    res.status(201).json(transformedIngredient);
+  } catch (error) {
+    console.error("Error creating ingredient:", error);
+    res.status(500).json({ error: "Failed to create ingredient" });
+  }
+});
+
+// PUT /api/admin/ingredients/:id - Update ingredient
+app.put("/api/admin/ingredients/:id", requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, category, parentId, allergen_tags } = req.body;
+
+    // Find category by name
+    let categoryId = null;
+    if (category) {
+      const categoryRecord = await prisma.category.findFirst({
+        where: { name: { contains: category, mode: "insensitive" } },
+      });
+      categoryId = categoryRecord?.id;
+    }
+
+    const ingredient = await prisma.ingredient.update({
+      where: { id },
+      data: {
+        name,
+        categoryId,
+        parentId: parentId || null,
+        allergenTags: JSON.stringify(allergen_tags || []),
+      },
+      include: {
+        category: true,
+      },
+    });
+
+    // Transform response
+    const transformedIngredient = {
+      id: ingredient.id,
+      name: ingredient.name,
+      category: ingredient.category?.name?.toLowerCase() || "other",
+      parentId: ingredient.parentId,
+      allergen_tags: JSON.parse(ingredient.allergenTags || "[]"),
+      createdAt: ingredient.createdAt,
+      updatedAt: ingredient.updatedAt,
+    };
+
+    res.json(transformedIngredient);
+  } catch (error) {
+    console.error("Error updating ingredient:", error);
+    res.status(500).json({ error: "Failed to update ingredient" });
+  }
+});
+
+// DELETE /api/admin/ingredients/:id - Delete ingredient
+app.delete("/api/admin/ingredients/:id", requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await prisma.ingredient.delete({
+      where: { id },
+    });
+
+    res.status(204).send();
+  } catch (error) {
+    console.error("Error deleting ingredient:", error);
+    res.status(500).json({ error: "Failed to delete ingredient" });
+  }
+});
+
+// GET /api/admin/categories - Get all categories
+app.get("/api/admin/categories", requireAuth, async (req, res) => {
+  try {
+    const categories = await prisma.category.findMany({
+      include: {
+        _count: {
+          select: { ingredients: true },
+        },
+        ingredients: {
+          select: {
+            id: true,
+            name: true,
+            allergenTags: true,
+          },
+        },
+      },
+      orderBy: { name: "asc" },
+    });
+
+    // Transform to include ingredient count and details
+    const transformedCategories = categories.map((category) => ({
+      id: category.id,
+      name: category.name,
+      description: category.description,
+      color: category.color,
+      icon: category.icon,
+      createdAt: category.createdAt,
+      updatedAt: category.updatedAt,
+      ingredientCount: category._count.ingredients,
+      ingredients: category.ingredients.map((ing) => ({
+        id: ing.id,
+        name: ing.name,
+        allergen_tags: JSON.parse(ing.allergenTags || "[]"),
+      })),
+    }));
+
+    res.json(transformedCategories);
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    res.status(500).json({ error: "Failed to fetch categories" });
+  }
+});
+
+// POST /api/admin/categories - Create new category
+app.post("/api/admin/categories", requireAuth, async (req, res) => {
+  try {
+    const { name, description, color, icon } = req.body;
+
+    const category = await prisma.category.create({
+      data: {
+        name,
+        description: description || "",
+        color: color || "#3B82F6",
+        icon: icon || "🥄",
+      },
+    });
+
+    res.status(201).json(category);
+  } catch (error) {
+    console.error("Error creating category:", error);
+    res.status(500).json({ error: "Failed to create category" });
+  }
+});
+
+// PUT /api/admin/categories/:id - Update category
+app.put("/api/admin/categories/:id", requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, color, icon } = req.body;
+
+    const category = await prisma.category.update({
+      where: { id },
+      data: {
+        name,
+        description,
+        color,
+        icon,
+      },
+    });
+
+    res.json(category);
+  } catch (error) {
+    console.error("Error updating category:", error);
+    res.status(500).json({ error: "Failed to update category" });
+  }
+});
+
+// DELETE /api/admin/categories/:id - Delete category
+app.delete("/api/admin/categories/:id", requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if category has any ingredients
+    const ingredientsCount = await prisma.ingredient.count({
+      where: { categoryId: id },
+    });
+
+    if (ingredientsCount > 0) {
+      return res.status(400).json({
+        error: `Cannot delete category. It has ${ingredientsCount} ingredient(s) assigned to it. Please reassign or delete the ingredients first.`,
+      });
+    }
+
+    await prisma.category.delete({
+      where: { id },
+    });
+
+    res.status(204).send();
+  } catch (error) {
+    console.error("Error deleting category:", error);
+    res.status(500).json({ error: "Failed to delete category" });
+  }
+});
+
+// Graceful shutdown
+process.on("beforeExit", async () => {
+  await prisma.$disconnect();
+});
+
+// Start server
+async function startServer() {
+  await testConnection();
+
+  app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+    console.log("Database connected and ready");
+  });
+}
+
+startServer().catch(console.error);
