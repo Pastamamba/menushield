@@ -1,6 +1,5 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { useAuth } from "../auth/AuthContext";
 
 interface QRCodeOptions {
   size: number;
@@ -11,7 +10,6 @@ interface QRCodeOptions {
 }
 
 export default function QRCodeManager() {
-  const { token } = useAuth();
   const [restaurantId] = useState("abc123"); // This would come from auth context in real app
   const [qrOptions, setQrOptions] = useState<QRCodeOptions>({
     size: 200,

@@ -1,5 +1,5 @@
 // src/admin/AdminMenu.tsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import DishManager from "./DishManager";
 import QRCodeManager from "./QRCodeManager";
