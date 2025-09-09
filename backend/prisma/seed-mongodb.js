@@ -6,6 +6,15 @@ async function main() {
   console.log('🌱 Starting MongoDB seed...');
 
   try {
+    // Check if data already exists
+    const existingDishes = await prisma.dish.count();
+    const existingCategories = await prisma.category.count();
+    
+    if (existingDishes > 0 || existingCategories > 0) {
+      console.log('✅ Data already exists, skipping seed');
+      console.log(`Found ${existingDishes} dishes and ${existingCategories} categories`);
+      return;
+    }
     // Create test categories
     const categories = await Promise.all([
       prisma.category.create({

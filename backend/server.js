@@ -56,6 +56,63 @@ app.get('/ping', (req, res) => {
   });
 });
 
+// Manual seed endpoint for testing
+app.post('/api/seed', async (req, res) => {
+  try {
+    console.log('Manual seed requested');
+    
+    // Check if data exists
+    const existingDishes = await prisma.dish.count();
+    if (existingDishes > 0) {
+      return res.json({ message: `Database already has ${existingDishes} dishes`, seeded: false });
+    }
+
+    // Create sample dishes
+    const sampleDishes = [
+      {
+        name: 'Margherita Pizza',
+        description: 'Classic tomato sauce, mozzarella, fresh basil',
+        price: 12.90,
+        category: 'Pizza',
+        allergenTags: JSON.stringify(['dairy', 'gluten']),
+        isModifiable: true,
+        modificationNote: 'Can be made vegan with dairy-free cheese'
+      },
+      {
+        name: 'Caesar Salad',
+        description: 'Romaine lettuce, parmesan, croutons, caesar dressing',
+        price: 10.50,
+        category: 'Salads',
+        allergenTags: JSON.stringify(['dairy', 'eggs', 'gluten']),
+        isModifiable: true,
+        modificationNote: 'Can be made without croutons for gluten-free'
+      },
+      {
+        name: 'Grilled Salmon',
+        description: 'Fresh Atlantic salmon with lemon herb butter',
+        price: 18.90,
+        category: 'Main Course',
+        allergenTags: JSON.stringify(['fish']),
+        isModifiable: false
+      }
+    ];
+
+    for (const dish of sampleDishes) {
+      await prisma.dish.create({ data: dish });
+    }
+
+    console.log(`✅ Created ${sampleDishes.length} sample dishes`);
+    res.json({ 
+      message: `Successfully seeded ${sampleDishes.length} dishes`, 
+      seeded: true,
+      dishes: sampleDishes.length
+    });
+  } catch (error) {
+    console.error('Seed error:', error);
+    res.status(500).json({ error: 'Failed to seed database', details: error.message });
+  }
+});
+
 app.use(
   cors({
     origin: process.env.NODE_ENV === 'production' 
