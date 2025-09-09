@@ -2,7 +2,7 @@
   "name": "menu-shield-backend",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
+    "start": "npx prisma generate && npx prisma db push && node server.js",
     "dev": "node --watch server.js",
     "build": "npx prisma generate",
     "migrate:deploy": "npx prisma db push",

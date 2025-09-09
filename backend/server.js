@@ -8,6 +8,12 @@ import { PrismaClient } from "@prisma/client";
 // Load environment variables
 dotenv.config();
 
+console.log('🔧 Environment check:');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('PORT:', process.env.PORT);
+console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
+
 const prisma = new PrismaClient();
 const app = express();
 
@@ -17,8 +23,25 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@example.com";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "supersecret";
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get('/health', async (req, res) => {
+  try {
+    // Test database connection
+    await prisma.$queryRaw`SELECT 1`;
+    res.status(200).json({ 
+      status: 'ok', 
+      timestamp: new Date().toISOString(),
+      database: 'connected',
+      env: process.env.NODE_ENV
+    });
+  } catch (error) {
+    console.error('Health check failed:', error);
+    res.status(503).json({ 
+      status: 'error', 
+      timestamp: new Date().toISOString(),
+      database: 'disconnected',
+      error: error.message
+    });
+  }
 });
 
 app.use(
@@ -581,19 +604,40 @@ app.delete("/api/admin/categories/:id", requireAuth, async (req, res) => {
   }
 });
 
-// Graceful shutdown
-process.on("beforeExit", async () => {
-  await prisma.$disconnect();
-});
-
-// Start server
+// Start server with proper error handling
 async function startServer() {
-  await testConnection();
+  try {
+    console.log('Starting server...');
+    console.log('Environment:', process.env.NODE_ENV);
+    console.log('Port:', PORT);
+    console.log('Database URL configured:', !!process.env.DATABASE_URL);
+    
+    // Test database connection
+    await testConnection();
+    console.log('Database connection successful');
+    
+    // Start server
+    const server = app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`📊 Health check: http://localhost:${PORT}/health`);
+      console.log('✅ Database connected and ready');
+    });
 
-  app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
-    console.log("Database connected and ready");
-  });
+    // Graceful shutdown
+    process.on('SIGTERM', async () => {
+      console.log('SIGTERM received, shutting down gracefully');
+      server.close(() => {
+        console.log('Server closed');
+        prisma.$disconnect();
+        process.exit(0);
+      });
+    });
+
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    console.error('Error details:', error.message);
+    process.exit(1);
+  }
 }
 
-startServer().catch(console.error);
+startServer();
