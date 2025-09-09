@@ -252,6 +252,35 @@ app.get("/api/menu", async (req, res) => {
   }
 });
 
+// Public: fetch categories
+app.get("/api/categories", async (req, res) => {
+  try {
+    const categories = await prisma.category.findMany({
+      orderBy: { name: 'asc' }
+    });
+    res.json(categories);
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    res.status(500).json({ error: "Failed to fetch categories" });
+  }
+});
+
+// Public: fetch ingredients
+app.get("/api/ingredients", async (req, res) => {
+  try {
+    const ingredients = await prisma.ingredient.findMany({
+      include: {
+        category: true
+      },
+      orderBy: { name: 'asc' }
+    });
+    res.json(ingredients);
+  } catch (error) {
+    console.error("Error fetching ingredients:", error);
+    res.status(500).json({ error: "Failed to fetch ingredients" });
+  }
+});
+
 // Public: fetch restaurant info
 app.get("/api/restaurant", async (req, res) => {
   try {
