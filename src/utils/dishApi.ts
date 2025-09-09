@@ -13,9 +13,17 @@ const api = {
     }
     const data = await response.json();
     
-    // Debug: log allergen_tags types
+    // Debug: log allergen_tags types and structure
     data.forEach((dish: any) => {
-      console.log(`Dish: ${dish.name}, allergen_tags:`, typeof dish.allergen_tags, dish.allergen_tags);
+      const tags = dish.allergen_tags;
+      console.log(`Dish: ${dish.name}, allergen_tags:`, {
+        type: typeof tags,
+        isArray: Array.isArray(tags),
+        hasLength: 'length' in tags,
+        length: tags?.length,
+        constructor: tags?.constructor?.name,
+        value: tags
+      });
     });
     
     return data;
