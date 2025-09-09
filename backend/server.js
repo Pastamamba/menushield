@@ -17,6 +17,17 @@ console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
 const prisma = new PrismaClient();
 const app = express();
 
+// Safe JSON parse for arrays
+const safeParseArray = (jsonString) => {
+  try {
+    const parsed = JSON.parse(jsonString || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.warn('Failed to parse JSON, returning empty array:', jsonString);
+    return [];
+  }
+};
+
 const JWT_SECRET = process.env.JWT_SECRET || "replace_with_strong_secret";
 const PORT = process.env.PORT || 4000;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@example.com";
@@ -238,10 +249,10 @@ app.get("/api/menu", async (req, res) => {
       description: dish.description,
       price: dish.price,
       category: dish.category,
-      allergen_tags: JSON.parse(dish.allergenTags || "[]"),
+      allergen_tags: safeParseArray(dish.allergenTags),
       modification_note: dish.modificationNote,
       is_modifiable: dish.isModifiable,
-      components: JSON.parse(dish.components || "[]"),
+      components: safeParseArray(dish.components),
       ingredients: dish.ingredients.map((di) => di.ingredient.name),
     }));
 
