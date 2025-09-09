@@ -36,8 +36,11 @@ export function analyzeDishSafety(
 ): DishSafetyStatus {
   const allergenInfo: AllergenInfo[] = [];
 
+  // Migrate dish to component format for analysis
+  const migratedDish = migrateDishToComponents(dish);
+
   // Check each component for allergens
-  for (const component of dish.components) {
+  for (const component of migratedDish.components) {
     for (const allergen of component.allergen_tags) {
       if (avoidAllergens.includes(allergen)) {
         allergenInfo.push({
