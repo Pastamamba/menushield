@@ -11,7 +11,14 @@ const api = {
     if (!response.ok) {
       throw new Error(`Failed to fetch menu: ${response.status}`);
     }
-    return response.json();
+    const data = await response.json();
+    
+    // Debug: log allergen_tags types
+    data.forEach((dish: any) => {
+      console.log(`Dish: ${dish.name}, allergen_tags:`, typeof dish.allergen_tags, dish.allergen_tags);
+    });
+    
+    return data;
   },
 
   // Admin dishes

@@ -127,13 +127,36 @@ export function migrateDishToComponents(dish: Dish): Dish {
     return dish;
   }
 
+  // Ensure allergen_tags is an array - handle all possible types
+  let allergenTags: string[] = [];
+  
+  if (Array.isArray(dish.allergen_tags)) {
+    allergenTags = dish.allergen_tags;
+  } else if (typeof dish.allergen_tags === 'string') {
+    // Single string allergen
+    allergenTags = dish.allergen_tags ? [dish.allergen_tags] : [];
+  } else if (dish.allergen_tags && typeof dish.allergen_tags === 'object') {
+    // Object or other type - try to extract values
+    try {
+      if ('length' in dish.allergen_tags) {
+        // Array-like object
+        allergenTags = Array.from(dish.allergen_tags as any);
+      } else {
+        // Regular object - use keys or values
+        allergenTags = Object.values(dish.allergen_tags).filter(Boolean) as string[];
+      }
+    } catch {
+      allergenTags = [];
+    }
+  }
+
   // Create a single "base" component from legacy data
   const baseComponent = {
     id: `${dish.id}-base`,
     name: "Base",
     type: "base" as const,
-    ingredients: dish.ingredients || [],
-    allergen_tags: dish.allergen_tags || [],
+    ingredients: Array.isArray(dish.ingredients) ? dish.ingredients : [],
+    allergen_tags: allergenTags,
     is_required: true,
   };
 
