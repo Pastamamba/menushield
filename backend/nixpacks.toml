@@ -1,11 +1,12 @@
 [variables]
-NODE_VERSION = "20"
+NODE_VERSION = "18"
+NPM_CONFIG_PRODUCTION = "false"
 
-[build]
+[phases.build]
 cmds = [
-  "npm install",
+  "npm ci",
   "npx prisma generate"
 ]
 
-[start]
+[phases.start]
 cmd = "npm start"
