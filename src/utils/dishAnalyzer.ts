@@ -153,10 +153,6 @@ export function migrateDishToComponents(dish: Dish): Dish {
     allergenTags = [];
   }
 
-  console.log(`Migration for ${dish.name}: original=${typeof tags}, converted=`, allergenTags);
-
-  console.log(`Migration for ${dish.name}: original=${typeof tags}, converted=`, allergenTags);
-
   // Create a single "base" component from legacy data
   const baseComponent = {
     id: `${dish.id}-base`,
