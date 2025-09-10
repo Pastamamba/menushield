@@ -4,7 +4,6 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "cd backend && node server.js",
-    "healthcheckPath": "/ping"
+    "startCommand": "cd backend && npm start"
   }
 }
