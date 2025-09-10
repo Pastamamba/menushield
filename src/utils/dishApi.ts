@@ -11,7 +11,23 @@ const api = {
     if (!response.ok) {
       throw new Error(`Failed to fetch menu: ${response.status}`);
     }
-    return response.json();
+    const data = await response.json();
+    
+    // Force allergen_tags to be arrays for all dishes
+    return data.map((dish: any) => ({
+      ...dish,
+      allergen_tags: Array.isArray(dish.allergen_tags) 
+        ? dish.allergen_tags 
+        : dish.allergen_tags 
+          ? [dish.allergen_tags].flat()
+          : [],
+      components: Array.isArray(dish.components) 
+        ? dish.components 
+        : [],
+      ingredients: Array.isArray(dish.ingredients) 
+        ? dish.ingredients 
+        : []
+    }));
   },
 
   // Admin dishes
@@ -22,7 +38,23 @@ const api = {
     if (!response.ok) {
       throw new Error(`Failed to fetch admin dishes: ${response.status}`);
     }
-    return response.json();
+    const data = await response.json();
+    
+    // Force allergen_tags to be arrays for all dishes
+    return data.map((dish: any) => ({
+      ...dish,
+      allergen_tags: Array.isArray(dish.allergen_tags) 
+        ? dish.allergen_tags 
+        : dish.allergen_tags 
+          ? [dish.allergen_tags].flat()
+          : [],
+      components: Array.isArray(dish.components) 
+        ? dish.components 
+        : [],
+      ingredients: Array.isArray(dish.ingredients) 
+        ? dish.ingredients 
+        : []
+    }));
   },
 
   // Create dish
