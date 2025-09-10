@@ -17,16 +17,25 @@ console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
 const prisma = new PrismaClient();
 const app = express();
 
-// Safe JSON parse for arrays
-const safeParseArray = (jsonString) => {
-  try {
-    const parsed = JSON.parse(jsonString || "[]");
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    console.warn('Failed to parse JSON, returning empty array:', jsonString);
-    return [];
+// Helper to safely parse allergenTags as array
+function safeParseArray(val) {
+  if (Array.isArray(val)) return val;
+  if (typeof val === 'string') {
+    try {
+      const parsed = JSON.parse(val);
+      return Array.isArray(parsed) ? parsed : [parsed];
+    } catch {
+      return [val];
+    }
   }
-};
+  if (val && typeof val === 'object' && 'length' in val) {
+    return Array.from(val);
+  }
+  if (val && typeof val === 'object') {
+    return Object.values(val).filter(v => typeof v === 'string');
+  }
+  return [];
+}
 
 const JWT_SECRET = process.env.JWT_SECRET || "replace_with_strong_secret";
 const PORT = process.env.PORT || 4000;
