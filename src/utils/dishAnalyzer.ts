@@ -28,6 +28,29 @@ export const ALL_ALLERGENS = [
 ];
 
 /**
+ * Safely converts any allergen_tags value to string array
+ */
+function safeAllergenTags(tags: any): string[] {
+  if (Array.isArray(tags)) return tags;
+  if (typeof tags === 'string') return [tags];
+  if (tags && typeof tags === 'object' && 'length' in tags) {
+    try {
+      return Array.from(tags as ArrayLike<string>);
+    } catch {
+      return [];
+    }
+  }
+  if (tags && typeof tags === 'object') {
+    try {
+      return Object.values(tags).filter(v => typeof v === 'string') as string[];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+/**
  * Analyzes a dish's safety status based on user's avoided allergens
  */
 export function analyzeDishSafety(
@@ -41,7 +64,7 @@ export function analyzeDishSafety(
 
   // Check each component for allergens
   for (const component of migratedDish.components) {
-    for (const allergen of component.allergen_tags) {
+    for (const allergen of safeAllergenTags(component.allergen_tags)) {
       if (avoidAllergens.includes(allergen)) {
         allergenInfo.push({
           tag: allergen,
@@ -131,27 +154,7 @@ export function migrateDishToComponents(dish: Dish): Dish {
   let allergenTags: string[] = [];
   
   const tags = dish.allergen_tags;
-  
-  if (!tags) {
-    allergenTags = [];
-  } else if (Array.isArray(tags)) {
-    allergenTags = tags;
-  } else if (typeof tags === 'string') {
-    allergenTags = [tags];
-  } else if (typeof tags === 'object' && 'length' in tags) {
-    // Array-like object (like NodeList or arguments object)
-    allergenTags = Array.from(tags as ArrayLike<string>);
-  } else if (typeof tags === 'object') {
-    // Regular object - try to extract values
-    try {
-      const values = Object.values(tags);
-      allergenTags = values.filter(v => typeof v === 'string') as string[];
-    } catch {
-      allergenTags = [];
-    }
-  } else {
-    allergenTags = [];
-  }
+  allergenTags = safeAllergenTags(tags);
 
   // Create a single "base" component from legacy data
   const baseComponent = {

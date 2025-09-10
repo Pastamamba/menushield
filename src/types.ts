@@ -17,7 +17,7 @@ export interface Dish {
   components: DishComponent[];
   // Legacy fields for backward compatibility
   ingredients: string[];
-  allergen_tags: string[];
+  allergen_tags: string[] | any; // Allow any type for backward compatibility
   modification_note: string | null;
   is_modifiable: boolean;
   created_at?: string;
