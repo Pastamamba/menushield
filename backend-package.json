@@ -1,0 +1,23 @@
+{
+  "name": "menu-shield-backend",
+  "type": "module",
+  "scripts": {
+    "start": "npx prisma db push --accept-data-loss && node prisma/seed-mongodb.js && node server.js",
+    "dev": "node --watch server.js",
+    "build": "npx prisma generate",
+    "migrate:deploy": "npx prisma db push",
+    "generate": "npx prisma generate",
+    "db:seed": "node prisma/seed-mongodb.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.15.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "prisma": "^5.15.0"
+  }
+}
