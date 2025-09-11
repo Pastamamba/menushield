@@ -251,19 +251,44 @@ app.get("/api/menu", async (req, res) => {
       },
     });
 
-    // Transform for guest view
-    const guestMenu = dishes.map((dish) => ({
-      id: dish.id,
-      name: dish.name,
-      description: dish.description,
-      price: dish.price,
-      category: dish.category,
-      allergen_tags: safeParseArray(dish.allergenTags),
-      modification_note: dish.modificationNote,
-      is_modifiable: dish.isModifiable,
-      components: safeParseArray(dish.components),
-      ingredients: dish.ingredients.map((di) => di.ingredient.name),
-    }));
+    // Transform for guest view with EXTRA safety
+    const guestMenu = dishes.map((dish) => {
+      let allergenTags;
+      try {
+        allergenTags = safeParseArray(dish.allergenTags);
+        // Extra check - force array
+        if (!Array.isArray(allergenTags)) {
+          allergenTags = [];
+        }
+      } catch (e) {
+        console.error('Allergen parsing error for dish', dish.name, ':', e);
+        allergenTags = [];
+      }
+
+      let components;
+      try {
+        components = safeParseArray(dish.components);
+        if (!Array.isArray(components)) {
+          components = [];
+        }
+      } catch (e) {
+        console.error('Components parsing error for dish', dish.name, ':', e);
+        components = [];
+      }
+
+      return {
+        id: dish.id,
+        name: dish.name,
+        description: dish.description,
+        price: dish.price,
+        category: dish.category,
+        allergen_tags: allergenTags,
+        modification_note: dish.modificationNote,
+        is_modifiable: dish.isModifiable,
+        components: components,
+        ingredients: dish.ingredients.map((di) => di.ingredient.name),
+      };
+    });
 
     res.json(guestMenu);
   } catch (error) {
@@ -425,12 +450,27 @@ app.get("/api/admin/menu", requireAuth, async (req, res) => {
       },
     });
 
-    const formattedDishes = dishes.map((dish) => ({
-      ...dish,
-      allergen_tags: JSON.parse(dish.allergenTags || "[]"),
-      components: JSON.parse(dish.components || "[]"),
-      ingredients: dish.ingredients.map((di) => di.ingredient.name),
-    }));
+    const formattedDishes = dishes.map((dish) => {
+      try {
+        const allergenTags = safeParseArray(dish.allergenTags);
+        const components = safeParseArray(dish.components);
+        
+        return {
+          ...dish,
+          allergen_tags: Array.isArray(allergenTags) ? allergenTags : [],
+          components: Array.isArray(components) ? components : [],
+          ingredients: dish.ingredients.map((di) => di.ingredient.name),
+        };
+      } catch (error) {
+        console.error(`Error formatting admin dish ${dish.name}:`, error);
+        return {
+          ...dish,
+          allergen_tags: [],
+          components: [],
+          ingredients: dish.ingredients.map((di) => di.ingredient.name),
+        };
+      }
+    });
 
     res.json(formattedDishes);
   } catch (error) {
