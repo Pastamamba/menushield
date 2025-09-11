@@ -1,16 +1,56 @@
+// src/routes/AppRoutes.tsx
 import { Routes, Route, Navigate } from "react-router-dom";
 import GuestMenu from "../components/GuestMenu";
 import LoginPage from "../admin/LoginPage";
+import SignupPage from "../admin/SignupPage";
+import AdminMenu from "../admin/AdminMenu";
+import IngredientManager from "../admin/IngredientManager";
+import { RouteGuard } from "../components/RouteGuard";
+import { ErrorBoundary } from "../components/ErrorBoundary";
+import { useAuth } from "../auth/AuthContext";
 
-const AppRoutes = () => {
+export default function AppRoutes() {
+  const { token } = useAuth();
+  
   return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/menu" element={<GuestMenu />} />
-      <Route path="/" element={<Navigate to="/menu" replace />} />
-      <Route path="*" element={<Navigate to="/menu" replace />} />
-    </Routes>
+    <ErrorBoundary>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/menu" element={<GuestMenu />} />
+        <Route path="/menu/:restaurantId" element={<GuestMenu />} />
+        
+        {/* Protected admin routes */}
+        <Route 
+          path="/admin" 
+          element={
+            <RouteGuard requireAuth adminOnly>
+              <AdminMenu />
+            </RouteGuard>
+          } 
+        />
+        <Route 
+          path="/admin/menu" 
+          element={
+            <RouteGuard requireAuth adminOnly>
+              <AdminMenu />
+            </RouteGuard>
+          } 
+        />
+        <Route 
+          path="/admin/ingredients" 
+          element={
+            <RouteGuard requireAuth adminOnly>
+              <IngredientManager token={token || ""} />
+            </RouteGuard>
+          } 
+        />
+        
+        {/* Default redirect */}
+        <Route path="/" element={<Navigate to="/menu" replace />} />
+        <Route path="*" element={<Navigate to="/menu" replace />} />
+      </Routes>
+    </ErrorBoundary>
   );
-};
-
-export default AppRoutes;
+}
