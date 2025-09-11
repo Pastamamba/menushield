@@ -30,7 +30,9 @@ export default function LoginPage() {
       // Check for redirect parameter
       const urlParams = new URLSearchParams(location.search);
       const redirect = urlParams.get("redirect");
-      navigate(redirect || "/admin/menu");
+      const targetPath = redirect || "/admin/menu";
+      console.log("Login successful, navigating to:", targetPath);
+      navigate(targetPath);
     } else {
       setError("Invalid credentials");
     }

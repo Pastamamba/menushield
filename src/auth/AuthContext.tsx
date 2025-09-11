@@ -19,6 +19,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const login = async (email: string, password: string) => {
     try {
       console.log("Attempting login with:", email); // Debug log
+      console.log("Making request to:", "/api/login"); // Debug log
+      
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -26,9 +28,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       });
 
       console.log("Login response status:", res.status); // Debug log
+      console.log("Login response headers:", Object.fromEntries(res.headers)); // Debug log
 
       if (!res.ok) {
-        console.error("Login failed with status:", res.status); // Debug log
+        const errorText = await res.text();
+        console.error("Login failed with status:", res.status, "Response:", errorText); // Debug log
         return false;
       }
 
