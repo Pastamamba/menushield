@@ -57,7 +57,7 @@ export default function GuestMenu() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Sticky Header with Enhanced Allergen Filter */}
-      <header className="bg-white shadow-lg sticky top-0 z-50">
+      <header className="bg-white shadow-lg sticky top-0 z-50" id="main-header">
         <div className="container mx-auto px-4 py-4">
           <div className="text-center mb-4">
             <h1 className="text-3xl font-bold text-green-600 mb-2">
@@ -83,7 +83,13 @@ export default function GuestMenu() {
                 <button
                   onClick={() => {
                     const menuSection = document.getElementById('menu-results');
-                    menuSection?.scrollIntoView({ behavior: 'smooth' });
+                    const header = document.getElementById('main-header');
+                    const headerHeight = header?.offsetHeight || 0;
+                    
+                    if (menuSection) {
+                      const top = menuSection.offsetTop - headerHeight - 20;
+                      window.scrollTo({ top, behavior: 'smooth' });
+                    }
                   }}
                   className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-all duration-200 font-semibold text-lg shadow-lg"
                 >
@@ -95,9 +101,8 @@ export default function GuestMenu() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 pt-8 pb-6 space-y-8 max-w-4xl" id="menu-results">
-        {/* Spacer to prevent content from hiding behind sticky header */}
-        <div className="h-4"></div>
+      {/* Main content with proper spacing */}
+      <main className="container mx-auto px-4 py-6 space-y-8 max-w-4xl" id="menu-results" style={{ marginTop: '2rem' }}>
         {/* Results Summary */}
         {avoid.length > 0 && (
           <section className="bg-white rounded-lg shadow-sm p-4">
