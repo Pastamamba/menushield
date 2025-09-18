@@ -1,3 +1,4 @@
+// Workspace change for Railway build trigger
 import type { Dish, DishSafetyStatus, AllergenInfo } from "../types";
 
 // Top 8 most common allergens for main display
