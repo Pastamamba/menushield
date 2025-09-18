@@ -56,30 +56,30 @@ export default function GuestMenu() {
   }
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Sticky Header with Enhanced Allergen Filter */}
+      {/* Compact Sticky Header with Enhanced Allergen Filter */}
       <header className="bg-white shadow-lg sticky top-0 z-50" id="main-header">
-        <div className="container mx-auto px-4 py-4">
-          <div className="text-center mb-4">
-            <h1 className="text-3xl font-bold text-green-600 mb-2">
+        <div className="container mx-auto px-4 py-3">
+          <div className="text-center mb-3">
+            <h1 className="text-2xl font-bold text-green-600 mb-1">
               MenuShield
             </h1>
-            <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+            <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
               <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full">
                 🛡️ Allergy-Safe Menu
               </span>
             </div>
           </div>
           
-          {/* Enhanced Allergen Selection - Always Visible */}
-          <div className="bg-gradient-to-r from-blue-50 to-green-50 border-2 border-blue-200 rounded-xl p-6 max-w-4xl mx-auto">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 text-center">
+          {/* Compact Allergen Selection - Always Visible */}
+          <div className="bg-gradient-to-r from-blue-50 to-green-50 border-2 border-blue-200 rounded-xl p-4 max-w-4xl mx-auto">
+            <h2 className="text-lg font-semibold mb-3 text-gray-800 text-center">
               🔍 Select Allergens to Avoid
             </h2>
             <AllergenFilter avoid={avoid} setAvoid={setAvoid} />
             
             {/* Show Dishes Button */}
             {avoid.length > 0 && (
-              <div className="text-center mt-6">
+              <div className="text-center mt-4">
                 <button
                   onClick={() => {
                     const menuSection = document.getElementById('menu-results');
@@ -91,7 +91,7 @@ export default function GuestMenu() {
                       window.scrollTo({ top, behavior: 'smooth' });
                     }
                   }}
-                  className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-all duration-200 font-semibold text-lg shadow-lg"
+                  className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-all duration-200 font-semibold shadow-lg"
                 >
                   🍽️ Show My Safe Dishes ({safeDishes.length + modifiableDishes.length})
                 </button>
