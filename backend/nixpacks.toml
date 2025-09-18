@@ -1,0 +1,11 @@
+[variables]
+NODE_VERSION = "18"
+
+[phases.install]
+cmds = ["npm install --no-package-lock"]
+
+[phases.build]
+cmds = ["npx prisma generate"]
+
+[phases.start]
+cmd = "npm start"
