@@ -6,7 +6,7 @@ import QRCodeManager from "./QRCodeManager";
 import CacheManager from "./CacheManager";
 import IngredientManager from "./IngredientManager";
 
-type TabType = "dishes" | "ingredients" | "qr-code" | "settings";
+type TabType = "dishes" | "qr-code" | "settings";
 
 export default function AdminMenu() {
   const { token, logout } = useAuth();
@@ -14,7 +14,6 @@ export default function AdminMenu() {
 
   const tabs: { id: TabType; label: string; icon: string }[] = [
     { id: "dishes", label: "Manage Dishes", icon: "🍽️" },
-    { id: "ingredients", label: "Ingredients", icon: "🥄" },
     { id: "qr-code", label: "QR Code & Sharing", icon: "📱" },
     { id: "settings", label: "Settings", icon: "⚙️" },
   ];
@@ -59,10 +58,6 @@ export default function AdminMenu() {
           <div className="bg-white p-6 rounded-lg shadow">
             <DishManager />
           </div>
-        )}
-
-        {activeTab === "ingredients" && token && (
-          <IngredientManager token={token} />
         )}
 
         {activeTab === "qr-code" && <QRCodeManager />}

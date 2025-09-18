@@ -56,9 +56,10 @@ export default function GuestMenu() {
   }
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-6">
-          <div className="text-center">
+      {/* Sticky Header with Enhanced Allergen Filter */}
+      <header className="bg-white shadow-lg sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="text-center mb-4">
             <h1 className="text-3xl font-bold text-green-600 mb-2">
               MenuShield
             </h1>
@@ -68,29 +69,33 @@ export default function GuestMenu() {
               </span>
             </div>
           </div>
+          
+          {/* Enhanced Allergen Selection - Always Visible */}
+          <div className="bg-gradient-to-r from-blue-50 to-green-50 border-2 border-blue-200 rounded-xl p-6 max-w-4xl mx-auto">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800 text-center">
+              🔍 Select Allergens to Avoid
+            </h2>
+            <AllergenFilter avoid={avoid} setAvoid={setAvoid} />
+            
+            {/* Show Dishes Button */}
+            {avoid.length > 0 && (
+              <div className="text-center mt-6">
+                <button
+                  onClick={() => {
+                    const menuSection = document.getElementById('menu-results');
+                    menuSection?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-all duration-200 font-semibold text-lg shadow-lg"
+                >
+                  🍽️ Show My Safe Dishes ({safeDishes.length + modifiableDishes.length})
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6 space-y-8 max-w-4xl">
-        {/* Instructions */}
-        <section className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h2 className="text-lg font-semibold text-blue-800 mb-2">
-            🔍 How to Use This Menu
-          </h2>
-          <ul className="text-blue-700 text-sm space-y-1">
-            <li>• Select any allergens you need to avoid below</li>
-            <li>• We'll show you dishes that are completely safe</li>
-            <li>• We'll also show dishes that can be modified to be safe</li>
-            <li>• Your ingredient information stays private and secure</li>
-          </ul>
-        </section>
-        {/* Allergen Selection */}
-        <section className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">
-            Select Allergens to Avoid
-          </h2>
-          <AllergenFilter avoid={avoid} setAvoid={setAvoid} />
-        </section>
+      <main className="container mx-auto px-4 py-6 space-y-8 max-w-4xl" id="menu-results">
         {/* Results Summary */}
         {avoid.length > 0 && (
           <section className="bg-white rounded-lg shadow-sm p-4">

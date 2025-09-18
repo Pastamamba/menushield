@@ -38,14 +38,7 @@ export default function AppRoutes() {
             </RouteGuard>
           } 
         />
-        <Route 
-          path="/admin/ingredients" 
-          element={
-            <RouteGuard requireAuth adminOnly>
-              <IngredientManager token={token || ""} />
-            </RouteGuard>
-          } 
-        />
+  {/* IngredientManager route removed for restaurants. Only available for superadmin if needed. */}
         
         {/* Default redirect */}
         <Route path="/" element={<Navigate to="/menu" replace />} />

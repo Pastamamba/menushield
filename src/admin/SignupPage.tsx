@@ -4,9 +4,11 @@ import { useNavigate } from "react-router-dom";
 export default function SignupPage() {
   const [formData, setFormData] = useState({
     restaurantName: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
+    emailConfirmation: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,13 +31,15 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:4000/api/signup", {
+      const res = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           restaurantName: formData.restaurantName,
+          username: formData.username,
           email: formData.email,
           password: formData.password,
+          emailConfirmation: formData.emailConfirmation,
         }),
       });
 
@@ -80,9 +84,7 @@ export default function SignupPage() {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Restaurant Name
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Restaurant Name</label>
             <input
               type="text"
               name="restaurantName"
@@ -91,6 +93,18 @@ export default function SignupPage() {
               onChange={handleChange}
               className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-green-500"
               placeholder="Your Restaurant Name"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Username (@username)</label>
+            <input
+              type="text"
+              name="username"
+              required
+              value={formData.username}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-green-500"
+              placeholder="unique username for your restaurant"
             />
           </div>
 
@@ -139,6 +153,17 @@ export default function SignupPage() {
             />
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email Confirmation (placeholder)</label>
+            <input
+              type="text"
+              name="emailConfirmation"
+              value={formData.emailConfirmation}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-green-500"
+              placeholder="Enter code from email (not implemented)"
+            />
+          </div>
           <button
             type="submit"
             disabled={loading}

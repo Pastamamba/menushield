@@ -1,6 +1,6 @@
 import type { Dish, DishSafetyStatus, AllergenInfo } from "../types";
 
-// Common allergens with expanded list
+// Top 8 most common allergens for main display
 export const COMMON_ALLERGENS = [
   { id: "dairy", name: "Dairy", icon: "🥛", color: "blue" },
   { id: "gluten", name: "Gluten", icon: "🌾", color: "yellow" },
@@ -10,15 +10,15 @@ export const COMMON_ALLERGENS = [
   { id: "fish", name: "Fish", icon: "🐟", color: "cyan" },
   { id: "eggs", name: "Eggs", icon: "🥚", color: "yellow" },
   { id: "soy", name: "Soy", icon: "🫘", color: "green" },
-  { id: "sesame", name: "Sesame", icon: "🫘", color: "tan" },
-  { id: "sulfites", name: "Sulfites", icon: "🍷", color: "purple" },
-  { id: "mustard", name: "Mustard", icon: "🟡", color: "yellow" },
-  { id: "celery", name: "Celery", icon: "🥬", color: "green" },
 ];
 
 // Extended allergen list for search
 export const ALL_ALLERGENS = [
   ...COMMON_ALLERGENS,
+  { id: "sesame", name: "Sesame", icon: "🫘", color: "tan" },
+  { id: "sulfites", name: "Sulfites", icon: "🍷", color: "purple" },
+  { id: "mustard", name: "Mustard", icon: "🟡", color: "yellow" },
+  { id: "celery", name: "Celery", icon: "🥬", color: "green" },
   { id: "lupin", name: "Lupin", icon: "🌸", color: "pink" },
   { id: "molluscs", name: "Molluscs", icon: "🐚", color: "teal" },
   { id: "corn", name: "Corn", icon: "🌽", color: "yellow" },
