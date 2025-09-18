@@ -95,7 +95,9 @@ export default function GuestMenu() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6 space-y-8 max-w-4xl" id="menu-results">
+      <main className="container mx-auto px-4 pt-8 pb-6 space-y-8 max-w-4xl" id="menu-results">
+        {/* Spacer to prevent content from hiding behind sticky header */}
+        <div className="h-4"></div>
         {/* Results Summary */}
         {avoid.length > 0 && (
           <section className="bg-white rounded-lg shadow-sm p-4">
