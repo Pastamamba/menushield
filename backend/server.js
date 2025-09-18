@@ -1,5 +1,9 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
+import compression from "compression";
+import rateLimit from "express-rate-limit";
+import { body, validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
@@ -8,11 +12,15 @@ import { PrismaClient } from "@prisma/client";
 // Load environment variables
 dotenv.config();
 
-console.log('🔧 Environment check:');
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('PORT:', process.env.PORT);
-console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
-console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
+// Only log in development
+const isDev = process.env.NODE_ENV !== 'production';
+if (isDev) {
+  console.log('🔧 Environment check:');
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  console.log('PORT:', process.env.PORT);
+  console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+  console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
+}
 
 const prisma = new PrismaClient();
 const app = express();
@@ -37,18 +45,68 @@ function safeParseArray(val) {
   return [];
 }
 
+// Validate JWT_SECRET in production
+if (!isDev && (!process.env.JWT_SECRET || process.env.JWT_SECRET === "replace_with_strong_secret")) {
+  console.error('⚠️ CRITICAL: Set a strong JWT_SECRET in production!');
+  process.exit(1);
+}
+
 const JWT_SECRET = process.env.JWT_SECRET || "replace_with_strong_secret";
 const PORT = process.env.PORT || 4000;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@example.com";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "supersecret";
 
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: { error: 'Too many requests from this IP, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // limit each IP to 5 login attempts per windowMs
+  message: { error: 'Too many login attempts, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Security middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:"],
+      scriptSrc: ["'self'"],
+    },
+  },
+}));
+
+app.use(compression());
+app.use(limiter);
+app.use(express.json({ limit: '10mb' }));
+
+// CORS configuration
+app.use(
+  cors({
+    origin: process.env.NODE_ENV === 'production' 
+      ? ['https://menushield.netlify.app', 'https://menushield-production.up.railway.app']
+      : ['http://localhost:5173', 'http://localhost:3000'],
+    credentials: true,
+  })
+);
+
 // Health check endpoint
 app.get('/health', async (req, res) => {
   try {
-    console.log('Health check requested');
+    if (isDev) console.log('Health check requested');
     // Test database connection with MongoDB
     await prisma.$connect();
-    console.log('Database connection OK');
+    if (isDev) console.log('Database connection OK');
     res.status(200).json({ 
       status: 'ok', 
       timestamp: new Date().toISOString(),
@@ -68,7 +126,7 @@ app.get('/health', async (req, res) => {
 
 // Simple test endpoint that doesn't need database
 app.get('/ping', (req, res) => {
-  console.log('Ping received');
+  if (isDev) console.log('Ping received');
   res.status(200).json({ 
     message: 'pong', 
     timestamp: new Date().toISOString(),
@@ -79,7 +137,7 @@ app.get('/ping', (req, res) => {
 // Manual seed endpoint for testing
 app.post('/api/seed', async (req, res) => {
   try {
-    console.log('Manual seed requested');
+    if (isDev) console.log('Manual seed requested');
     
     // Check if categories exist
     const existingCategories = await prisma.category.count();
@@ -98,7 +156,7 @@ app.post('/api/seed', async (req, res) => {
       for (const category of categories) {
         await prisma.category.create({ data: category });
       }
-      console.log(`✅ Created ${categories.length} categories`);
+      if (isDev) console.log(`✅ Created ${categories.length} categories`);
     }
 
     // Check if ingredients exist
@@ -121,7 +179,7 @@ app.post('/api/seed', async (req, res) => {
       for (const ingredient of ingredients) {
         await prisma.ingredient.create({ data: ingredient });
       }
-      console.log(`✅ Created ${ingredients.length} ingredients`);
+      if (isDev) console.log(`✅ Created ${ingredients.length} ingredients`);
     }
 
     // Check if admin user exists
@@ -135,7 +193,7 @@ app.post('/api/seed', async (req, res) => {
       };
 
       await prisma.user.create({ data: adminUser });
-      console.log('✅ Created admin user');
+      if (isDev) console.log('✅ Created admin user');
     }
 
     // Check if more dishes are needed
@@ -181,7 +239,7 @@ app.post('/api/seed', async (req, res) => {
           await prisma.dish.create({ data: dish });
         }
       }
-      console.log(`✅ Added sample dishes`);
+      if (isDev) console.log(`✅ Added sample dishes`);
     }
 
     const stats = {
@@ -217,13 +275,12 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json());
 
 // Database connection test
 async function testConnection() {
   try {
     await prisma.$connect();
-    console.log("Database connected successfully");
+    if (isDev) console.log("Database connected successfully");
   } catch (error) {
     console.error("Database connection failed:", error);
     process.exit(1);
@@ -342,8 +399,33 @@ app.get("/api/restaurant", async (req, res) => {
   }
 });
 
+// Input validation middleware
+const validateEmail = body('email').isEmail().normalizeEmail();
+const validatePassword = body('password').isLength({ min: 6 }).trim();
+const validateRestaurantName = body('restaurantName').isLength({ min: 1, max: 100 }).trim();
+const validateDishInput = [
+  body('name').isLength({ min: 1, max: 200 }).trim(),
+  body('description').optional().isLength({ max: 500 }).trim(),
+  body('price').isFloat({ min: 0 }),
+  body('category').isLength({ min: 1, max: 100 }).trim(),
+  body('allergenTags').optional().isArray(),
+  body('components').optional().isArray(),
+];
+
+// Error handler for validation
+const handleValidationErrors = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ 
+      error: 'Validation failed', 
+      details: errors.array() 
+    });
+  }
+  next();
+};
+
 // Admin: login
-app.post("/api/login", async (req, res) => {
+app.post("/api/login", authLimiter, [validateEmail, validatePassword], handleValidationErrors, async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -373,19 +455,9 @@ app.post("/api/login", async (req, res) => {
 });
 
 // Admin: signup
-app.post("/api/signup", async (req, res) => {
+app.post("/api/signup", authLimiter, [validateEmail, validatePassword, validateRestaurantName], handleValidationErrors, async (req, res) => {
   try {
     const { restaurantName, email, password } = req.body;
-
-    if (!restaurantName || !email || !password) {
-      return res.status(400).json({ error: "All fields are required" });
-    }
-
-    if (password.length < 6) {
-      return res
-        .status(400)
-        .json({ error: "Password must be at least 6 characters" });
-    }
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -407,7 +479,7 @@ app.post("/api/signup", async (req, res) => {
       },
     });
 
-    console.log(`New restaurant signup: ${restaurantName} (${email})`);
+    if (isDev) console.log(`New restaurant signup: ${restaurantName} (${email})`);
 
     res.status(201).json({
       message: "Account created successfully",
@@ -480,7 +552,7 @@ app.get("/api/admin/menu", requireAuth, async (req, res) => {
 });
 
 // Admin: create new dish
-app.post("/api/admin/menu", requireAuth, async (req, res) => {
+app.post("/api/admin/menu", requireAuth, validateDishInput, handleValidationErrors, async (req, res) => {
   try {
     const {
       name,
@@ -494,7 +566,7 @@ app.post("/api/admin/menu", requireAuth, async (req, res) => {
       components,
     } = req.body;
 
-    if (!name || !Array.isArray(ingredients) || !Array.isArray(allergen_tags)) {
+    if (!Array.isArray(ingredients) || !Array.isArray(allergen_tags)) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
