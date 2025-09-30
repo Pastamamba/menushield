@@ -15,7 +15,7 @@ export default function GuestMenu() {
   // Close mobile filter when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (showMobileFilter && !(event.target as Element).closest('.mobile-filter-drawer')) {
+      if (showMobileFilter && !(event.target as Element).closest('[data-drawer="mobile-filter"]')) {
         setShowMobileFilter(false);
       }
     };
@@ -95,7 +95,7 @@ export default function GuestMenu() {
     <div className="min-h-screen bg-gray-50">
       {/* Mobile Header - Always visible on mobile */}
       <div className="mobile-header lg:hidden sticky top-0 z-40 bg-gradient-to-r from-green-500 to-blue-600 shadow-lg">
-        <div className="px-4 py-3">
+        <div className="px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold text-white">MenuShield</h1>
@@ -103,14 +103,14 @@ export default function GuestMenu() {
             </div>
             <button
               onClick={() => setShowMobileFilter(true)}
-              className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-white/30 transition-colors"
+              className="bg-white/20 backdrop-blur-sm text-white px-4 py-3 rounded-xl flex items-center gap-2 hover:bg-white/30 transition-all active:scale-95 shadow-md"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586a1 1 0 01-.293.707l-2 2A1 1 0 0110 21v-8.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
               </svg>
-              Filter
+              <span className="font-medium">Filter</span>
               {selectedAllergens.length > 0 && (
-                <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px]">
+                <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] font-semibold">
                   {selectedAllergens.length}
                 </span>
               )}
@@ -157,25 +157,31 @@ export default function GuestMenu() {
       {showMobileFilter && (
         <>
           {/* Backdrop */}
-          <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity" />
+          <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity animate-fade-in" />
           
           {/* Drawer */}
-          <div className="lg:hidden fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white z-50 shadow-2xl transform transition-transform translate-x-0">
+          <div 
+            data-drawer="mobile-filter"
+            className="lg:hidden fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white z-50 shadow-2xl transform transition-transform translate-x-0 rounded-r-2xl animate-slide-in"
+            style={{ animationDuration: '0.3s', animationTimingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)' }}
+          >
             <div className="flex flex-col h-full">
               {/* Drawer Header */}
-              <div className="bg-gradient-to-r from-green-500 to-blue-600 p-4">
+              <div className="bg-gradient-to-r from-green-500 to-blue-600 p-6 rounded-tr-2xl">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-bold text-white">Filter Menu</h2>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">Filter Menu</h2>
+                    <p className="text-green-100 text-sm mt-1">Find safe dishes for you</p>
+                  </div>
                   <button
                     onClick={() => setShowMobileFilter(false)}
-                    className="text-white hover:text-gray-200 p-1"
+                    className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white/10 transition-colors"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
                 </div>
-                <p className="text-green-100 text-sm mt-1">Select allergens to avoid</p>
               </div>
 
               {/* Drawer Content */}
@@ -191,19 +197,23 @@ export default function GuestMenu() {
                   }}
                   searchTerm={searchTerm}
                   onSearchChange={setSearchTerm}
+                  isMobile={true}
                 />
               </div>
 
               {/* Drawer Footer */}
-              <div className="border-t border-gray-200 p-4 bg-gray-50">
+              <div className="border-t border-gray-200 p-6 bg-gray-50 rounded-br-2xl">
                 <button
                   onClick={scrollToMenu}
-                  className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors shadow-md"
+                  className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-4 rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transition-all shadow-lg active:scale-95 flex items-center justify-center"
                 >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                   Show My Safe Dishes
                   {selectedAllergens.length > 0 && (
-                    <span className="ml-2 bg-green-800 text-green-100 px-2 py-1 rounded-full text-sm">
-                      {selectedAllergens.length} filters
+                    <span className="ml-2 bg-green-800 text-green-100 px-3 py-1 rounded-full text-sm font-medium">
+                      {selectedAllergens.length}
                     </span>
                   )}
                 </button>
@@ -211,7 +221,7 @@ export default function GuestMenu() {
                 {selectedAllergens.length > 0 && (
                   <button
                     onClick={() => setSelectedAllergens([])}
-                    className="w-full mt-2 text-gray-600 py-2 text-sm hover:text-gray-800"
+                    className="w-full mt-3 text-gray-600 py-2 text-sm hover:text-gray-800 font-medium"
                   >
                     Clear all filters
                   </button>
@@ -225,19 +235,20 @@ export default function GuestMenu() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-6" ref={menuSectionRef}>
         {/* Summary */}
-        <div className="mb-6 bg-white rounded-lg shadow-sm p-4">
+        <div className="mb-6 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">Menu Overview</h3>
           <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
+            <div className="p-3 bg-green-50 rounded-lg">
               <div className="text-2xl font-bold text-green-600">{categorizedDishes.safe.length}</div>
-              <div className="text-sm text-gray-600">Safe dishes</div>
+              <div className="text-sm text-gray-600 font-medium">Safe dishes</div>
             </div>
-            <div>
+            <div className="p-3 bg-yellow-50 rounded-lg">
               <div className="text-2xl font-bold text-yellow-600">{categorizedDishes.modifiable.length}</div>
-              <div className="text-sm text-gray-600">Modifiable</div>
+              <div className="text-sm text-gray-600 font-medium">Modifiable</div>
             </div>
-            <div>
+            <div className="p-3 bg-red-50 rounded-lg">
               <div className="text-2xl font-bold text-red-600">{categorizedDishes.unsafe.length}</div>
-              <div className="text-sm text-gray-600">Avoid</div>
+              <div className="text-sm text-gray-600 font-medium">Avoid</div>
             </div>
           </div>
         </div>
