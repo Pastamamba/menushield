@@ -2,11 +2,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Ingredient, CreateIngredientRequest, UpdateIngredientRequest, IngredientCategory, CreateCategoryRequest, UpdateCategoryRequest } from '../types';
 
 // API base URL (same as dishApi)
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
+// Helper function for API URLs
+const getApiUrl = (path: string) => API_BASE ? `${API_BASE}${path}` : path;
 
 // Ingredients API functions
 async function fetchIngredients(): Promise<Ingredient[]> {
-  const response = await fetch(`${API_BASE}/api/admin/ingredients`, {
+  const response = await fetch(getApiUrl('/api/admin/ingredients'), {
     credentials: 'include',
   });
   
@@ -18,7 +21,7 @@ async function fetchIngredients(): Promise<Ingredient[]> {
 }
 
 async function createIngredient(data: CreateIngredientRequest): Promise<Ingredient> {
-  const response = await fetch(`${API_BASE}/api/admin/ingredients`, {
+  const response = await fetch(getApiUrl('/api/admin/ingredients'), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -35,7 +38,7 @@ async function createIngredient(data: CreateIngredientRequest): Promise<Ingredie
 }
 
 async function updateIngredient(id: string, data: Partial<UpdateIngredientRequest>): Promise<Ingredient> {
-  const response = await fetch(`${API_BASE}/api/admin/ingredients/${id}`, {
+  const response = await fetch(getApiUrl(`/api/admin/ingredients/${id}`), {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -52,7 +55,7 @@ async function updateIngredient(id: string, data: Partial<UpdateIngredientReques
 }
 
 async function deleteIngredient(id: string): Promise<void> {
-  const response = await fetch(`${API_BASE}/api/admin/ingredients/${id}`, {
+  const response = await fetch(getApiUrl(`/api/admin/ingredients/${id}`), {
     method: 'DELETE',
     credentials: 'include',
   });
@@ -64,7 +67,7 @@ async function deleteIngredient(id: string): Promise<void> {
 
 // Categories API functions
 async function fetchCategories(): Promise<IngredientCategory[]> {
-  const response = await fetch(`${API_BASE}/api/admin/categories`, {
+  const response = await fetch(getApiUrl('/api/admin/categories'), {
     credentials: 'include',
   });
   
@@ -76,7 +79,7 @@ async function fetchCategories(): Promise<IngredientCategory[]> {
 }
 
 async function createCategory(data: CreateCategoryRequest): Promise<IngredientCategory> {
-  const response = await fetch(`${API_BASE}/api/admin/categories`, {
+  const response = await fetch(getApiUrl('/api/admin/categories'), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -93,7 +96,7 @@ async function createCategory(data: CreateCategoryRequest): Promise<IngredientCa
 }
 
 async function updateCategory(id: string, data: Partial<UpdateCategoryRequest>): Promise<IngredientCategory> {
-  const response = await fetch(`${API_BASE}/api/admin/categories/${id}`, {
+  const response = await fetch(getApiUrl(`/api/admin/categories/${id}`), {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -110,7 +113,7 @@ async function updateCategory(id: string, data: Partial<UpdateCategoryRequest>):
 }
 
 async function deleteCategory(id: string): Promise<void> {
-  const response = await fetch(`${API_BASE}/api/admin/categories/${id}`, {
+  const response = await fetch(getApiUrl(`/api/admin/categories/${id}`), {
     method: 'DELETE',
     credentials: 'include',
   });
