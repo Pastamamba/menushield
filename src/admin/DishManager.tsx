@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useAdminDishes, useCreateDish, useUpdateDish, useDeleteDish } from "../utils/dishApi";
-import { useAuth } from "../auth/AuthContext";
 import type { Dish, CreateDishRequest } from "../types";
 
 export default function DishManager() {
@@ -36,7 +35,7 @@ export default function DishManager() {
     }
     alert(`Imported ${dishes.length} dishes!`);
   };
-  const { token } = useAuth();
+  
   const { data: dishes = [], isLoading, error } = useAdminDishes();
   const [editingDish, setEditingDish] = useState<Dish | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);

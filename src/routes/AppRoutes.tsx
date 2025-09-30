@@ -4,13 +4,10 @@ import GuestMenu from "../components/GuestMenu";
 import LoginPage from "../admin/LoginPage";
 import SignupPage from "../admin/SignupPage";
 import AdminMenu from "../admin/AdminMenu";
-import IngredientManager from "../admin/IngredientManager";
 import { RouteGuard } from "../components/RouteGuard";
 import { ErrorBoundary } from "../components/ErrorBoundary";
-import { useAuth } from "../auth/AuthContext";
 
 export default function AppRoutes() {
-  const { token } = useAuth();
   
   return (
     <ErrorBoundary>

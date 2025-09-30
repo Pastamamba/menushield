@@ -6,29 +6,46 @@ import {
 } from "../utils/dishAnalyzer";
 
 interface AllergenFilterProps {
-  avoid: string[];
-  setAvoid: (allergens: string[]) => void;
+  avoid?: string[];
+  setAvoid?: (allergens: string[]) => void;
+  selectedAllergens?: string[];
+  onAllergenToggle?: (allergen: string) => void;
+  searchTerm?: string;
+  onSearchChange?: (searchTerm: string) => void;
 }
 
 export default function AllergenFilter({
-  avoid,
+  avoid = [],
   setAvoid,
+  selectedAllergens = [],
+  onAllergenToggle,
+  searchTerm = "",
+  onSearchChange,
 }: AllergenFilterProps) {
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const searchResults = searchAllergens(searchQuery);
+  // Use new props if available, fallback to old props
+  const currentAllergens = selectedAllergens.length > 0 ? selectedAllergens : avoid;
+  const handleToggle = onAllergenToggle || ((allergen: string) => {
+    if (setAvoid) {
+      const newAllergens = currentAllergens.includes(allergen)
+        ? currentAllergens.filter(a => a !== allergen)
+        : [...currentAllergens, allergen];
+      setAvoid(newAllergens);
+    }
+  });
+  const currentSearchTerm = searchTerm || searchQuery;
+  const handleSearchChange = onSearchChange || setSearchQuery;
+
+  const searchResults = searchAllergens(currentSearchTerm);
   const displayAllergens = showSearch ? searchResults : COMMON_ALLERGENS;
 
   const toggleAllergen = (allergenId: string) => {
-    if (avoid.includes(allergenId)) {
-      setAvoid(avoid.filter((id) => id !== allergenId));
-    } else {
-      setAvoid([...avoid, allergenId]);
-    }
+    handleToggle(allergenId);
   };
 
-  const isSelected = (allergenId: string) => avoid.includes(allergenId);
+  const isSelected = (allergenId: string) => currentAllergens.includes(allergenId);
 
   return (
     <div className="space-y-3">
@@ -74,14 +91,14 @@ export default function AllergenFilter({
             <input
               type="text"
               placeholder="Search allergens..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={currentSearchTerm}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
             />
             <button
               onClick={() => {
                 setShowSearch(false);
-                setSearchQuery("");
+                handleSearchChange("");
               }}
               className="px-2 py-1 text-gray-600 hover:text-gray-800 text-sm"
             >
@@ -98,21 +115,27 @@ export default function AllergenFilter({
       )}
 
       {/* Selected Allergens Summary */}
-      {avoid.length > 0 && (
+      {currentAllergens.length > 0 && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-3">
           <div className="flex items-center justify-between mb-2">
             <h4 className="text-sm font-medium text-red-800">
-              Currently Avoiding ({avoid.length})
+              Currently Avoiding ({currentAllergens.length})
             </h4>
             <button
-              onClick={() => setAvoid([])}
+              onClick={() => {
+                if (onAllergenToggle) {
+                  currentAllergens.forEach(allergen => onAllergenToggle(allergen));
+                } else if (setAvoid) {
+                  setAvoid([]);
+                }
+              }}
               className="text-xs text-red-600 hover:text-red-800 underline"
             >
               Clear All
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
-            {avoid.map((allergenId) => {
+            {currentAllergens.map((allergenId) => {
               const allergen = ALL_ALLERGENS.find((a) => a.id === allergenId);
               return allergen ? (
                 <span

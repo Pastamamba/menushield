@@ -1,52 +1,71 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useMenu } from "../utils/dishApi";
 import AllergenFilter from "../components/AllergenFilter";
 import DishCard from "./DishCard";
-import { MenuLoadingState } from "./LoadingShimmer";
-import { useMenu } from "../utils/dishApi";
 import { analyzeDishSafety } from "../utils/dishAnalyzer";
-import type { Dish, DishSafetyStatus } from "../types";
-
-interface DishAnalysis {
-  dish: Dish;
-  safety: DishSafetyStatus;
-}
+import type { Dish } from "../types";
 
 export default function GuestMenu() {
-  // Use TanStack Query for menu data
-  const { data: menu = [], isLoading, error: queryError } = useMenu();
-  const [avoid, setAvoid] = useState<string[]>([]);
+  const { data: dishes = [], isLoading, error } = useMenu();
+  const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showMobileFilter, setShowMobileFilter] = useState(false);
+  const menuSectionRef = useRef<HTMLDivElement>(null);
 
-  // Analyze dishes with new component-based system
-  const dishAnalysis: DishAnalysis[] = menu.map((dish: Dish) => ({
-    dish,
-    safety: analyzeDishSafety(dish, avoid),
-  }));
+  // Close mobile filter when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showMobileFilter && !(event.target as Element).closest('.mobile-filter-drawer')) {
+        setShowMobileFilter(false);
+      }
+    };
 
-  const safeDishes = dishAnalysis.filter(
-    ({ safety }: DishAnalysis) => safety.status === "safe"
-  );
-  const modifiableDishes = dishAnalysis.filter(
-    ({ safety }: DishAnalysis) => safety.status === "modifiable"
-  );
-  const unsafeDishes = dishAnalysis.filter(
-    ({ safety }: DishAnalysis) => safety.status === "unsafe"
-  );
+    if (showMobileFilter) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.body.style.overflow = 'unset';
+    };
+  }, [showMobileFilter]);
+
+  const scrollToMenu = () => {
+    setShowMobileFilter(false); // Close mobile filter when showing dishes
+    setTimeout(() => {
+      if (menuSectionRef.current) {
+        const headerHeight = document.querySelector('.mobile-header')?.clientHeight || 80;
+        const targetPosition = menuSectionRef.current.offsetTop - headerHeight - 20;
+        window.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth'
+        });
+      }
+    }, 300); // Wait for drawer close animation
+  };
+
   if (isLoading) {
-    return <MenuLoadingState />;
-  }
-
-  if (queryError) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-6">
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">
-            Menu Unavailable
-          </h2>
-          <p className="text-gray-600 mb-4">{queryError.message}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading menu...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Error loading menu: {error.message}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
           >
             Try Again
           </button>
@@ -54,240 +73,236 @@ export default function GuestMenu() {
       </div>
     );
   }
+
+  // Filter dishes based on search term
+  const filteredDishes = dishes.filter(dish =>
+    dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    dish.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Categorize dishes by safety level
+  const categorizedDishes = filteredDishes.reduce((acc, dish) => {
+    const safety = analyzeDishSafety(dish, selectedAllergens);
+    acc[safety.status].push({ dish, safety });
+    return acc;
+  }, {
+    safe: [] as Array<{ dish: Dish; safety: ReturnType<typeof analyzeDishSafety> }>,
+    modifiable: [] as Array<{ dish: Dish; safety: ReturnType<typeof analyzeDishSafety> }>,
+    unsafe: [] as Array<{ dish: Dish; safety: ReturnType<typeof analyzeDishSafety> }>
+  });
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Compact Sticky Header with Enhanced Allergen Filter */}
-      <header className="bg-white shadow-lg sticky top-0 z-50" id="main-header">
-        <div className="container mx-auto px-4 py-3">
-          <div className="text-center mb-3">
-            <h1 className="text-2xl font-bold text-green-600 mb-1">
-              MenuShield
-            </h1>
-            <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
-              <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                🛡️ Allergy-Safe Menu
-              </span>
+      {/* Mobile Header - Always visible on mobile */}
+      <div className="mobile-header lg:hidden sticky top-0 z-40 bg-gradient-to-r from-green-500 to-blue-600 shadow-lg">
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-xl font-bold text-white">MenuShield</h1>
+              <p className="text-green-100 text-sm">Safe dining for everyone</p>
             </div>
-          </div>
-          
-          {/* Compact Allergen Selection - Always Visible */}
-          <div className="bg-gradient-to-r from-blue-50 to-green-50 border-2 border-blue-200 rounded-xl p-4 max-w-4xl mx-auto">
-            <h2 className="text-lg font-semibold mb-3 text-gray-800 text-center">
-              🔍 Select Allergens to Avoid
-            </h2>
-            <AllergenFilter avoid={avoid} setAvoid={setAvoid} />
-            
-            {/* Show Dishes Button */}
-            {avoid.length > 0 && (
-              <div className="text-center mt-4">
-                <button
-                  onClick={() => {
-                    const menuSection = document.getElementById('menu-results');
-                    const header = document.getElementById('main-header');
-                    const headerHeight = header?.offsetHeight || 0;
-                    
-                    if (menuSection) {
-                      const top = menuSection.offsetTop - headerHeight - 20;
-                      window.scrollTo({ top, behavior: 'smooth' });
-                    }
-                  }}
-                  className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-all duration-200 font-semibold shadow-lg"
-                >
-                  🍽️ Show My Safe Dishes ({safeDishes.length + modifiableDishes.length})
-                </button>
-              </div>
-            )}
+            <button
+              onClick={() => setShowMobileFilter(true)}
+              className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-white/30 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586a1 1 0 01-.293.707l-2 2A1 1 0 0110 21v-8.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              Filter
+              {selectedAllergens.length > 0 && (
+                <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px]">
+                  {selectedAllergens.length}
+                </span>
+              )}
+            </button>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Main content with proper spacing */}
-      <main className="container mx-auto px-4 py-6 space-y-8 max-w-4xl" id="menu-results" style={{ marginTop: '2rem' }}>
-        {/* Results Summary */}
-        {avoid.length > 0 && (
-          <section className="bg-white rounded-lg shadow-sm p-4">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-600">
-                Avoiding:{" "}
-                {avoid
-                  .map(
-                    (allergen: string) =>
-                      allergen.charAt(0).toUpperCase() + allergen.slice(1)
-                  )
-                  .join(", ")}
-              </div>
+      {/* Desktop Header - Always visible on desktop */}
+      <div className="hidden lg:block sticky top-0 z-40 bg-gradient-to-r from-green-500 to-blue-600 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="text-center mb-4">
+            <h1 className="text-3xl font-bold text-white mb-2">MenuShield</h1>
+            <p className="text-green-100">Safe dining for everyone</p>
+          </div>
+          
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-4">
+            <AllergenFilter
+              selectedAllergens={selectedAllergens}
+              onAllergenToggle={(allergen) => {
+                setSelectedAllergens(prev =>
+                  prev.includes(allergen)
+                    ? prev.filter(a => a !== allergen)
+                    : [...prev, allergen]
+                );
+              }}
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+            />
+            
+            <div className="mt-4 text-center">
               <button
-                onClick={() => setAvoid([])}
-                className="text-sm text-green-600 hover:text-green-800 underline"
+                onClick={scrollToMenu}
+                className="bg-white text-green-600 px-6 py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors shadow-md"
               >
-                Clear All
+                Show My Safe Dishes
               </button>
-            </div>{" "}
-            <div className="mt-2 text-sm font-medium text-gray-800">
-              Found {safeDishes.length} safe dishes, {modifiableDishes.length}{" "}
-              modifiable dishes, and {unsafeDishes.length} unsafe dishes
             </div>
-          </section>
-        )}{" "}
-        {/* Safe Dishes */}
-        {safeDishes.length > 0 && (
-          <section>
-            <h3 className="text-xl font-semibold mb-4 text-green-700 flex items-center gap-2">
-              ✅ Safe Dishes ({safeDishes.length})
-            </h3>
-            <div className="grid gap-4">
-              {safeDishes.map(({ dish, safety }: DishAnalysis) => (
-                <DishCard
-                  key={dish.id}
-                  dish={dish}
-                  safetyStatus={safety}
-                  isOffline={false}
-                />
-              ))}
-            </div>
-          </section>
-        )}
-        {/* Modifiable Dishes */}
-        {modifiableDishes.length > 0 && (
-          <section>
-            <h3 className="text-xl font-semibold mb-4 text-yellow-700 flex items-center gap-2">
-              ⚠️ Dishes You May Be Able To Customize ({modifiableDishes.length})
-            </h3>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
-              <p className="text-sm text-yellow-800">
-                💡{" "}
-                <strong>
-                  These dishes contain allergens in optional components
-                </strong>{" "}
-                (like sauce, side, or garnish) that may be removable or
-                swappable. Ask your server for modifications!
-              </p>
-            </div>{" "}
-            <div className="grid gap-4">
-              {modifiableDishes.map(({ dish, safety }: DishAnalysis) => (
-                <DishCard
-                  key={dish.id}
-                  dish={dish}
-                  safetyStatus={safety}
-                  isOffline={false}
-                />
-              ))}
-            </div>
-          </section>
-        )}
-        {/* Unsafe Dishes */}
-        {unsafeDishes.length > 0 && avoid.length > 0 && (
-          <section>
-            <h3 className="text-xl font-semibold mb-4 text-red-700 flex items-center gap-2">
-              ❌ Dishes That Cannot Be Made Safe ({unsafeDishes.length})
-            </h3>
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-              <p className="text-sm text-red-800">
-                ⚠️{" "}
-                <strong>
-                  These dishes contain allergens in their base components
-                </strong>{" "}
-                and cannot be safely modified. Please avoid these dishes.
-              </p>
-            </div>
-            <div className="grid gap-4">
-              {unsafeDishes.map(({ dish, safety }: DishAnalysis) => (
-                <DishCard
-                  key={dish.id}
-                  dish={dish}
-                  safetyStatus={safety}
-                  isOffline={false}
-                />
-              ))}
-            </div>
-          </section>
-        )}
-        {/* Enhanced No matches with better messaging */}
-        {avoid.length > 0 &&
-          safeDishes.length === 0 &&
-          modifiableDishes.length === 0 && (
-            <section className="text-center py-12 bg-white rounded-lg shadow-sm">
-              <div className="text-6xl mb-4">😕</div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                No Safe or Modifiable Options Found
-              </h3>
-              <p className="text-gray-600 mb-2 max-w-md mx-auto">
-                We couldn't find any dishes that are safe or easily modifiable
-                for your selected allergens ({avoid.join(", ")}).
-              </p>
-              {unsafeDishes.length > 0 && (
-                <p className="text-red-600 mb-6 max-w-md mx-auto text-sm">
-                  All available dishes contain allergens in their base
-                  components and cannot be safely modified.
-                </p>
-              )}
+          </div>
+        </div>
+      </div>
 
-              <div className="grid md:grid-cols-3 gap-4 max-w-2xl mx-auto mb-6">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <div className="text-2xl mb-2">🔍</div>
-                  <h4 className="font-medium text-blue-800 mb-1">
-                    Try Fewer Filters
-                  </h4>
-                  <p className="text-sm text-blue-600">
-                    Remove some allergens to see more options
-                  </p>
+      {/* Mobile Filter Drawer */}
+      {showMobileFilter && (
+        <>
+          {/* Backdrop */}
+          <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity" />
+          
+          {/* Drawer */}
+          <div className="lg:hidden mobile-filter-drawer fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white z-50 shadow-2xl transform transition-transform">
+            <div className="flex flex-col h-full">
+              {/* Drawer Header */}
+              <div className="bg-gradient-to-r from-green-500 to-blue-600 p-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-white">Filter Menu</h2>
+                  <button
+                    onClick={() => setShowMobileFilter(false)}
+                    className="text-white hover:text-gray-200 p-1"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                 </div>
-
-                <div className="bg-yellow-50 p-4 rounded-lg">
-                  <div className="text-2xl mb-2">🍽️</div>
-                  <h4 className="font-medium text-yellow-800 mb-1">
-                    Ask Your Server
-                  </h4>
-                  <p className="text-sm text-yellow-600">
-                    They may have special accommodations or off-menu options
-                  </p>
-                </div>
-
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <div className="text-2xl mb-2">📞</div>
-                  <h4 className="font-medium text-green-800 mb-1">
-                    Call Ahead
-                  </h4>
-                  <p className="text-sm text-green-600">
-                    Restaurants often create custom allergen-free dishes
-                  </p>
-                </div>
+                <p className="text-green-100 text-sm mt-1">Select allergens to avoid</p>
               </div>
 
-              <div className="flex gap-3 justify-center">
+              {/* Drawer Content */}
+              <div className="flex-1 overflow-y-auto p-4">
+                <AllergenFilter
+                  selectedAllergens={selectedAllergens}
+                  onAllergenToggle={(allergen) => {
+                    setSelectedAllergens(prev =>
+                      prev.includes(allergen)
+                        ? prev.filter(a => a !== allergen)
+                        : [...prev, allergen]
+                    );
+                  }}
+                  searchTerm={searchTerm}
+                  onSearchChange={setSearchTerm}
+                />
+              </div>
+
+              {/* Drawer Footer */}
+              <div className="border-t border-gray-200 p-4 bg-gray-50">
                 <button
-                  onClick={() => setAvoid([])}
-                  className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                  onClick={scrollToMenu}
+                  className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors shadow-md"
                 >
-                  Clear All Filters
+                  Show My Safe Dishes
+                  {selectedAllergens.length > 0 && (
+                    <span className="ml-2 bg-green-800 text-green-100 px-2 py-1 rounded-full text-sm">
+                      {selectedAllergens.length} filters
+                    </span>
+                  )}
                 </button>
+                
+                {selectedAllergens.length > 0 && (
+                  <button
+                    onClick={() => setSelectedAllergens([])}
+                    className="w-full mt-2 text-gray-600 py-2 text-sm hover:text-gray-800"
+                  >
+                    Clear all filters
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 py-6" ref={menuSectionRef}>
+        {/* Summary */}
+        <div className="mb-6 bg-white rounded-lg shadow-sm p-4">
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <div className="text-2xl font-bold text-green-600">{categorizedDishes.safe.length}</div>
+              <div className="text-sm text-gray-600">Safe dishes</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-yellow-600">{categorizedDishes.modifiable.length}</div>
+              <div className="text-sm text-gray-600">Modifiable</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-red-600">{categorizedDishes.unsafe.length}</div>
+              <div className="text-sm text-gray-600">Avoid</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Dishes by Safety Level */}
+        <div className="space-y-8">
+          {/* Safe Dishes */}
+          {categorizedDishes.safe.length > 0 && (
+            <section>
+              <h2 className="text-2xl font-bold text-green-700 mb-4 flex items-center">
+                <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                Safe Dishes ({categorizedDishes.safe.length})
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {categorizedDishes.safe.map(({ dish, safety }) => (
+                  <DishCard key={dish.id} dish={dish} safetyStatus={safety} />
+                ))}
               </div>
             </section>
           )}
-        {/* No filters selected */}
-        {avoid.length === 0 && (
-          <section className="text-center py-8 bg-white rounded-lg shadow-sm">
-            <div className="text-4xl mb-4">👆</div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              Select Your Allergens Above
-            </h3>
-            <p className="text-gray-600">
-              Choose any allergens you need to avoid to see your personalized
-              safe menu.
-            </p>
-          </section>
+
+          {/* Modifiable Dishes */}
+          {categorizedDishes.modifiable.length > 0 && (
+            <section>
+              <h2 className="text-2xl font-bold text-yellow-700 mb-4 flex items-center">
+                <span className="w-3 h-3 bg-yellow-500 rounded-full mr-3"></span>
+                Modifiable Dishes ({categorizedDishes.modifiable.length})
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {categorizedDishes.modifiable.map(({ dish, safety }) => (
+                  <DishCard key={dish.id} dish={dish} safetyStatus={safety} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Unsafe Dishes */}
+          {categorizedDishes.unsafe.length > 0 && (
+            <section>
+              <h2 className="text-2xl font-bold text-red-700 mb-4 flex items-center">
+                <span className="w-3 h-3 bg-red-500 rounded-full mr-3"></span>
+                Dishes to Avoid ({categorizedDishes.unsafe.length})
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {categorizedDishes.unsafe.map(({ dish, safety }) => (
+                  <DishCard key={dish.id} dish={dish} safetyStatus={safety} />
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+
+        {/* No Results */}
+        {filteredDishes.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-gray-400 mb-4">
+              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No dishes found</h3>
+            <p className="text-gray-600">Try adjusting your search or allergen filters</p>
+          </div>
         )}
       </main>
-
-      <footer className="bg-white border-t mt-12">
-        <div className="container mx-auto px-4 py-6 text-center text-sm text-gray-500">
-          <p>
-            Powered by{" "}
-            <span className="text-green-600 font-semibold">MenuShield</span> -
-            Keeping dining safe for everyone
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }

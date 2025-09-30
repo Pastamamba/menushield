@@ -4,12 +4,11 @@ import { useAuth } from "../auth/AuthContext";
 import DishManager from "./DishManager";
 import QRCodeManager from "./QRCodeManager";
 import CacheManager from "./CacheManager";
-import IngredientManager from "./IngredientManager";
 
 type TabType = "dishes" | "qr-code" | "settings";
 
 export default function AdminMenu() {
-  const { token, logout } = useAuth();
+  const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>("dishes");
 
   const tabs: { id: TabType; label: string; icon: string }[] = [
