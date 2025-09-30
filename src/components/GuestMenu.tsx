@@ -205,58 +205,111 @@ export default function GuestMenu() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-6" ref={menuSectionRef}>
+        {/* Desktop Allergen Filter */}
+        <div className="hidden md:block mb-8">
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <AllergenFilter
+              selectedAllergens={selectedAllergens}
+              onAllergenToggle={(allergen) => {
+                setSelectedAllergens(prev => 
+                  prev.includes(allergen)
+                    ? prev.filter(a => a !== allergen)
+                    : [...prev, allergen]
+                );
+              }}
+            />
+          </div>
+        </div>
+
         {/* Summary */}
         <div className="mb-6 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">Menu Overview</h3>
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="p-3 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">{categorizedDishes.safe.length}</div>
-              <div className="text-sm text-gray-600 font-medium">Safe dishes</div>
+          {selectedAllergens.length === 0 ? (
+            <div className="text-center">
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <div className="text-2xl font-bold text-gray-600">{filteredDishes.length}</div>
+                <div className="text-sm text-gray-600 font-medium">Kaikki ruoat</div>
+              </div>
             </div>
-            <div className="p-3 bg-yellow-50 rounded-lg">
-              <div className="text-2xl font-bold text-yellow-600">{categorizedDishes.modifiable.length}</div>
-              <div className="text-sm text-gray-600 font-medium">Modifiable</div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div className="p-3 bg-green-50 rounded-lg">
+                <div className="text-2xl font-bold text-green-600">{categorizedDishes.safe.length}</div>
+                <div className="text-sm text-gray-600 font-medium">Turvalliset ruoat</div>
+              </div>
+              <div className="p-3 bg-orange-50 rounded-lg">
+                <div className="text-2xl font-bold text-orange-600">{categorizedDishes.modifiable.length + categorizedDishes.unsafe.length}</div>
+                <div className="text-sm text-gray-600 font-medium">Sisältää allergeneja</div>
+              </div>
             </div>
-            <div className="p-3 bg-red-50 rounded-lg">
-              <div className="text-2xl font-bold text-red-600">{categorizedDishes.unsafe.length}</div>
-              <div className="text-sm text-gray-600 font-medium">Avoid</div>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Dishes by Safety Level */}
         <div className="space-y-8">
-          {/* Safe Dishes */}
-          {categorizedDishes.safe.length > 0 && (
+          {selectedAllergens.length === 0 ? (
+            /* Show all dishes when no allergens selected */
             <section>
-              <h2 className="text-2xl font-bold text-green-700 mb-4 flex items-center">
-                <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
-                Turvalliset ruoat
+              <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                <span className="w-3 h-3 bg-gray-500 rounded-full mr-3"></span>
+                Kaikki ruoat
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {categorizedDishes.safe.map(({ dish, safety }) => (
-                  <DishCard key={dish.id} dish={dish} safetyStatus={safety} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Modifiable Dishes */}
-          {categorizedDishes.modifiable.length > 0 && (
-            <section>
-              <h2 className="text-2xl font-bold text-orange-700 mb-4 flex items-center">
-                <span className="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
-                Ruoat joissa on vältettäviä allergeneja
-              </h2>
-              <p className="text-orange-600 mb-4 p-3 bg-orange-50 rounded-lg border border-orange-200">
-                ⚠️ Nämä ruoat sisältävät valitsemiasi allergeneja. Kysy tiskiltä, voiko allergeenit vaihtaa tai poistaa.
+              <p className="text-gray-600 mb-4">
+                Valitse allergeenit nähdäksesi turvallisia vaihtoehtoja
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {categorizedDishes.modifiable.map(({ dish, safety }) => (
-                  <DishCard key={dish.id} dish={dish} safetyStatus={safety} />
+                {filteredDishes.map((dish) => (
+                  <DishCard 
+                    key={dish.id} 
+                    dish={dish} 
+                    safetyStatus={{ 
+                      status: "safe", 
+                      allergens: [] 
+                    }} 
+                  />
                 ))}
               </div>
             </section>
+          ) : (
+            <>
+              {/* Safe Dishes */}
+              {categorizedDishes.safe.length > 0 && (
+                <section>
+                  <h2 className="text-2xl font-bold text-green-700 mb-4 flex items-center">
+                    <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    Turvalliset ruoat
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {categorizedDishes.safe.map(({ dish, safety }) => (
+                      <DishCard key={dish.id} dish={dish} safetyStatus={safety} />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Modifiable and Unsafe Dishes Combined */}
+              {(categorizedDishes.modifiable.length > 0 || categorizedDishes.unsafe.length > 0) && (
+                <section>
+                  <h2 className="text-2xl font-bold text-orange-700 mb-4 flex items-center">
+                    <span className="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
+                    Sisältää allergeneja
+                  </h2>
+                  <p className="text-orange-600 mb-4 p-3 bg-orange-50 rounded-lg border border-orange-200">
+                    ⚠️ Nämä ruoat sisältävät valitsemiasi allergeneja. Kysy tarjoilijalta, voiko allergeneja vaihtaa tai poistaa.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Show modifiable dishes first */}
+                    {categorizedDishes.modifiable.map(({ dish, safety }) => (
+                      <DishCard key={dish.id} dish={dish} safetyStatus={safety} />
+                    ))}
+                    {/* Then show unsafe dishes */}
+                    {categorizedDishes.unsafe.map(({ dish, safety }) => (
+                      <DishCard key={dish.id} dish={dish} safetyStatus={safety} />
+                    ))}
+                  </div>
+                </section>
+              )}
+            </>
           )}
         </div>
 
