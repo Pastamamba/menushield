@@ -2,36 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Mobile drawer animations */
-.mobile-filter-drawer {
-  transform: translateX(-100%);
-  transition: transform 0.3s ease-in-out;
-}
-
-.mobile-filter-drawer.open {
-  transform: translateX(0);
-}
-
-/* Ensure drawer appears above everything */
-.mobile-filter-drawer {
-  z-index: 51;
-}
-
-/* Smooth backdrop fade */
-.backdrop {
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
-}
-
-.backdrop.show {
-  opacity: 1;
-}
-
-/* Prevent scrolling when drawer is open */
-body.drawer-open {
-  overflow: hidden;
-}
-
 /* Custom animations for offline/online transitions */
 @keyframes slideInDown {
   from {

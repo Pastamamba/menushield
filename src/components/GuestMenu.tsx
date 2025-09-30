@@ -157,10 +157,10 @@ export default function GuestMenu() {
       {showMobileFilter && (
         <>
           {/* Backdrop */}
-          <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity" />
+          <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity" />
           
           {/* Drawer */}
-          <div className="lg:hidden mobile-filter-drawer fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white z-50 shadow-2xl transform transition-transform">
+          <div className="lg:hidden fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white z-50 shadow-2xl transform transition-transform translate-x-0">
             <div className="flex flex-col h-full">
               {/* Drawer Header */}
               <div className="bg-gradient-to-r from-green-500 to-blue-600 p-4">
