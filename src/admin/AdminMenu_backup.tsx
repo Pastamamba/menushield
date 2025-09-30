@@ -13,11 +13,11 @@ export default function AdminMenu() {
   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
 
   const menuItems = [
-    { id: "dashboard" as const, label: "Dashboard", icon: "📊" },
-    { id: "dishes" as const, label: "Dishes", icon: "🍽️" },
-    { id: "ingredients" as const, label: "Ingredients", icon: "🥬" },
-    { id: "qr-code" as const, label: "QR Code", icon: "📱" },
-    { id: "settings" as const, label: "Settings", icon: "⚙️" },
+    { id: "dashboard", label: "Dashboard", icon: "📊" },
+    { id: "dishes", label: "Dishes", icon: "🍽️" },
+    { id: "ingredients", label: "Ingredients", icon: "🥬" },
+    { id: "qr-code", label: "QR Code", icon: "📱" },
+    { id: "settings", label: "Settings", icon: "⚙️" },
   ];
 
   return (
@@ -179,6 +179,70 @@ function AdminSettings() {
           <CacheManager />
         </div>
       </div>
+    </div>
+  );
+        </div>
+      </nav>
+
+      <main className="container mx-auto px-6 py-8">
+        {activeTab === "dishes" && (
+          <div className="bg-white p-6 rounded-lg shadow">
+            <DishManager />
+          </div>
+        )}
+
+        {activeTab === "qr-code" && <QRCodeManager />}
+
+        {activeTab === "settings" && (
+          <div className="space-y-6">
+            <div className="bg-white p-6 rounded-lg shadow">
+              <h2 className="text-xl font-semibold mb-6">
+                Restaurant Settings
+              </h2>
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Restaurant Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Your Restaurant Name"
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Restaurant Description
+                  </label>
+                  <textarea
+                    placeholder="Brief description of your restaurant"
+                    className="w-full border rounded px-3 py-2"
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Contact Information
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Phone number or email"
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+
+                <button className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
+                  Save Settings
+                </button>
+              </div>
+            </div>
+
+            <CacheManager />
+          </div>
+        )}
+      </main>
     </div>
   );
 }

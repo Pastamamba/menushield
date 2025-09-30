@@ -41,6 +41,8 @@ export default function DishManager() {
   const { data: availableIngredients = [] } = useAdminIngredients();
   const [editingDish, setEditingDish] = useState<Dish | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   const createDishMutation = useCreateDish();
   const updateDishMutation = useUpdateDish();
@@ -68,15 +70,16 @@ export default function DishManager() {
     );
   }
 
-  // Group dishes by category
-  const dishesByCategory = dishes.reduce((acc, dish) => {
-    const category = dish.category || "Uncategorized";
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(dish);
-    return acc;
-  }, {} as Record<string, Dish[]>);
+  // Filter and group dishes  
+  const filteredDishes = dishes.filter(dish => {
+    const matchesSearch = dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         dish.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === "all" || dish.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  // Get unique categories for filter dropdown
+  const allCategories = ["all", ...Array.from(new Set(dishes.map(d => d.category || "Uncategorized")))];
 
   const handleCreateDish = async (dishData: CreateDishRequest) => {
     try {
@@ -108,64 +111,116 @@ export default function DishManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold text-gray-900">Dish Manager</h2>
-        <div className="flex space-x-2">
+      {/* Header with search and actions */}
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <h2 className="text-2xl font-semibold text-gray-900">Dishes ({filteredDishes.length})</h2>
+        
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setShowCreateForm(true)}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
           >
-            + Add New Dish
+            + Add Dish
           </button>
-          <label className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 cursor-pointer">
-            Bulk Import CSV
+          <label className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 cursor-pointer transition-colors">
+            Import CSV
             <input type="file" accept=".csv" style={{ display: "none" }} onChange={handleCSVImport} />
           </label>
         </div>
       </div>
 
-      {Object.entries(dishesByCategory).map(([category, categoryDishes]) => (
-        <div key={category} className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">{category}</h3>
-            <p className="text-sm text-gray-500">{categoryDishes.length} items</p>
-          </div>
-          
-          <div className="divide-y divide-gray-200">
-            {categoryDishes.map((dish) => (
-              <div key={dish.id} className="px-6 py-4 flex justify-between items-center">
-                <div className="flex-1">
-                  <h4 className="text-sm font-medium text-gray-900">{dish.name}</h4>
-                  <p className="text-sm text-gray-500">{dish.description}</p>
-                  <div className="mt-1">
-                    <span className="text-xs text-gray-400">
-                      Allergens: {dish.allergen_tags?.length ? dish.allergen_tags.join(", ") : "None"}
+      {/* Search and Filters */}
+      <div className="bg-white p-4 rounded-lg shadow flex flex-col sm:flex-row gap-4">
+        <div className="flex-1">
+          <input
+            type="text"
+            placeholder="Search dishes by name or description..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          />
+        </div>
+        <div className="sm:w-48">
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          >
+            <option value="all">All Categories</option>
+            {allCategories.slice(1).map(category => (
+              <option key={category} value={category}>{category}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Compact Dish List */}
+      <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="divide-y divide-gray-200">
+          {filteredDishes.map((dish) => (
+            <div key={dish.id} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3">
+                  <h4 className="text-lg font-medium text-gray-900 truncate">{dish.name}</h4>
+                  {dish.category && (
+                    <span className="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
+                      {dish.category}
                     </span>
-                  </div>
+                  )}
                   {dish.price && (
-                    <span className="text-sm font-semibold text-green-600">${dish.price}</span>
+                    <span className="text-lg font-semibold text-green-600">
+                      ${dish.price.toFixed(2)}
+                    </span>
                   )}
                 </div>
-                
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => setEditingDish(dish)}
-                    className="text-blue-600 hover:text-blue-800 text-sm"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteDish(dish.id)}
-                    className="text-red-600 hover:text-red-800 text-sm"
-                  >
-                    Delete
-                  </button>
+                <p className="text-sm text-gray-500 truncate mt-1">{dish.description}</p>
+                <div className="flex items-center gap-4 mt-2">
+                  <span className="text-xs text-gray-400">
+                    🥬 {Array.isArray(dish.ingredients) ? dish.ingredients.length : 0} ingredients
+                  </span>
+                  <span className="text-xs text-gray-400">
+                    ⚠️ {Array.isArray(dish.allergen_tags) ? dish.allergen_tags.length : 0} allergens
+                  </span>
+                  {Array.isArray(dish.allergen_tags) && dish.allergen_tags.length > 0 && (
+                    <span className="text-xs text-orange-600">
+                      {dish.allergen_tags.slice(0, 3).join(", ")}
+                      {dish.allergen_tags.length > 3 && "..."}
+                    </span>
+                  )}
                 </div>
               </div>
-            ))}
-          </div>
+              
+              <div className="flex items-center gap-2 ml-4">
+                <button
+                  onClick={() => setEditingDish(dish)}
+                  className="text-blue-600 hover:text-blue-800 p-2 hover:bg-blue-50 rounded transition-colors"
+                  title="Edit dish"
+                >
+                  ✏️
+                </button>
+                <button
+                  onClick={() => handleDeleteDish(dish.id)}
+                  className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded transition-colors"
+                  title="Delete dish"
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+          ))}
+          
+          {filteredDishes.length === 0 && (
+            <div className="px-6 py-12 text-center">
+              <p className="text-gray-500">
+                {searchTerm || selectedCategory !== "all" 
+                  ? "No dishes match your search criteria"
+                  : "No dishes found. Add your first dish!"
+                }
+              </p>
+            </div>
+          )}
         </div>
-      ))}
+      </div>
 
       {dishes.length === 0 && (
         <div className="bg-white shadow rounded-lg p-6 text-center">
