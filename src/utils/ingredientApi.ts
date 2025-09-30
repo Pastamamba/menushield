@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '../auth/AuthContext';
 import type { Ingredient, CreateIngredientRequest, UpdateIngredientRequest, IngredientCategory, CreateCategoryRequest, UpdateCategoryRequest } from '../types';
 
 // API base URL (same as dishApi)
@@ -8,9 +9,9 @@ const API_BASE = import.meta.env.VITE_API_URL || '';
 const getApiUrl = (path: string) => API_BASE ? `${API_BASE}${path}` : path;
 
 // Ingredients API functions
-async function fetchIngredients(): Promise<Ingredient[]> {
+async function fetchIngredients(token: string): Promise<Ingredient[]> {
   const response = await fetch(getApiUrl('/api/admin/ingredients'), {
-    credentials: 'include',
+    headers: { Authorization: `Bearer ${token}` },
   });
   
   if (!response.ok) {
@@ -20,13 +21,13 @@ async function fetchIngredients(): Promise<Ingredient[]> {
   return response.json();
 }
 
-async function createIngredient(data: CreateIngredientRequest): Promise<Ingredient> {
+async function createIngredient(data: CreateIngredientRequest, token: string): Promise<Ingredient> {
   const response = await fetch(getApiUrl('/api/admin/ingredients'), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
     },
-    credentials: 'include',
     body: JSON.stringify(data),
   });
   
@@ -37,13 +38,13 @@ async function createIngredient(data: CreateIngredientRequest): Promise<Ingredie
   return response.json();
 }
 
-async function updateIngredient(id: string, data: Partial<UpdateIngredientRequest>): Promise<Ingredient> {
+async function updateIngredient(id: string, data: Partial<UpdateIngredientRequest>, token: string): Promise<Ingredient> {
   const response = await fetch(getApiUrl(`/api/admin/ingredients/${id}`), {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
     },
-    credentials: 'include',
     body: JSON.stringify(data),
   });
   
@@ -54,10 +55,10 @@ async function updateIngredient(id: string, data: Partial<UpdateIngredientReques
   return response.json();
 }
 
-async function deleteIngredient(id: string): Promise<void> {
+async function deleteIngredient(id: string, token: string): Promise<void> {
   const response = await fetch(getApiUrl(`/api/admin/ingredients/${id}`), {
     method: 'DELETE',
-    credentials: 'include',
+    headers: { Authorization: `Bearer ${token}` },
   });
   
   if (!response.ok) {
@@ -66,9 +67,9 @@ async function deleteIngredient(id: string): Promise<void> {
 }
 
 // Categories API functions
-async function fetchCategories(): Promise<IngredientCategory[]> {
+async function fetchCategories(token: string): Promise<IngredientCategory[]> {
   const response = await fetch(getApiUrl('/api/admin/categories'), {
-    credentials: 'include',
+    headers: { Authorization: `Bearer ${token}` },
   });
   
   if (!response.ok) {
@@ -125,18 +126,28 @@ async function deleteCategory(id: string): Promise<void> {
 
 // React Query hooks for ingredients
 export function useAdminIngredients() {
+  const { token } = useAuth();
+  
   return useQuery({
     queryKey: ['admin', 'ingredients'],
-    queryFn: fetchIngredients,
+    queryFn: () => {
+      if (!token) throw new Error('No authentication token');
+      return fetchIngredients(token);
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!token,
   });
 }
 
 export function useCreateIngredient() {
   const queryClient = useQueryClient();
+  const { token } = useAuth();
   
   return useMutation({
-    mutationFn: createIngredient,
+    mutationFn: (data: CreateIngredientRequest) => {
+      if (!token) throw new Error('No authentication token');
+      return createIngredient(data, token);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'ingredients'] });
     },
@@ -145,10 +156,13 @@ export function useCreateIngredient() {
 
 export function useUpdateIngredient() {
   const queryClient = useQueryClient();
+  const { token } = useAuth();
   
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<UpdateIngredientRequest> }) =>
-      updateIngredient(id, data),
+    mutationFn: ({ id, data }: { id: string; data: Partial<UpdateIngredientRequest> }) => {
+      if (!token) throw new Error('No authentication token');
+      return updateIngredient(id, data, token);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'ingredients'] });
     },
@@ -157,9 +171,13 @@ export function useUpdateIngredient() {
 
 export function useDeleteIngredient() {
   const queryClient = useQueryClient();
+  const { token } = useAuth();
   
   return useMutation({
-    mutationFn: deleteIngredient,
+    mutationFn: (id: string) => {
+      if (!token) throw new Error('No authentication token');
+      return deleteIngredient(id, token);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'ingredients'] });
     },
@@ -168,10 +186,16 @@ export function useDeleteIngredient() {
 
 // React Query hooks for categories
 export function useAdminCategories() {
+  const { token } = useAuth();
+  
   return useQuery({
     queryKey: ['admin', 'categories'],
-    queryFn: fetchCategories,
+    queryFn: () => {
+      if (!token) throw new Error('No authentication token');
+      return fetchCategories(token);
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!token,
   });
 }
 
