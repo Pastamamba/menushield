@@ -228,18 +228,18 @@ export default function GuestMenu() {
             <div className="text-center">
               <div className="p-3 bg-gray-50 rounded-lg">
                 <div className="text-2xl font-bold text-gray-600">{filteredDishes.length}</div>
-                <div className="text-sm text-gray-600 font-medium">Kaikki ruoat</div>
+                <div className="text-sm text-gray-600 font-medium">All dishes</div>
               </div>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4 text-center">
               <div className="p-3 bg-green-50 rounded-lg">
                 <div className="text-2xl font-bold text-green-600">{categorizedDishes.safe.length}</div>
-                <div className="text-sm text-gray-600 font-medium">Turvalliset ruoat</div>
+                <div className="text-sm text-gray-600 font-medium">Safe dishes</div>
               </div>
               <div className="p-3 bg-orange-50 rounded-lg">
                 <div className="text-2xl font-bold text-orange-600">{categorizedDishes.modifiable.length + categorizedDishes.unsafe.length}</div>
-                <div className="text-sm text-gray-600 font-medium">Sisältää allergeneja</div>
+                <div className="text-sm text-gray-600 font-medium">Contains allergens</div>
               </div>
             </div>
           )}
@@ -252,10 +252,10 @@ export default function GuestMenu() {
             <section>
               <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
                 <span className="w-3 h-3 bg-gray-500 rounded-full mr-3"></span>
-                Kaikki ruoat
+                All dishes
               </h2>
               <p className="text-gray-600 mb-4">
-                Valitse allergeenit nähdäksesi turvallisia vaihtoehtoja
+                Select allergens to see safe options
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredDishes.map((dish) => (
@@ -277,7 +277,7 @@ export default function GuestMenu() {
                 <section>
                   <h2 className="text-2xl font-bold text-green-700 mb-4 flex items-center">
                     <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
-                    Turvalliset ruoat
+                    Safe dishes
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {categorizedDishes.safe.map(({ dish, safety }) => (
@@ -292,10 +292,10 @@ export default function GuestMenu() {
                 <section>
                   <h2 className="text-2xl font-bold text-orange-700 mb-4 flex items-center">
                     <span className="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
-                    Sisältää allergeneja
+                    Contains allergens
                   </h2>
                   <p className="text-orange-600 mb-4 p-3 bg-orange-50 rounded-lg border border-orange-200">
-                    ⚠️ Nämä ruoat sisältävät valitsemiasi allergeneja. Kysy tarjoilijalta, voiko allergeneja vaihtaa tai poistaa.
+                    ⚠️ These dishes contain your selected allergens. Ask the server if allergens can be modified or removed.
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {/* Show modifiable dishes first */}

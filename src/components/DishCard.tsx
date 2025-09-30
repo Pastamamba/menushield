@@ -24,7 +24,7 @@ export default function DishCard({
       case "modifiable":
         return {
           badge: "⚠️",
-          label: "Sisältää allergeneja",
+          label: "Contains allergens",
           borderColor: "border-orange-500",
           bgColor: "bg-orange-50",
           textColor: "text-orange-800",
@@ -32,7 +32,7 @@ export default function DishCard({
       case "unsafe":
         return {
           badge: "❌",
-          label: "Contains Allergens",
+          label: "Contains allergens",
           borderColor: "border-red-500",
           bgColor: "bg-red-50",
           textColor: "text-red-800",
@@ -75,18 +75,31 @@ export default function DishCard({
         <p className="text-gray-600 mb-3">{dish.description}</p>
       )}
 
-      {/* Modification Instruction for Modifiable Dishes */}
-      {safetyStatus.status === "modifiable" && (
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-3">
+      {/* Allergen Information for Modifiable and Unsafe Dishes */}
+      {(safetyStatus.status === "modifiable" || safetyStatus.status === "unsafe") && (
+          <div className={`border rounded-lg p-3 mb-3 ${
+            safetyStatus.status === "modifiable" 
+              ? "bg-orange-50 border-orange-200" 
+              : "bg-red-50 border-red-200"
+          }`}>
             {/* Show specific allergens found */}
             {safetyStatus.allergens.length > 0 && (
               <div className="mb-2">
-                <p className="text-sm font-medium text-orange-700 mb-1">
-                  Sisältää allergeneja:
+                <p className={`text-sm font-medium mb-1 ${
+                  safetyStatus.status === "modifiable" ? "text-orange-700" : "text-red-700"
+                }`}>
+                  Contains allergens:
                 </p>
                 <div className="flex flex-wrap gap-1">
                   {safetyStatus.allergens.map((allergen, index) => (
-                    <span key={index} className="inline-block bg-orange-200 text-orange-800 px-2 py-1 rounded text-xs font-medium">
+                    <span 
+                      key={index} 
+                      className={`inline-block px-2 py-1 rounded text-xs font-medium ${
+                        safetyStatus.status === "modifiable"
+                          ? "bg-orange-200 text-orange-800"
+                          : "bg-red-200 text-red-800"
+                      }`}
+                    >
                       {allergen.tag}
                     </span>
                   ))}
@@ -94,12 +107,19 @@ export default function DishCard({
               </div>
             )}
             {safetyStatus.modificationSuggestion && (
-              <p className="text-sm italic text-orange-700 mb-1">
+              <p className={`text-sm italic mb-1 ${
+                safetyStatus.status === "modifiable" ? "text-orange-700" : "text-red-700"
+              }`}>
                 {safetyStatus.modificationSuggestion}
               </p>
             )}
-            <p className="text-xs text-orange-600 font-medium">
-              💡 Kysy tiskiltä, voiko allergeenit vaihtaa tai poistaa
+            <p className={`text-xs font-medium ${
+              safetyStatus.status === "modifiable" ? "text-orange-600" : "text-red-600"
+            }`}>
+              {safetyStatus.status === "modifiable" 
+                ? "💡 Ask the server if allergens can be modified or removed"
+                : "⚠️ Not recommended - contains allergens you want to avoid"
+              }
             </p>
           </div>
         )}
