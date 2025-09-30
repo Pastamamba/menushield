@@ -206,7 +206,7 @@ export default function GuestMenu() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-6" ref={menuSectionRef}>
         {/* Desktop Allergen Filter */}
-        <div className="hidden md:block mb-8">
+        <div className="hidden lg:block mb-8">
           <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
             <AllergenFilter
               selectedAllergens={selectedAllergens}

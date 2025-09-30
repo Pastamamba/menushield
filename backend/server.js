@@ -566,8 +566,8 @@ app.post("/api/admin/menu", requireAuth, validateDishInput, handleValidationErro
       components,
     } = req.body;
 
-    if (!Array.isArray(ingredients) || !Array.isArray(allergen_tags)) {
-      return res.status(400).json({ error: "Missing required fields" });
+    if (!Array.isArray(allergen_tags)) {
+      return res.status(400).json({ error: "allergen_tags must be an array" });
     }
 
     const newDish = await prisma.dish.create({
@@ -583,11 +583,17 @@ app.post("/api/admin/menu", requireAuth, validateDishInput, handleValidationErro
       },
     });
 
+    // Handle ingredients if provided (for future use)
+    if (Array.isArray(ingredients) && ingredients.length > 0) {
+      // For now, we'll just include ingredients in response without storing relationships
+      // This maintains backward compatibility
+    }
+
     res.status(201).json({
       ...newDish,
       allergen_tags: JSON.parse(newDish.allergenTags),
       components: JSON.parse(newDish.components || "[]"),
-      ingredients: ingredients,
+      ingredients: ingredients || [],
     });
   } catch (error) {
     console.error("Error creating dish:", error);
