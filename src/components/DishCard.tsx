@@ -24,10 +24,10 @@ export default function DishCard({
       case "modifiable":
         return {
           badge: "⚠️",
-          label: "May Be Customizable",
-          borderColor: "border-yellow-500",
-          bgColor: "bg-yellow-50",
-          textColor: "text-yellow-800",
+          label: "Sisältää allergeneja",
+          borderColor: "border-orange-500",
+          bgColor: "bg-orange-50",
+          textColor: "text-orange-800",
         };
       case "unsafe":
         return {
@@ -76,14 +76,30 @@ export default function DishCard({
       )}
 
       {/* Modification Instruction for Modifiable Dishes */}
-      {safetyStatus.status === "modifiable" &&
-        safetyStatus.modificationSuggestion && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-3">
-            <p className="text-sm italic text-yellow-700">
-              {safetyStatus.modificationSuggestion}
-            </p>
-            <p className="text-xs text-yellow-600 mt-1">
-              💡 Please ask your server about this modification
+      {safetyStatus.status === "modifiable" && (
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-3">
+            {/* Show specific allergens found */}
+            {safetyStatus.allergens.length > 0 && (
+              <div className="mb-2">
+                <p className="text-sm font-medium text-orange-700 mb-1">
+                  Sisältää allergeneja:
+                </p>
+                <div className="flex flex-wrap gap-1">
+                  {safetyStatus.allergens.map((allergen, index) => (
+                    <span key={index} className="inline-block bg-orange-200 text-orange-800 px-2 py-1 rounded text-xs font-medium">
+                      {allergen.tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {safetyStatus.modificationSuggestion && (
+              <p className="text-sm italic text-orange-700 mb-1">
+                {safetyStatus.modificationSuggestion}
+              </p>
+            )}
+            <p className="text-xs text-orange-600 font-medium">
+              💡 Kysy tiskiltä, voiko allergeenit vaihtaa tai poistaa
             </p>
           </div>
         )}

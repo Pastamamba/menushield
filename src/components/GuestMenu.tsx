@@ -121,34 +121,10 @@ export default function GuestMenu() {
 
       {/* Desktop Header - Always visible on desktop */}
       <div className="hidden lg:block sticky top-0 z-40 bg-gradient-to-r from-green-500 to-blue-600 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="text-center mb-4">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="text-center">
             <h1 className="text-3xl font-bold text-white mb-2">MenuShield</h1>
             <p className="text-green-100">Safe dining for everyone</p>
-          </div>
-          
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-4">
-            <AllergenFilter
-              selectedAllergens={selectedAllergens}
-              onAllergenToggle={(allergen) => {
-                setSelectedAllergens(prev =>
-                  prev.includes(allergen)
-                    ? prev.filter(a => a !== allergen)
-                    : [...prev, allergen]
-                );
-              }}
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-            />
-            
-            <div className="mt-4 text-center">
-              <button
-                onClick={scrollToMenu}
-                className="bg-white text-green-600 px-6 py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors shadow-md"
-              >
-                Show My Safe Dishes
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -162,12 +138,12 @@ export default function GuestMenu() {
           {/* Drawer */}
           <div 
             data-drawer="mobile-filter"
-            className="lg:hidden fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white z-50 shadow-2xl transform transition-transform translate-x-0 rounded-r-2xl animate-slide-in"
+            className="lg:hidden fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white z-50 shadow-2xl transform transition-transform translate-x-0 rounded-l-2xl animate-slide-in-right"
             style={{ animationDuration: '0.3s', animationTimingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)' }}
           >
             <div className="flex flex-col h-full">
               {/* Drawer Header */}
-              <div className="bg-gradient-to-r from-green-500 to-blue-600 p-6 rounded-tr-2xl">
+              <div className="bg-gradient-to-r from-green-500 to-blue-600 p-6 rounded-tl-2xl">
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-xl font-bold text-white">Filter Menu</h2>
@@ -211,11 +187,6 @@ export default function GuestMenu() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                   Show My Safe Dishes
-                  {selectedAllergens.length > 0 && (
-                    <span className="ml-2 bg-green-800 text-green-100 px-3 py-1 rounded-full text-sm font-medium">
-                      {selectedAllergens.length}
-                    </span>
-                  )}
                 </button>
                 
                 {selectedAllergens.length > 0 && (
@@ -260,7 +231,7 @@ export default function GuestMenu() {
             <section>
               <h2 className="text-2xl font-bold text-green-700 mb-4 flex items-center">
                 <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
-                Safe Dishes ({categorizedDishes.safe.length})
+                Turvalliset ruoat
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {categorizedDishes.safe.map(({ dish, safety }) => (
@@ -273,27 +244,15 @@ export default function GuestMenu() {
           {/* Modifiable Dishes */}
           {categorizedDishes.modifiable.length > 0 && (
             <section>
-              <h2 className="text-2xl font-bold text-yellow-700 mb-4 flex items-center">
-                <span className="w-3 h-3 bg-yellow-500 rounded-full mr-3"></span>
-                Modifiable Dishes ({categorizedDishes.modifiable.length})
+              <h2 className="text-2xl font-bold text-orange-700 mb-4 flex items-center">
+                <span className="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
+                Ruoat joissa on vältettäviä allergeneja
               </h2>
+              <p className="text-orange-600 mb-4 p-3 bg-orange-50 rounded-lg border border-orange-200">
+                ⚠️ Nämä ruoat sisältävät valitsemiasi allergeneja. Kysy tiskiltä, voiko allergeenit vaihtaa tai poistaa.
+              </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {categorizedDishes.modifiable.map(({ dish, safety }) => (
-                  <DishCard key={dish.id} dish={dish} safetyStatus={safety} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Unsafe Dishes */}
-          {categorizedDishes.unsafe.length > 0 && (
-            <section>
-              <h2 className="text-2xl font-bold text-red-700 mb-4 flex items-center">
-                <span className="w-3 h-3 bg-red-500 rounded-full mr-3"></span>
-                Dishes to Avoid ({categorizedDishes.unsafe.length})
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {categorizedDishes.unsafe.map(({ dish, safety }) => (
                   <DishCard key={dish.id} dish={dish} safetyStatus={safety} />
                 ))}
               </div>
