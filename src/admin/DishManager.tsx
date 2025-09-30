@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAdminDishes, useCreateDish, useUpdateDish, useDeleteDish } from "../utils/dishApi";
+import { useAdminIngredients } from "../utils/ingredientApi";
 import type { Dish, CreateDishRequest } from "../types";
 
 export default function DishManager() {
@@ -37,6 +38,7 @@ export default function DishManager() {
   };
   
   const { data: dishes = [], isLoading, error } = useAdminDishes();
+  const { data: availableIngredients = [] } = useAdminIngredients();
   const [editingDish, setEditingDish] = useState<Dish | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
@@ -178,25 +180,51 @@ export default function DishManager() {
       )}
 
       {showCreateForm && (
-        <CreateDishForm
-          onSubmit={handleCreateDish}
-          onCancel={() => setShowCreateForm(false)}
-        />
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+            onClick={() => setShowCreateForm(false)}
+          />
+          {/* Slide-up panel */}
+          <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl transform transition-transform duration-300 ease-out translate-y-0 max-h-[80vh] overflow-y-auto">
+            <CreateDishForm
+              onSubmit={handleCreateDish}
+              onCancel={() => setShowCreateForm(false)}
+              availableIngredients={availableIngredients}
+            />
+          </div>
+        </div>
       )}
 
       {editingDish && (
-        <EditDishForm
-          dish={editingDish}
-          onSubmit={(data) => handleUpdateDish(editingDish.id, data)}
-          onCancel={() => setEditingDish(null)}
-        />
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+            onClick={() => setEditingDish(null)}
+          />
+          {/* Slide-up panel */}
+          <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl transform transition-transform duration-300 ease-out translate-y-0 max-h-[80vh] overflow-y-auto">
+            <EditDishForm
+              dish={editingDish}
+              onSubmit={(data) => handleUpdateDish(editingDish.id, data)}
+              onCancel={() => setEditingDish(null)}
+              availableIngredients={availableIngredients}
+            />
+          </div>
+        </div>
       )}
     </div>
   );
 }
 
 // Placeholder forms - these would need to be implemented
-function CreateDishForm({ onSubmit, onCancel }: { onSubmit: (data: CreateDishRequest) => void; onCancel: () => void }) {
+function CreateDishForm({ onSubmit, onCancel, availableIngredients }: { 
+  onSubmit: (data: CreateDishRequest) => void; 
+  onCancel: () => void;
+  availableIngredients: any[];
+}) {
   const [form, setForm] = useState<CreateDishRequest>({
     name: "",
     description: "",
@@ -228,44 +256,122 @@ function CreateDishForm({ onSubmit, onCancel }: { onSubmit: (data: CreateDishReq
   };
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
-      <h3 className="text-lg font-medium mb-4">Add New Dish</h3>
-      {error && <div className="text-red-600 mb-2">{error}</div>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Name</label>
-          <input name="name" value={form.name} onChange={handleChange} required className="w-full border rounded px-3 py-2" />
+    <div className="p-6">
+      {/* Header with close button */}
+      <div className="flex items-center justify-between mb-6 pb-4 border-b">
+        <h3 className="text-xl font-semibold text-gray-900">Add New Dish</h3>
+        <button
+          onClick={onCancel}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+          <p className="text-red-800 text-sm">{error}</p>
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Description</label>
-          <textarea name="description" value={form.description} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Name *</label>
+            <input 
+              name="name" 
+              value={form.name} 
+              onChange={handleChange} 
+              required 
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
+              placeholder="Enter dish name"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+            <input 
+              name="category" 
+              value={form.category} 
+              onChange={handleChange} 
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
+              placeholder="e.g., Main Course, Appetizer"
+            />
+          </div>
         </div>
+
         <div>
-          <label className="block text-sm font-medium mb-1">Price</label>
-          <input name="price" type="number" value={form.price ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+          <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+          <textarea 
+            name="description" 
+            value={form.description} 
+            onChange={handleChange} 
+            rows={3}
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
+            placeholder="Describe the dish"
+          />
         </div>
+
         <div>
-          <label className="block text-sm font-medium mb-1">Category</label>
-          <input name="category" value={form.category} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+          <label className="block text-sm font-medium text-gray-700 mb-2">Price ($)</label>
+          <input 
+            name="price" 
+            type="number" 
+            step="0.01"
+            value={form.price ?? ""} 
+            onChange={handleChange} 
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
+            placeholder="0.00"
+          />
         </div>
+
         <div>
-          <label className="block text-sm font-medium mb-1">Ingredients (comma separated)</label>
-          <input name="ingredients" value={form.ingredients.join(", ")} onChange={(e) => handleArrayChange("ingredients", e.target.value)} className="w-full border rounded px-3 py-2" />
+          <label className="block text-sm font-medium text-gray-700 mb-2">Ingredients</label>
+          <IngredientSelector 
+            selectedIngredients={form.ingredients}
+            availableIngredients={availableIngredients}
+            onChange={(ingredients: string[]) => setForm(prev => ({ ...prev, ingredients }))}
+          />
         </div>
+
         <div>
-          <label className="block text-sm font-medium mb-1">Allergen Tags (comma separated)</label>
-          <input name="allergen_tags" value={form.allergen_tags.join(", ")} onChange={(e) => handleArrayChange("allergen_tags", e.target.value)} className="w-full border rounded px-3 py-2" />
+          <label className="block text-sm font-medium text-gray-700 mb-2">Allergen Tags</label>
+          <input 
+            name="allergen_tags" 
+            value={form.allergen_tags.join(", ")} 
+            onChange={(e) => handleArrayChange("allergen_tags", e.target.value)} 
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
+            placeholder="gluten, dairy, nuts (comma separated)"
+          />
         </div>
-        <div className="flex space-x-2 mt-4">
-          <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded">Save</button>
-          <button type="button" onClick={onCancel} className="bg-gray-300 text-gray-700 px-4 py-2 rounded">Cancel</button>
+
+        <div className="flex space-x-3 pt-4 border-t">
+          <button 
+            type="submit" 
+            className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+          >
+            Save Dish
+          </button>
+          <button 
+            type="button" 
+            onClick={onCancel} 
+            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-6 rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
         </div>
       </form>
     </div>
   );
 }
 
-function EditDishForm({ dish, onSubmit, onCancel }: { dish: Dish; onSubmit: (data: Partial<CreateDishRequest>) => void; onCancel: () => void }) {
+function EditDishForm({ dish, onSubmit, onCancel, availableIngredients }: { 
+  dish: Dish; 
+  onSubmit: (data: Partial<CreateDishRequest>) => void; 
+  onCancel: () => void;
+  availableIngredients: any[];
+}) {
   const [form, setForm] = useState<Partial<CreateDishRequest>>({
     name: dish.name,
     description: dish.description,
@@ -297,39 +403,205 @@ function EditDishForm({ dish, onSubmit, onCancel }: { dish: Dish; onSubmit: (dat
   };
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
-      <h3 className="text-lg font-medium mb-4">Edit Dish: {dish.name}</h3>
-      {error && <div className="text-red-600 mb-2">{error}</div>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Name</label>
-          <input name="name" value={form.name ?? ""} onChange={handleChange} required className="w-full border rounded px-3 py-2" />
+    <div className="p-6">
+      {/* Header with close button */}
+      <div className="flex items-center justify-between mb-6 pb-4 border-b">
+        <h3 className="text-xl font-semibold text-gray-900">Edit Dish: {dish.name}</h3>
+        <button
+          onClick={onCancel}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+          <p className="text-red-800 text-sm">{error}</p>
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Description</label>
-          <textarea name="description" value={form.description ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Name *</label>
+            <input 
+              name="name" 
+              value={form.name ?? ""} 
+              onChange={handleChange} 
+              required 
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
+              placeholder="Enter dish name"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+            <input 
+              name="category" 
+              value={form.category ?? ""} 
+              onChange={handleChange} 
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
+              placeholder="e.g., Main Course, Appetizer"
+            />
+          </div>
         </div>
+
         <div>
-          <label className="block text-sm font-medium mb-1">Price</label>
-          <input name="price" type="number" value={form.price ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+          <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+          <textarea 
+            name="description" 
+            value={form.description ?? ""} 
+            onChange={handleChange} 
+            rows={3}
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
+            placeholder="Describe the dish"
+          />
         </div>
+
         <div>
-          <label className="block text-sm font-medium mb-1">Category</label>
-          <input name="category" value={form.category ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+          <label className="block text-sm font-medium text-gray-700 mb-2">Price ($)</label>
+          <input 
+            name="price" 
+            type="number" 
+            step="0.01"
+            value={form.price ?? ""} 
+            onChange={handleChange} 
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
+            placeholder="0.00"
+          />
         </div>
+
         <div>
-          <label className="block text-sm font-medium mb-1">Ingredients (comma separated)</label>
-          <input name="ingredients" value={Array.isArray(form.ingredients) ? form.ingredients.join(", ") : ""} onChange={(e) => handleArrayChange("ingredients", e.target.value)} className="w-full border rounded px-3 py-2" />
+          <label className="block text-sm font-medium text-gray-700 mb-2">Ingredients</label>
+          <IngredientSelector 
+            selectedIngredients={Array.isArray(form.ingredients) ? form.ingredients : []}
+            availableIngredients={availableIngredients}
+            onChange={(ingredients: string[]) => setForm(prev => ({ ...prev, ingredients }))}
+          />
         </div>
+
         <div>
-          <label className="block text-sm font-medium mb-1">Allergen Tags (comma separated)</label>
-          <input name="allergen_tags" value={Array.isArray(form.allergen_tags) ? form.allergen_tags.join(", ") : ""} onChange={(e) => handleArrayChange("allergen_tags", e.target.value)} className="w-full border rounded px-3 py-2" />
+          <label className="block text-sm font-medium text-gray-700 mb-2">Allergen Tags</label>
+          <input 
+            name="allergen_tags" 
+            value={Array.isArray(form.allergen_tags) ? form.allergen_tags.join(", ") : ""} 
+            onChange={(e) => handleArrayChange("allergen_tags", e.target.value)} 
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
+            placeholder="gluten, dairy, nuts (comma separated)"
+          />
         </div>
-        <div className="flex space-x-2 mt-4">
-          <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded">Save</button>
-          <button type="button" onClick={onCancel} className="bg-gray-300 text-gray-700 px-4 py-2 rounded">Cancel</button>
+
+        <div className="flex space-x-3 pt-4 border-t">
+          <button 
+            type="submit" 
+            className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+          >
+            Update Dish
+          </button>
+          <button 
+            type="button" 
+            onClick={onCancel} 
+            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-6 rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
         </div>
       </form>
     </div>
   );
 }
+// Ingredient Selector Component
+interface IngredientSelectorProps {
+  selectedIngredients: string[];
+  availableIngredients: any[];
+  onChange: (ingredients: string[]) => void;
+}
+
+function IngredientSelector({ selectedIngredients, availableIngredients, onChange }: IngredientSelectorProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const filteredIngredients = availableIngredients.filter(ingredient =>
+    ingredient.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    !selectedIngredients.includes(ingredient.name)
+  );
+
+  const addIngredient = (ingredientName: string) => {
+    onChange([...selectedIngredients, ingredientName]);
+    setSearchTerm("");
+    setShowDropdown(false);
+  };
+
+  const removeIngredient = (ingredientName: string) => {
+    onChange(selectedIngredients.filter(name => name !== ingredientName));
+  };
+
+  return (
+    <div className="space-y-3">
+      {/* Search and add */}
+      <div className="relative">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setShowDropdown(true);
+          }}
+          onFocus={() => setShowDropdown(true)}
+          className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+          placeholder="Search and select ingredients..."
+        />
+        
+        {/* Dropdown */}
+        {showDropdown && searchTerm && (
+          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+            {filteredIngredients.length > 0 ? (
+              filteredIngredients.map((ingredient) => (
+                <button
+                  key={ingredient.id}
+                  type="button"
+                  onClick={() => addIngredient(ingredient.name)}
+                  className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
+                >
+                  <div className="font-medium">{ingredient.name}</div>
+                  {ingredient.category && (
+                    <div className="text-sm text-gray-500">{ingredient.category}</div>
+                  )}
+                </button>
+              ))
+            ) : (
+              <div className="px-4 py-3 text-gray-500 text-center">
+                No ingredients found. Try a different search term.
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Selected ingredients */}
+      {selectedIngredients.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {selectedIngredients.map((ingredient) => (
+            <span
+              key={ingredient}
+              className="inline-flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 text-sm rounded-lg border border-green-200"
+            >
+              {ingredient}
+              <button
+                type="button"
+                onClick={() => removeIngredient(ingredient)}
+                className="text-green-500 hover:text-green-700 transition-colors"
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+

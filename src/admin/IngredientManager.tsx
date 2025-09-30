@@ -447,25 +447,45 @@ function IngredientsTab({
 
       {/* Forms */}
       {showForm && (
-        <IngredientForm
-          categories={categories}
-          allIngredients={ingredients}
-          onSubmit={onCreateIngredient}
-          onCancel={() => setShowForm(false)}
-        />
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+            onClick={() => setShowForm(false)}
+          />
+          {/* Slide-up panel */}
+          <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl transform transition-transform duration-300 ease-out translate-y-0 max-h-[80vh] overflow-y-auto">
+            <IngredientForm
+              categories={categories}
+              allIngredients={ingredients}
+              onSubmit={onCreateIngredient}
+              onCancel={() => setShowForm(false)}
+            />
+          </div>
+        </div>
       )}
 
       {editingItem && (
-        <IngredientForm
-          categories={categories}
-          allIngredients={ingredients}
-          initialData={editingItem}
-          onSubmit={(data: Partial<CreateIngredientRequest>) =>
-            onUpdateIngredient(editingItem.id, data)
-          }
-          onCancel={() => setEditingItem(null)}
-          isEditing
-        />
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+            onClick={() => setEditingItem(null)}
+          />
+          {/* Slide-up panel */}
+          <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl transform transition-transform duration-300 ease-out translate-y-0 max-h-[80vh] overflow-y-auto">
+            <IngredientForm
+              categories={categories}
+              allIngredients={ingredients}
+              initialData={editingItem}
+              onSubmit={(data: Partial<CreateIngredientRequest>) =>
+                onUpdateIngredient(editingItem.id, data)
+              }
+              onCancel={() => setEditingItem(null)}
+              isEditing
+            />
+          </div>
+        </div>
       )}
     </div>
   );
@@ -636,75 +656,85 @@ function IngredientForm({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <h2 className="text-xl font-semibold mb-4">
-            {isEditing ? "Edit Ingredient" : "Add New Ingredient"}
-          </h2>
+    <div className="p-6">
+      {/* Header with close button */}
+      <div className="flex items-center justify-between mb-6 pb-4 border-b">
+        <h2 className="text-xl font-semibold text-gray-900">
+          {isEditing ? "Edit Ingredient" : "Add New Ingredient"}
+        </h2>
+        <button
+          onClick={onCancel}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Name *
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                required
-              />
-            </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Name *
+            </label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+              placeholder="Enter ingredient name"
+              required
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category
-              </label>
-              <select
-                value={formData.category}
-                onChange={(e) =>
-                  setFormData({ ...formData, category: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              >
-                <option value="">Select category</option>
-                {categories.map((cat: IngredientCategory) => (
-                  <option key={cat.id} value={cat.name.toLowerCase()}>
-                    {cat.icon} {cat.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Parent Ingredient (for hierarchy)
-              </label>
-              <select
-                value={formData.parentId}
-                onChange={(e) =>
-                  setFormData({ ...formData, parentId: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              >
-                <option value="">
-                  No parent (this will be a main category)
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Category
+            </label>
+            <select
+              value={formData.category}
+              onChange={(e) =>
+                setFormData({ ...formData, category: e.target.value })
+              }
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+            >
+              <option value="">Select category</option>
+              {categories.map((cat: IngredientCategory) => (
+                <option key={cat.id} value={cat.name.toLowerCase()}>
+                  {cat.icon} {cat.name}
                 </option>
-                {possibleParents.map((parent: any) => (
-                  <option key={parent.id} value={parent.id}>
-                    {parent.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+              ))}
+            </select>
+          </div>
+        </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Allergen Tags
-              </label>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Parent Ingredient (for hierarchy)
+          </label>
+          <select
+            value={formData.parentId}
+            onChange={(e) =>
+              setFormData({ ...formData, parentId: e.target.value })
+            }
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+          >
+            <option value="">None (top-level ingredient)</option>
+            {possibleParents.map((parent: any) => (
+              <option key={parent.id} value={parent.id}>
+                {parent.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Allergen Tags
+          </label>
               <div className="flex gap-2 mb-2">
                 <select
                   value={newAllergen}
@@ -877,26 +907,43 @@ function CategoriesTab({
 
       {/* Add form */}
       {showForm && (
-        <CategoryForm
-          onSubmit={onCreateCategory}
-          onCancel={() => setShowForm(false)}
-        />
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+            onClick={() => setShowForm(false)}
+          />
+          {/* Slide-up panel */}
+          <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl transform transition-transform duration-300 ease-out translate-y-0 max-h-[80vh] overflow-y-auto">
+            <CategoryForm
+              onSubmit={onCreateCategory}
+              onCancel={() => setShowForm(false)}
+            />
+          </div>
+        </div>
       )}
 
       {/* Edit form */}
       {editingItem && (
-        <>
-          {console.log("Rendering edit form for:", editingItem)}
-          <CategoryForm
-            initialData={editingItem}
-            onSubmit={(data: Partial<CreateCategoryRequest>) => {
-              console.log("Form submitted with data:", data);
-              onUpdateCategory(editingItem.id, data);
-            }}
-            onCancel={() => setEditingItem(null)}
-            isEditing
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+            onClick={() => setEditingItem(null)}
           />
-        </>
+          {/* Slide-up panel */}
+          <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl transform transition-transform duration-300 ease-out translate-y-0 max-h-[80vh] overflow-y-auto">
+            <CategoryForm
+              initialData={editingItem}
+              onSubmit={(data: Partial<CreateCategoryRequest>) => {
+                console.log("Form submitted with data:", data);
+                onUpdateCategory(editingItem.id, data);
+              }}
+              onCancel={() => setEditingItem(null)}
+              isEditing
+            />
+          </div>
+        </div>
       )}
     </div>
   );
