@@ -411,7 +411,8 @@ const validateDishInput = [
   body('description').optional().isLength({ max: 500 }).trim(),
   body('price').optional().toFloat().isFloat({ min: 0 }),
   body('category').optional().isLength({ max: 100 }).trim(),
-  body('allergenTags').optional().isArray(),
+  body('allergen_tags').optional().isArray(),
+  body('ingredients').optional().isArray(),
   body('components').optional().isArray(),
 ];
 

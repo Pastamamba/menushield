@@ -70,6 +70,7 @@ model Dish {
   description      String?
   price            Float?
   category         String?
+  ingredients      String?  // JSON array as string
   allergenTags     String   @map("allergen_tags") // JSON array as string
   modificationNote String?  @map("modification_note")
   isModifiable     Boolean  @default(false) @map("is_modifiable")
@@ -77,7 +78,7 @@ model Dish {
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
-  ingredients DishIngredient[]
+  dishIngredients DishIngredient[]
 
   @@map("dishes")
 }
