@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAdminDishes, useCreateDish, useUpdateDish, useDeleteDish } from "../utils/dishApi";
 import { useAdminIngredients } from "../utils/ingredientApi";
+import { calculateAllergensFromIngredients, getAllergenChips } from "../utils/allergenCalculator";
 import type { Dish, CreateDishRequest } from "../types";
 
 export default function DishManager() {
@@ -296,8 +297,13 @@ function CreateDishForm({ onSubmit, onCancel, availableIngredients }: {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleArrayChange = (name: keyof CreateDishRequest, value: string) => {
-    setForm((prev) => ({ ...prev, [name]: value.split(",").map((v) => v.trim()).filter(Boolean) }));
+  const handleIngredientsChange = (newIngredients: string[]) => {
+    const autoAllergens = calculateAllergensFromIngredients(newIngredients, availableIngredients);
+    setForm(prev => ({
+      ...prev,
+      ingredients: newIngredients,
+      allergen_tags: autoAllergens
+    }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -386,19 +392,36 @@ function CreateDishForm({ onSubmit, onCancel, availableIngredients }: {
           <IngredientSelector 
             selectedIngredients={form.ingredients}
             availableIngredients={availableIngredients}
-            onChange={(ingredients: string[]) => setForm(prev => ({ ...prev, ingredients }))}
+            onChange={handleIngredientsChange}
           />
         </div>
 
+        {/* Auto-calculated Allergens Display */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Allergen Tags</label>
-          <input 
-            name="allergen_tags" 
-            value={form.allergen_tags.join(", ")} 
-            onChange={(e) => handleArrayChange("allergen_tags", e.target.value)} 
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
-            placeholder="gluten, dairy, nuts (comma separated)"
-          />
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Allergens (Auto-calculated from ingredients)
+          </label>
+          <div className="min-h-[3rem] p-3 border border-gray-200 rounded-lg bg-gray-50">
+            {form.allergen_tags.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {getAllergenChips(form.allergen_tags).map((allergen) => (
+                  <span
+                    key={allergen.name}
+                    className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
+                  >
+                    <span>{allergen.icon}</span>
+                    <span className="capitalize">{allergen.name}</span>
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No allergens detected. Add ingredients to see allergens.</p>
+            )}
+          </div>
+          <p className="text-xs text-gray-500 mt-1">
+            Allergens are automatically calculated based on selected ingredients. 
+            Update ingredients to modify allergens.
+          </p>
         </div>
 
         <div className="flex space-x-3 pt-4 border-t">
@@ -443,8 +466,13 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients }: {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleArrayChange = (name: keyof CreateDishRequest, value: string) => {
-    setForm((prev) => ({ ...prev, [name]: value.split(",").map((v) => v.trim()).filter(Boolean) }));
+  const handleIngredientsChange = (ingredients: string[]) => {
+    const allergens = calculateAllergensFromIngredients(ingredients, availableIngredients);
+    setForm(prev => ({ 
+      ...prev, 
+      ingredients,
+      allergen_tags: allergens // Auto-update allergens
+    }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -533,19 +561,36 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients }: {
           <IngredientSelector 
             selectedIngredients={Array.isArray(form.ingredients) ? form.ingredients : []}
             availableIngredients={availableIngredients}
-            onChange={(ingredients: string[]) => setForm(prev => ({ ...prev, ingredients }))}
+            onChange={handleIngredientsChange}
           />
         </div>
 
+        {/* Auto-calculated Allergens Display */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Allergen Tags</label>
-          <input 
-            name="allergen_tags" 
-            value={Array.isArray(form.allergen_tags) ? form.allergen_tags.join(", ") : ""} 
-            onChange={(e) => handleArrayChange("allergen_tags", e.target.value)} 
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
-            placeholder="gluten, dairy, nuts (comma separated)"
-          />
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Allergens (Auto-calculated from ingredients)
+          </label>
+          <div className="min-h-[3rem] p-3 border border-gray-200 rounded-lg bg-gray-50">
+            {Array.isArray(form.allergen_tags) && form.allergen_tags.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {getAllergenChips(form.allergen_tags).map((allergen) => (
+                  <span
+                    key={allergen.name}
+                    className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
+                  >
+                    <span>{allergen.icon}</span>
+                    <span className="capitalize">{allergen.name}</span>
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No allergens detected. Add ingredients to see allergens.</p>
+            )}
+          </div>
+          <p className="text-xs text-gray-500 mt-1">
+            Allergens are automatically calculated based on selected ingredients. 
+            Update ingredients to modify allergens.
+          </p>
         </div>
 
         <div className="flex space-x-3 pt-4 border-t">

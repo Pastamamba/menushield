@@ -1,4 +1,5 @@
 import type { Dish, DishSafetyStatus } from "../types";
+import { getAllergenChips } from "../utils/allergenCalculator";
 
 interface DishCardProps {
   dish: Dish;
@@ -85,27 +86,46 @@ export default function DishCard({
             {/* Show specific allergens found */}
             {safetyStatus.allergens.length > 0 && (
               <div className="mb-2">
-                <p className={`text-sm font-medium mb-1 ${
+                <p className={`text-sm font-medium mb-2 ${
                   safetyStatus.status === "modifiable" ? "text-orange-700" : "text-red-700"
                 }`}>
                   Contains allergens:
                 </p>
                 <div className="flex flex-wrap gap-1">
-                  {safetyStatus.allergens.map((allergen, index) => (
-                    <span 
-                      key={index} 
-                      className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                        safetyStatus.status === "modifiable"
-                          ? "bg-orange-200 text-orange-800"
-                          : "bg-red-200 text-red-800"
-                      }`}
+                  {Array.from(new Set(safetyStatus.allergens.map(a => a.tag))).map((allergenName) => {
+                    const allergenChip = getAllergenChips([allergenName])[0];
+                    return (
+                      <span 
+                        key={allergenName} 
+                        className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergenChip?.color || 'bg-gray-100 text-gray-800 border-gray-200'}`}
+                      >
+                        <span>{allergenChip?.icon || '⚠️'}</span>
+                        <span className="capitalize">{allergenName}</span>
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            
+            {/* Show all dish allergens as chips */}
+            {Array.isArray(dish.allergen_tags) && dish.allergen_tags.length > 0 && (
+              <div className="mb-2">
+                <p className="text-sm font-medium mb-2 text-gray-700">All allergens in dish:</p>
+                <div className="flex flex-wrap gap-1">
+                  {getAllergenChips(dish.allergen_tags).map((allergen) => (
+                    <span
+                      key={allergen.name}
+                      className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
                     >
-                      {allergen.tag}
+                      <span>{allergen.icon}</span>
+                      <span className="capitalize">{allergen.name}</span>
                     </span>
                   ))}
                 </div>
               </div>
             )}
+            
             {safetyStatus.modificationSuggestion && (
               <p className={`text-sm italic mb-1 ${
                 safetyStatus.status === "modifiable" ? "text-orange-700" : "text-red-700"

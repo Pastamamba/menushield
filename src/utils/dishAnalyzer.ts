@@ -1,5 +1,6 @@
 // Workspace change for Railway build trigger
 import type { Dish, DishSafetyStatus, AllergenInfo } from "../types";
+import { calculateAllergensFromIngredients } from "./allergenCalculator";
 
 // Top 8 most common allergens for main display
 export const COMMON_ALLERGENS = [
@@ -56,12 +57,13 @@ function safeAllergenTags(tags: any): string[] {
  */
 export function analyzeDishSafety(
   dish: Dish,
-  avoidAllergens: string[]
+  avoidAllergens: string[],
+  availableIngredients?: any[]
 ): DishSafetyStatus {
   const allergenInfo: AllergenInfo[] = [];
 
   // Migrate dish to component format for analysis
-  const migratedDish = migrateDishToComponents(dish);
+  const migratedDish = migrateDishToComponents(dish, availableIngredients);
 
   // Check each component for allergens
   for (const component of migratedDish.components) {
@@ -145,24 +147,37 @@ export function searchAllergens(query: string): typeof ALL_ALLERGENS {
 /**
  * Legacy compatibility: converts old dish format to component-based
  */
-export function migrateDishToComponents(dish: Dish): Dish {
+export function migrateDishToComponents(dish: Dish, availableIngredients?: any[]): Dish {
   // If dish already has components, return as-is
   if (dish.components && dish.components.length > 0) {
     return dish;
   }
 
-  // Ensure allergen_tags is an array - handle all possible types
+  // Get ingredients array
+  const ingredients = Array.isArray(dish.ingredients) ? dish.ingredients : [];
+
+  // Calculate allergens automatically from ingredients
   let allergenTags: string[] = [];
   
-  const tags = dish.allergen_tags;
-  allergenTags = safeAllergenTags(tags);
+  if (availableIngredients) {
+    // Use automatic calculation if ingredients database is available
+    allergenTags = calculateAllergensFromIngredients(ingredients, availableIngredients);
+  } else {
+    // Fallback to existing allergen_tags if no ingredient database
+    const existingTags = dish.allergen_tags;
+    if (existingTags && Array.isArray(existingTags) && existingTags.length > 0) {
+      allergenTags = existingTags;
+    } else {
+      allergenTags = safeAllergenTags(existingTags);
+    }
+  }
 
   // Create a single "base" component from legacy data
   const baseComponent = {
     id: `${dish.id}-base`,
     name: "Base",
     type: "base" as const,
-    ingredients: Array.isArray(dish.ingredients) ? dish.ingredients : [],
+    ingredients,
     allergen_tags: allergenTags,
     is_required: true,
   };
@@ -170,5 +185,6 @@ export function migrateDishToComponents(dish: Dish): Dish {
   return {
     ...dish,
     components: [baseComponent],
+    allergen_tags: allergenTags, // Update dish-level allergens too
   };
 }
