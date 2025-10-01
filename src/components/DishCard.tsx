@@ -76,6 +76,23 @@ export default function DishCard({
         <p className="text-gray-600 mb-3">{dish.description}</p>
       )}
 
+      {/* Ingredients */}
+      {Array.isArray(dish.ingredients) && dish.ingredients.length > 0 && (
+        <div className="mb-3">
+          <p className="text-sm font-medium text-gray-700 mb-2">Ingredients:</p>
+          <div className="flex flex-wrap gap-1">
+            {dish.ingredients.map((ingredient) => (
+              <span
+                key={ingredient}
+                className="inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full border border-gray-200"
+              >
+                {ingredient}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Allergen Information for Modifiable and Unsafe Dishes */}
       {(safetyStatus.status === "modifiable" || safetyStatus.status === "unsafe") && (
           <div className={`border rounded-lg p-3 mb-3 ${

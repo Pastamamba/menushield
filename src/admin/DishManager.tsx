@@ -175,6 +175,50 @@ export default function DishManager() {
                   )}
                 </div>
                 <p className="text-sm text-gray-500 truncate mt-1">{dish.description}</p>
+                
+                {/* Ingredients chips */}
+                {Array.isArray(dish.ingredients) && dish.ingredients.length > 0 && (
+                  <div className="mt-2">
+                    <div className="flex flex-wrap gap-1">
+                      {dish.ingredients.slice(0, 4).map((ingredient) => (
+                        <span
+                          key={ingredient}
+                          className="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-full border border-blue-200"
+                        >
+                          {ingredient}
+                        </span>
+                      ))}
+                      {dish.ingredients.length > 4 && (
+                        <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
+                          +{dish.ingredients.length - 4} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Allergen chips */}
+                {Array.isArray(dish.allergen_tags) && dish.allergen_tags.length > 0 && (
+                  <div className="mt-2">
+                    <div className="flex flex-wrap gap-1">
+                      {getAllergenChips(dish.allergen_tags.slice(0, 3)).map((allergen) => (
+                        <span
+                          key={allergen.name}
+                          className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
+                        >
+                          <span>{allergen.icon}</span>
+                          <span className="capitalize">{allergen.name}</span>
+                        </span>
+                      ))}
+                      {dish.allergen_tags.length > 3 && (
+                        <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
+                          +{dish.allergen_tags.length - 3} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex items-center gap-4 mt-2">
                   <span className="text-xs text-gray-400">
                     🥬 {Array.isArray(dish.ingredients) ? dish.ingredients.length : 0} ingredients
@@ -182,12 +226,6 @@ export default function DishManager() {
                   <span className="text-xs text-gray-400">
                     ⚠️ {Array.isArray(dish.allergen_tags) ? dish.allergen_tags.length : 0} allergens
                   </span>
-                  {Array.isArray(dish.allergen_tags) && dish.allergen_tags.length > 0 && (
-                    <span className="text-xs text-orange-600">
-                      {dish.allergen_tags.slice(0, 3).join(", ")}
-                      {dish.allergen_tags.length > 3 && "..."}
-                    </span>
-                  )}
                 </div>
               </div>
               
@@ -293,8 +331,11 @@ function CreateDishForm({ onSubmit, onCancel, availableIngredients }: {
   const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+    setForm(prev => ({
+      ...prev,
+      [name]: type === "number" ? (value ? parseFloat(value) : undefined) : value
+    }));
   };
 
   const handleIngredientsChange = (newIngredients: string[]) => {
@@ -462,8 +503,11 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients }: {
   const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+    setForm(prev => ({
+      ...prev,
+      [name]: type === "number" ? (value ? parseFloat(value) : undefined) : value
+    }));
   };
 
   const handleIngredientsChange = (ingredients: string[]) => {

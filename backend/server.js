@@ -298,15 +298,7 @@ app.get("/api/menu", async (req, res) => {
   try {
     const restaurantId = req.query.rid || req.query.r;
 
-    const dishes = await prisma.dish.findMany({
-      include: {
-        ingredients: {
-          include: {
-            ingredient: true,
-          },
-        },
-      },
-    });
+    const dishes = await prisma.dish.findMany({});
 
     // Transform for guest view with EXTRA safety
     const guestMenu = dishes.map((dish) => {
@@ -333,17 +325,28 @@ app.get("/api/menu", async (req, res) => {
         components = [];
       }
 
+      let ingredients;
+      try {
+        ingredients = safeParseArray(dish.ingredients);
+        if (!Array.isArray(ingredients)) {
+          ingredients = [];
+        }
+      } catch (e) {
+        console.error('Ingredients parsing error for dish', dish.name, ':', e);
+        ingredients = [];
+      }
+
       return {
         id: dish.id,
         name: dish.name,
         description: dish.description,
         price: dish.price,
         category: dish.category,
+        ingredients: ingredients,
         allergen_tags: allergenTags,
         modification_note: dish.modificationNote,
         is_modifiable: dish.isModifiable,
         components: components,
-        ingredients: dish.ingredients.map((di) => di.ingredient.name),
       };
     });
 
@@ -406,8 +409,8 @@ const validateRestaurantName = body('restaurantName').isLength({ min: 1, max: 10
 const validateDishInput = [
   body('name').isLength({ min: 1, max: 200 }).trim(),
   body('description').optional().isLength({ max: 500 }).trim(),
-  body('price').isFloat({ min: 0 }),
-  body('category').isLength({ min: 1, max: 100 }).trim(),
+  body('price').optional().toFloat().isFloat({ min: 0 }),
+  body('category').optional().isLength({ max: 100 }).trim(),
   body('allergenTags').optional().isArray(),
   body('components').optional().isArray(),
 ];
@@ -574,8 +577,9 @@ app.post("/api/admin/menu", requireAuth, validateDishInput, handleValidationErro
       data: {
         name,
         description: description || "",
-        price: price || 0,
+        price: typeof price === 'string' ? parseFloat(price) || 0 : (price || 0),
         category: category || "",
+        ingredients: JSON.stringify(ingredients || []),
         allergenTags: JSON.stringify(allergen_tags),
         modificationNote: modification_note || null,
         isModifiable: is_modifiable || false,
@@ -590,14 +594,26 @@ app.post("/api/admin/menu", requireAuth, validateDishInput, handleValidationErro
     }
 
     res.status(201).json({
-      ...newDish,
+      id: newDish.id,
+      name: newDish.name,
+      description: newDish.description,
+      price: newDish.price,
+      category: newDish.category,
+      ingredients: JSON.parse(newDish.ingredients || "[]"),
       allergen_tags: JSON.parse(newDish.allergenTags),
+      modification_note: newDish.modificationNote,
+      is_modifiable: newDish.isModifiable,
       components: JSON.parse(newDish.components || "[]"),
-      ingredients: ingredients || [],
+      created_at: newDish.createdAt,
+      updated_at: newDish.updatedAt,
     });
   } catch (error) {
     console.error("Error creating dish:", error);
-    res.status(500).json({ error: "Failed to create dish" });
+    console.error("Request body:", req.body);
+    res.status(500).json({ 
+      error: "Failed to create dish",
+      details: isDev ? error.message : undefined
+    });
   }
 });
 
@@ -613,6 +629,7 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
       description: updateData.description,
       price: updateData.price,
       category: updateData.category,
+      ingredients: JSON.stringify(updateData.ingredients || []),
       allergenTags: JSON.stringify(updateData.allergen_tags || []),
       modificationNote: updateData.modification_note,
       isModifiable: updateData.is_modifiable,
@@ -629,10 +646,18 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
     }
 
     res.json({
-      ...updatedDish,
+      id: updatedDish.id,
+      name: updatedDish.name,
+      description: updatedDish.description,
+      price: updatedDish.price,
+      category: updatedDish.category,
+      ingredients: JSON.parse(updatedDish.ingredients || "[]"),
       allergen_tags: JSON.parse(updatedDish.allergenTags),
+      modification_note: updatedDish.modificationNote,
+      is_modifiable: updatedDish.isModifiable,
       components: JSON.parse(updatedDish.components || "[]"),
-      ingredients: updateData.ingredients || [],
+      created_at: updatedDish.createdAt,
+      updated_at: updatedDish.updatedAt,
     });
   } catch (error) {
     console.error("Error updating dish:", error);
