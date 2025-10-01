@@ -327,7 +327,7 @@ app.get("/api/menu", async (req, res) => {
 
       let ingredients;
       try {
-        ingredients = safeParseArray(dish.ingredients);
+        ingredients = dish.ingredients ? safeParseArray(dish.ingredients) : [];
         if (!Array.isArray(ingredients)) {
           ingredients = [];
         }
@@ -516,34 +516,43 @@ function requireAuth(req, res, next) {
 // Admin: list all dishes
 app.get("/api/admin/menu", requireAuth, async (req, res) => {
   try {
-    const dishes = await prisma.dish.findMany({
-      include: {
-        ingredients: {
-          include: {
-            ingredient: true,
-          },
-        },
-      },
-    });
+    const dishes = await prisma.dish.findMany({});
 
     const formattedDishes = dishes.map((dish) => {
       try {
         const allergenTags = safeParseArray(dish.allergenTags);
         const components = safeParseArray(dish.components);
+        const ingredients = dish.ingredients ? safeParseArray(dish.ingredients) : [];
         
         return {
-          ...dish,
+          id: dish.id,
+          name: dish.name,
+          description: dish.description,
+          price: dish.price,
+          category: dish.category,
+          ingredients: Array.isArray(ingredients) ? ingredients : [],
           allergen_tags: Array.isArray(allergenTags) ? allergenTags : [],
+          modification_note: dish.modificationNote,
+          is_modifiable: dish.isModifiable,
           components: Array.isArray(components) ? components : [],
-          ingredients: dish.ingredients.map((di) => di.ingredient.name),
+          created_at: dish.createdAt,
+          updated_at: dish.updatedAt,
         };
       } catch (error) {
         console.error(`Error formatting admin dish ${dish.name}:`, error);
         return {
-          ...dish,
+          id: dish.id,
+          name: dish.name,
+          description: dish.description,
+          price: dish.price,
+          category: dish.category,
+          ingredients: [],
           allergen_tags: [],
+          modification_note: dish.modificationNote,
+          is_modifiable: dish.isModifiable,
           components: [],
-          ingredients: dish.ingredients.map((di) => di.ingredient.name),
+          created_at: dish.createdAt,
+          updated_at: dish.updatedAt,
         };
       }
     });
