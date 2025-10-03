@@ -2,11 +2,10 @@
 import { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import DishManager from "./DishManager";
-import IngredientManager from "./IngredientManager";
 import QRCodeManager from "./QRCodeManager";
 import CacheManager from "./CacheManager";
 
-type TabType = "dashboard" | "dishes" | "ingredients" | "qr-code" | "settings";
+type TabType = "dashboard" | "dishes" | "qr-code" | "settings";
 
 export default function AdminMenu() {
   const { logout } = useAuth();
@@ -14,9 +13,8 @@ export default function AdminMenu() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const menuItems = [
-    { id: "dashboard" as const, label: "Dashboard", icon: "📊" },
-    { id: "dishes" as const, label: "Dishes", icon: "🍽️" },
-    { id: "ingredients" as const, label: "Ingredients", icon: "🥬" },
+    { id: "dashboard" as const, label: "Dish Administration", icon: "🍽️" },
+    { id: "dishes" as const, label: "All Dishes", icon: "📋" },
     { id: "qr-code" as const, label: "QR Code", icon: "📱" },
     { id: "settings" as const, label: "Settings", icon: "⚙️" },
   ];
@@ -120,7 +118,6 @@ export default function AdminMenu() {
           {/* Dashboard = DishManager */}
           {activeTab === "dashboard" && <DishManager />}
           {activeTab === "dishes" && <DishManager />}
-          {activeTab === "ingredients" && <IngredientManager token="" />}
           {activeTab === "qr-code" && <QRCodeManager />}
           {activeTab === "settings" && <AdminSettings />}
         </div>
