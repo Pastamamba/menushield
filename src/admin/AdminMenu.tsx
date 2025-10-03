@@ -117,84 +117,14 @@ export default function AdminMenu() {
       {/* Main Content */}
       <main className="flex-1 lg:ml-0 pt-16 lg:pt-0">
         <div className="p-4 lg:p-8">
-          {activeTab === "dashboard" && <AdminDashboard />}
+          {/* Dashboard = DishManager */}
+          {activeTab === "dashboard" && <DishManager />}
           {activeTab === "dishes" && <DishManager />}
           {activeTab === "ingredients" && <IngredientManager token="" />}
           {activeTab === "qr-code" && <QRCodeManager />}
           {activeTab === "settings" && <AdminSettings />}
         </div>
       </main>
-    </div>
-  );
-}
-
-// Quick Dashboard Component
-function AdminDashboard() {
-  return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-semibold text-gray-900">Dashboard</h2>
-      
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center">
-            <div className="p-3 bg-green-100 rounded-full">
-              <span className="text-2xl">🍽️</span>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm text-gray-500">Total Dishes</p>
-              <p className="text-2xl font-semibold">-</p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center">
-            <div className="p-3 bg-blue-100 rounded-full">
-              <span className="text-2xl">🥬</span>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm text-gray-500">Ingredients</p>
-              <p className="text-2xl font-semibold">-</p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center">
-            <div className="p-3 bg-yellow-100 rounded-full">
-              <span className="text-2xl">⚠️</span>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm text-gray-500">Allergens</p>
-              <p className="text-2xl font-semibold">-</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button className="p-4 text-center border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-            <span className="text-2xl block mb-2">➕</span>
-            <span className="text-sm">Add Dish</span>
-          </button>
-          <button className="p-4 text-center border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-            <span className="text-2xl block mb-2">🥬</span>
-            <span className="text-sm">Add Ingredient</span>
-          </button>
-          <button className="p-4 text-center border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-            <span className="text-2xl block mb-2">📱</span>
-            <span className="text-sm">Generate QR</span>
-          </button>
-          <button className="p-4 text-center border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-            <span className="text-2xl block mb-2">📤</span>
-            <span className="text-sm">Export Data</span>
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
