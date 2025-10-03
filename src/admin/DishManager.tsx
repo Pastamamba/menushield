@@ -358,13 +358,17 @@ function CreateDishForm({ onSubmit, onCancel, availableIngredients }: {
   };
 
   return (
-    <div className="p-6">
-      {/* Header with close button */}
+    <div className="p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+      {/* Header with progress indicator */}
       <div className="flex items-center justify-between mb-6 pb-4 border-b">
-        <h3 className="text-xl font-semibold text-gray-900">Add New Dish</h3>
+        <div>
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900">✨ Add New Dish</h3>
+          <p className="text-sm text-gray-500 mt-1">Create a delicious new menu item</p>
+        </div>
         <button
           onClick={onCancel}
           className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          aria-label="Close"
         >
           <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -373,109 +377,160 @@ function CreateDishForm({ onSubmit, onCancel, availableIngredients }: {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-          <p className="text-red-800 text-sm">{error}</p>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-center">
+          <span className="text-red-500 mr-2">⚠️</span>
+          <p className="text-red-800 text-sm font-medium">{error}</p>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Name *</label>
-            <input 
-              name="name" 
-              value={form.name} 
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Basic Information Section */}
+        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <span className="mr-2">📝</span>
+            Basic Information
+          </h4>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Dish Name *
+              </label>
+              <input 
+                name="name" 
+                value={form.name} 
+                onChange={handleChange} 
+                required 
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400" 
+                placeholder="e.g., Grilled Salmon with Herbs"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category
+              </label>
+              <input 
+                name="category" 
+                value={form.category} 
+                onChange={handleChange} 
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400" 
+                placeholder="e.g., Main Course, Appetizer, Dessert"
+              />
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Description
+            </label>
+            <textarea 
+              name="description" 
+              value={form.description} 
               onChange={handleChange} 
-              required 
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
-              placeholder="Enter dish name"
+              rows={4}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 resize-none" 
+              placeholder="Describe your dish, its preparation method, and what makes it special..."
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-            <input 
-              name="category" 
-              value={form.category} 
-              onChange={handleChange} 
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
-              placeholder="e.g., Main Course, Appetizer"
-            />
+
+          <div className="mt-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Price (USD)
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg font-medium">$</span>
+              <input 
+                name="price" 
+                type="number" 
+                step="0.01"
+                value={form.price ?? ""} 
+                onChange={handleChange} 
+                className="w-full border border-gray-300 rounded-lg pl-8 pr-4 py-3 text-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400" 
+                placeholder="0.00"
+              />
+            </div>
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-          <textarea 
-            name="description" 
-            value={form.description} 
-            onChange={handleChange} 
-            rows={3}
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
-            placeholder="Describe the dish"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Price ($)</label>
-          <input 
-            name="price" 
-            type="number" 
-            step="0.01"
-            value={form.price ?? ""} 
-            onChange={handleChange} 
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
-            placeholder="0.00"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Ingredients</label>
-          <IngredientSelector 
-            selectedIngredients={form.ingredients}
-            availableIngredients={availableIngredients}
-            onChange={handleIngredientsChange}
-          />
-        </div>
-
-        {/* Auto-calculated Allergens Display */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Allergens (Auto-calculated from ingredients)
-          </label>
-          <div className="min-h-[3rem] p-3 border border-gray-200 rounded-lg bg-gray-50">
-            {form.allergen_tags.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {getAllergenChips(form.allergen_tags).map((allergen) => (
-                  <span
-                    key={allergen.name}
-                    className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
-                  >
-                    <span>{allergen.icon}</span>
-                    <span className="capitalize">{allergen.name}</span>
-                  </span>
-                ))}
+        {/* Ingredients Section */}
+        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <span className="mr-2">🥬</span>
+            Ingredients
+            <span className="ml-2 text-sm font-normal text-gray-500">
+              ({form.ingredients.length} selected)
+            </span>
+          </h4>
+          
+          <div className="space-y-4">
+            <IngredientSelector 
+              selectedIngredients={form.ingredients}
+              availableIngredients={availableIngredients}
+              onChange={handleIngredientsChange}
+            />
+            
+            {form.ingredients.length === 0 && (
+              <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+                <span className="text-4xl mb-2 block">🍽️</span>
+                <p className="text-gray-500 font-medium">No ingredients selected yet</p>
+                <p className="text-gray-400 text-sm">Start typing above to add ingredients</p>
               </div>
-            ) : (
-              <p className="text-sm text-gray-500">No allergens detected. Add ingredients to see allergens.</p>
             )}
           </div>
-          <p className="text-xs text-gray-500 mt-1">
-            Allergens are automatically calculated based on selected ingredients. 
-            Update ingredients to modify allergens.
-          </p>
         </div>
 
-        <div className="flex space-x-3 pt-4 border-t">
+        {/* Auto-calculated Allergens Section */}
+        <div className="bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-xl p-6 shadow-sm">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <span className="mr-2">⚠️</span>
+            Allergen Information
+            <span className="ml-2 px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full">
+              Auto-calculated
+            </span>
+          </h4>
+          
+          <div className="min-h-[4rem] p-4 border border-orange-200 rounded-lg bg-white">
+            {form.allergen_tags.length > 0 ? (
+              <div className="space-y-3">
+                <div className="flex flex-wrap gap-2">
+                  {getAllergenChips(form.allergen_tags).map((allergen) => (
+                    <span
+                      key={allergen.name}
+                      className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-full border-2 ${allergen.color} shadow-sm`}
+                    >
+                      <span className="text-base">{allergen.icon}</span>
+                      <span className="capitalize font-semibold">{allergen.name}</span>
+                    </span>
+                  ))}
+                </div>
+                <p className="text-sm text-orange-600 font-medium">
+                  ⚡ These allergens are automatically detected from your selected ingredients
+                </p>
+              </div>
+            ) : (
+              <div className="text-center py-4">
+                <span className="text-3xl mb-2 block">✅</span>
+                <p className="text-green-600 font-medium">No allergens detected</p>
+                <p className="text-gray-500 text-sm">Add ingredients to see potential allergens</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
           <button 
             type="submit" 
-            className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+            className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center"
           >
-            Save Dish
+            <span className="mr-2 text-lg">✨</span>
+            Create Dish
           </button>
           <button 
             type="button" 
             onClick={onCancel} 
-            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-6 rounded-lg transition-colors"
+            className="flex-1 sm:flex-initial bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-4 px-8 rounded-xl transition-all duration-200 border border-gray-300"
           >
             Cancel
           </button>
@@ -683,65 +738,120 @@ function IngredientSelector({ selectedIngredients, availableIngredients, onChang
   };
 
   return (
-    <div className="space-y-3">
-      {/* Search and add */}
+    <div className="space-y-4">
+      {/* Search Input */}
       <div className="relative">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setShowDropdown(true);
-          }}
-          onFocus={() => setShowDropdown(true)}
-          className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
-          placeholder="Search and select ingredients..."
-        />
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg">🔍</span>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setShowDropdown(true);
+            }}
+            onFocus={() => setShowDropdown(true)}
+            className="w-full pl-10 pr-4 py-3 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+            placeholder="Search ingredients... (e.g., salmon, tomato, cheese)"
+          />
+        </div>
         
         {/* Dropdown */}
         {showDropdown && searchTerm && (
-          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-60 overflow-y-auto">
             {filteredIngredients.length > 0 ? (
-              filteredIngredients.map((ingredient) => (
-                <button
-                  key={ingredient.id}
-                  type="button"
-                  onClick={() => addIngredient(ingredient.name)}
-                  className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
-                >
-                  <div className="font-medium">{ingredient.name}</div>
-                  {ingredient.category && (
-                    <div className="text-sm text-gray-500">{ingredient.category}</div>
-                  )}
-                </button>
-              ))
+              <div className="py-2">
+                {filteredIngredients.slice(0, 8).map((ingredient) => (
+                  <button
+                    key={ingredient.id}
+                    type="button"
+                    onClick={() => addIngredient(ingredient.name)}
+                    className="w-full px-4 py-3 text-left hover:bg-green-50 hover:text-green-700 transition-colors flex items-center justify-between group"
+                  >
+                    <div className="flex items-center">
+                      <span className="text-lg mr-3">🥬</span>
+                      <span className="font-medium">{ingredient.name}</span>
+                      {ingredient.category && (
+                        <span className="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                          {ingredient.category}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-green-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                      + Add
+                    </span>
+                  </button>
+                ))}
+                {filteredIngredients.length > 8 && (
+                  <div className="px-4 py-2 text-sm text-gray-500 border-t">
+                    ... and {filteredIngredients.length - 8} more matches
+                  </div>
+                )}
+              </div>
             ) : (
-              <div className="px-4 py-3 text-gray-500 text-center">
-                No ingredients found. Try a different search term.
+              <div className="px-4 py-6 text-center text-gray-500">
+                <span className="text-2xl block mb-2">😕</span>
+                <p className="font-medium">No ingredients found</p>
+                <p className="text-sm">Try a different search term</p>
               </div>
             )}
           </div>
         )}
       </div>
 
-      {/* Selected ingredients */}
+      {/* Selected Ingredients */}
       {selectedIngredients.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {selectedIngredients.map((ingredient) => (
-            <span
-              key={ingredient}
-              className="inline-flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 text-sm rounded-lg border border-green-200"
-            >
-              {ingredient}
-              <button
-                type="button"
-                onClick={() => removeIngredient(ingredient)}
-                className="text-green-500 hover:text-green-700 transition-colors"
-              >
-                ×
-              </button>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h5 className="font-medium text-gray-700">Selected Ingredients</h5>
+            <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+              {selectedIngredients.length} ingredient{selectedIngredients.length !== 1 ? 's' : ''}
             </span>
-          ))}
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {selectedIngredients.map((ingredient) => (
+              <div
+                key={ingredient}
+                className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2 group hover:bg-green-100 transition-colors"
+              >
+                <div className="flex items-center">
+                  <span className="text-lg mr-2">🥬</span>
+                  <span className="font-medium text-green-800">{ingredient}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeIngredient(ingredient)}
+                  className="text-green-600 hover:text-red-600 hover:bg-red-50 rounded-full p-1 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                  title={`Remove ${ingredient}`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Quick Add Suggestions */}
+      {selectedIngredients.length === 0 && !searchTerm && (
+        <div className="space-y-3">
+          <h5 className="font-medium text-gray-700">Popular Ingredients</h5>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+            {availableIngredients.slice(0, 8).map((ingredient) => (
+              <button
+                key={ingredient.id}
+                type="button"
+                onClick={() => addIngredient(ingredient.name)}
+                className="flex items-center justify-center bg-gray-50 hover:bg-green-50 hover:border-green-300 border border-gray-200 rounded-lg px-3 py-2 transition-all duration-200 text-sm font-medium hover:text-green-700"
+              >
+                <span className="mr-2">🥬</span>
+                {ingredient.name}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>
