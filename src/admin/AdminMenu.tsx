@@ -1,5 +1,5 @@
 // src/admin/AdminMenu.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../auth/AuthContext";
 import DishManager from "./DishManager";
 import QRCodeManager from "./QRCodeManager";
@@ -9,8 +9,27 @@ type TabType = "dashboard" | "dishes" | "qr-code" | "settings";
 
 export default function AdminMenu() {
   const { logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<TabType>("dashboard");
+  
+  // Initialize activeTab from localStorage or default to "dashboard"
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    try {
+      const saved = localStorage.getItem('admin-active-tab');
+      const validTabs: TabType[] = ["dashboard", "dishes", "qr-code", "settings"];
+      if (saved && validTabs.includes(saved as TabType)) {
+        return saved as TabType;
+      }
+    } catch (error) {
+      console.log('Error reading localStorage:', error);
+    }
+    return "dashboard";
+  });
+  
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Save activeTab to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('admin-active-tab', activeTab);
+  }, [activeTab]);
 
   const menuItems = [
     { id: "dashboard" as const, label: "Dish Administration", icon: "🍽️" },
