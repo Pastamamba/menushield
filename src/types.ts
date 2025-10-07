@@ -20,6 +20,7 @@ export interface Dish {
   allergen_tags: string[] | any; // Allow any type for backward compatibility
   modification_note: string | null;
   is_modifiable: boolean;
+  is_active?: boolean; // For dish activation toggle
   created_at?: string;
   updated_at?: string;
 }
@@ -54,6 +55,7 @@ export interface CreateDishRequest {
   allergen_tags: string[];
   modification_note?: string;
   is_modifiable?: boolean;
+  is_active?: boolean;
   // New component-based system (optional for now)
   components?: Omit<DishComponent, "id">[];
 }

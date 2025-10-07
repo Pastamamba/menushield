@@ -44,6 +44,7 @@ export default function DishManager() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all"); // all, active, inactive
 
   const createDishMutation = useCreateDish();
   const updateDishMutation = useUpdateDish();
@@ -76,7 +77,10 @@ export default function DishManager() {
     const matchesSearch = dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          dish.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "all" || dish.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesStatus = statusFilter === "all" || 
+                         (statusFilter === "active" && dish.is_active !== false) ||
+                         (statusFilter === "inactive" && dish.is_active === false);
+    return matchesSearch && matchesCategory && matchesStatus;
   });
 
   // Get unique categories for filter dropdown
@@ -107,6 +111,20 @@ export default function DishManager() {
       } catch (error) {
         console.error("Failed to delete dish:", error);
       }
+    }
+  };
+
+  const handleToggleActivation = async (dish: Dish) => {
+    try {
+      await updateDishMutation.mutateAsync({
+        id: dish.id,
+        dish: {
+          is_active: !dish.is_active
+        }
+      });
+    } catch (error) {
+      console.error("Error toggling dish activation:", error);
+      alert("Failed to update dish status. Please try again.");
     }
   };
 
@@ -153,16 +171,36 @@ export default function DishManager() {
             ))}
           </select>
         </div>
+        <div className="sm:w-48">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          >
+            <option value="all">All Status</option>
+            <option value="active">Active Only</option>
+            <option value="inactive">Inactive Only</option>
+          </select>
+        </div>
       </div>
 
       {/* Compact Dish List */}
       <div className="bg-white shadow rounded-lg overflow-hidden">
         <div className="divide-y divide-gray-200">
           {filteredDishes.map((dish) => (
-            <div key={dish.id} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
+            <div key={dish.id} className={`px-6 py-4 flex items-center justify-between hover:bg-gray-50 ${
+              dish.is_active === false ? 'opacity-60 bg-gray-50' : ''
+            }`}>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3">
-                  <h4 className="text-lg font-medium text-gray-900 truncate">{dish.name}</h4>
+                  <h4 className={`text-lg font-medium truncate ${
+                    dish.is_active === false ? 'text-gray-500' : 'text-gray-900'
+                  }`}>{dish.name}</h4>
+                  {dish.is_active === false && (
+                    <span className="inline-flex px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
+                      Inactive
+                    </span>
+                  )}
                   {dish.category && (
                     <span className="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
                       {dish.category}
@@ -230,6 +268,28 @@ export default function DishManager() {
               </div>
               
               <div className="flex items-center gap-2 ml-4">
+                {/* Activation Toggle */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleToggleActivation(dish)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                      dish.is_active !== false ? 'bg-green-600' : 'bg-gray-300'
+                    }`}
+                    title={dish.is_active !== false ? "Deactivate dish" : "Activate dish"}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        dish.is_active !== false ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                  <span className={`text-xs font-medium ${
+                    dish.is_active !== false ? 'text-green-700' : 'text-gray-500'
+                  }`}>
+                    {dish.is_active !== false ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+                
                 <button
                   onClick={() => setEditingDish(dish)}
                   className="text-blue-600 hover:text-blue-800 p-2 hover:bg-blue-50 rounded transition-colors"
@@ -328,6 +388,7 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients }: {
     ingredients: [],
     allergen_tags: [],
     is_modifiable: true,
+    is_active: true,
     components: []
   });
   
