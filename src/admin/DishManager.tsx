@@ -274,21 +274,11 @@ export default function DishManager() {
       )}
 
       {showCreateForm && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
-          {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-            onClick={() => setShowCreateForm(false)}
-          />
-          {/* Slide-up panel */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl transform transition-transform duration-300 ease-out translate-y-0 max-h-[80vh] overflow-y-auto">
-            <CreateDishForm
-              onSubmit={handleCreateDish}
-              onCancel={() => setShowCreateForm(false)}
-              availableIngredients={availableIngredients}
-            />
-          </div>
-        </div>
+        <CreateDishModal
+          onSubmit={handleCreateDish}
+          onCancel={() => setShowCreateForm(false)}
+          availableIngredients={availableIngredients}
+        />
       )}
 
       {editingDish && (
@@ -313,21 +303,438 @@ export default function DishManager() {
   );
 }
 
-// Placeholder forms - these would need to be implemented
-function CreateDishForm({ onSubmit, onCancel, availableIngredients }: { 
+// Two-page centered modal for creating dishes
+function CreateDishModal({ onSubmit, onCancel, availableIngredients }: { 
   onSubmit: (data: CreateDishRequest) => void; 
   onCancel: () => void;
   availableIngredients: any[];
 }) {
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Component group definitions
+  const componentGroups = [
+    { id: 'main', name: 'Main Component', canChange: false, icon: '🍽️' },
+    { id: 'base', name: 'Base', canChange: true, icon: '🍞' },
+    { id: 'side', name: 'Side Dish', canChange: true, icon: '🥗' },
+    { id: 'sauce', name: 'Sauce/Dip', canChange: true, icon: '🫙' },
+    { id: 'topping', name: 'Topping/Garnish', canChange: true, icon: '🌿' }
+  ];
+
   const [form, setForm] = useState<CreateDishRequest>({
     name: "",
     description: "",
-    price: undefined,
+    price: 0,
     category: "",
     ingredients: [],
     allergen_tags: [],
     is_modifiable: true,
+    components: []
   });
+  
+  // Component groups state - track ingredients by group
+  const [componentIngredients, setComponentIngredients] = useState<{[key: string]: string[]}>({
+    main: [],
+    base: [],
+    side: [],
+    sauce: [],
+    topping: []
+  });
+  
+  const [error, setError] = useState("");
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    if (type === "checkbox") {
+      const checkbox = e.target as HTMLInputElement;
+      setForm(prev => ({ ...prev, [name]: checkbox.checked }));
+    } else {
+      setForm(prev => ({
+        ...prev,
+        [name]: type === "number" ? (value ? parseFloat(value) : 0) : value
+      }));
+    }
+  };
+
+  // Handle ingredient changes for component groups
+  const handleComponentIngredientsChange = (groupId: string, ingredients: string[]) => {
+    setComponentIngredients(prev => ({
+      ...prev,
+      [groupId]: ingredients
+    }));
+    
+    // Update form with all ingredients and calculate allergens
+    const allIngredients = Object.values({
+      ...componentIngredients,
+      [groupId]: ingredients
+    }).flat();
+    
+    const allergens = calculateAllergensFromIngredients(allIngredients, availableIngredients);
+    
+    // Create components for the dish
+    const components = componentGroups.map(group => ({
+      name: group.name,
+      type: group.id === 'main' ? 'base' as const : 
+            group.id === 'base' ? 'base' as const :
+            group.id === 'side' ? 'side' as const :
+            group.id === 'sauce' ? 'sauce' as const :
+            group.id === 'topping' ? 'garnish' as const :
+            'other' as const,
+      ingredients: componentIngredients[group.id] || [],
+      allergen_tags: calculateAllergensFromIngredients(componentIngredients[group.id] || [], availableIngredients),
+      is_required: !group.canChange,
+      is_locked: !group.canChange
+    })).filter(comp => comp.ingredients.length > 0);
+    
+    setForm(prev => ({ 
+      ...prev, 
+      ingredients: allIngredients,
+      allergen_tags: allergens,
+      components: components
+    }));
+  };
+
+  const handleNextPage = () => {
+    if (!form.name.trim()) {
+      setError("Dish name is required");
+      return;
+    }
+    setError("");
+    setCurrentPage(2);
+  };
+
+  const handlePreviousPage = () => {
+    setCurrentPage(1);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (componentIngredients.main.length === 0) {
+      setError("At least one main component ingredient is required");
+      return;
+    }
+    if (form.ingredients.length === 0) {
+      setError("At least one ingredient is required");
+      return;
+    }
+    setError("");
+    onSubmit(form);
+  };
+
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onCancel();
+    }
+  };
+
+  const handleEscapeKey = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onCancel();
+    }
+  };
+
+  // Add escape key listener
+  useState(() => {
+    document.addEventListener('keydown', handleEscapeKey);
+    return () => document.removeEventListener('keydown', handleEscapeKey);
+  });
+
+  return (
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm"
+      onClick={handleBackdropClick}
+    >
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden transform transition-all">
+        {/* Modal Header */}
+        <div className="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-white">Create New Dish</h2>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-green-100 text-sm">Step {currentPage} of 2</span>
+                <div className="flex gap-1">
+                  <div className={`w-2 h-2 rounded-full ${currentPage >= 1 ? 'bg-white' : 'bg-green-300'}`}></div>
+                  <div className={`w-2 h-2 rounded-full ${currentPage >= 2 ? 'bg-white' : 'bg-green-300'}`}></div>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={onCancel}
+              className="text-white hover:text-green-100 transition-colors p-1"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="mx-6 mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
+            <p className="text-red-800 text-sm flex items-center">
+              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              {error}
+            </p>
+          </div>
+        )}
+
+        {/* Modal Content */}
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+          <form onSubmit={handleSubmit}>
+            {currentPage === 1 && (
+              <div className="space-y-6">
+                <div className="text-center mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Basic Information</h3>
+                  <p className="text-gray-600 text-sm">Enter the basic details about your dish</p>
+                </div>
+
+                {/* Dish Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Dish Name <span className="text-red-500">*</span>
+                  </label>
+                  <input 
+                    name="name" 
+                    value={form.name} 
+                    onChange={handleChange} 
+                    required 
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors text-lg" 
+                    placeholder="e.g., Grilled Salmon with Herbs"
+                  />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                  <textarea 
+                    name="description" 
+                    value={form.description} 
+                    onChange={handleChange} 
+                    rows={4}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors resize-none" 
+                    placeholder="Describe your dish, cooking method, or special features..."
+                  />
+                </div>
+
+                {/* Category and Price Row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                    <select
+                      name="category"
+                      value={form.category}
+                      onChange={handleChange}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+                    >
+                      <option value="">Select a category</option>
+                      <option value="Appetizer">Appetizer</option>
+                      <option value="Main Course">Main Course</option>
+                      <option value="Dessert">Dessert</option>
+                      <option value="Beverage">Beverage</option>
+                      <option value="Salad">Salad</option>
+                      <option value="Soup">Soup</option>
+                      <option value="Side Dish">Side Dish</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Price ($)</label>
+                    <input 
+                      name="price" 
+                      type="number" 
+                      step="0.01"
+                      min="0"
+                      value={form.price} 
+                      onChange={handleChange} 
+                      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+
+                {/* Modifiable Toggle */}
+                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+                  <input
+                    type="checkbox"
+                    name="is_modifiable"
+                    checked={form.is_modifiable}
+                    onChange={handleChange}
+                    className="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                  />
+                  <div>
+                    <label className="text-sm font-medium text-gray-900">Allow Modifications</label>
+                    <p className="text-xs text-gray-600">Customers can request ingredient changes</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {currentPage === 2 && (
+              <div className="space-y-6">
+                <div className="text-center mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Ingredient Components</h3>
+                  <p className="text-gray-600 text-sm">Organize ingredients into component groups</p>
+                </div>
+
+                {/* Component Groups */}
+                <div className="space-y-4">
+                  {componentGroups.map((group) => (
+                    <div key={group.id} className="border border-gray-200 rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{group.icon}</span>
+                          <h4 className="font-semibold text-gray-900">{group.name}</h4>
+                          <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                            group.canChange 
+                              ? 'bg-green-100 text-green-700 border border-green-200' 
+                              : 'bg-red-100 text-red-700 border border-red-200'
+                          }`}>
+                            {group.canChange ? 'Modifiable' : 'Required'}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <IngredientSelector 
+                        selectedIngredients={componentIngredients[group.id] || []}
+                        availableIngredients={availableIngredients}
+                        onChange={(ingredients) => handleComponentIngredientsChange(group.id, ingredients)}
+                        placeholder={`Select ${group.name.toLowerCase()} ingredients...`}
+                      />
+                      
+                      {group.id === 'main' && componentIngredients[group.id]?.length === 0 && (
+                        <div className="mt-2 text-sm text-red-600 flex items-center">
+                          <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                          Main component is required
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Total ingredients summary */}
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                  <h5 className="text-sm font-semibold text-gray-900 mb-2 flex items-center">
+                    <span className="mr-2">📊</span>
+                    Ingredient Summary
+                  </h5>
+                  <div className="text-sm text-gray-600">
+                    <p>Total ingredients: <span className="font-semibold">{form.ingredients.length}</span></p>
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {componentGroups.map(group => {
+                        const count = componentIngredients[group.id]?.length || 0;
+                        return count > 0 ? (
+                          <span key={group.id} className="inline-flex items-center gap-1 px-2 py-1 bg-white rounded-md text-xs border">
+                            <span>{group.icon}</span>
+                            <span>{group.name}: {count}</span>
+                          </span>
+                        ) : null;
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Auto-calculated Allergens */}
+                <div className="bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-xl p-4">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                    <span className="mr-2">⚠️</span>
+                    Detected Allergens
+                    <span className="ml-2 px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full">
+                      Auto-calculated
+                    </span>
+                  </h4>
+                  
+                  <div className="min-h-[3rem] p-3 border border-orange-200 rounded-lg bg-white">
+                    {form.allergen_tags.length > 0 ? (
+                      <div className="space-y-3">
+                        <div className="flex flex-wrap gap-2">
+                          {getAllergenChips(form.allergen_tags).map((allergen) => (
+                            <span
+                              key={allergen.name}
+                              className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
+                            >
+                              <span>{allergen.icon}</span>
+                              <span className="capitalize">{allergen.name}</span>
+                            </span>
+                          ))}
+                        </div>
+                        <p className="text-xs text-orange-600 font-medium">
+                          ⚡ These allergens are automatically detected from your selected ingredients
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="text-center py-2">
+                        <span className="text-2xl mb-1 block">✅</span>
+                        <p className="text-green-600 font-medium text-sm">No allergens detected</p>
+                        <p className="text-gray-500 text-xs">Add ingredients to see potential allergens</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </form>
+        </div>
+
+        {/* Modal Footer */}
+        <div className="bg-gray-50 px-6 py-4 flex justify-between">
+          {currentPage === 1 ? (
+            <>
+              <button 
+                type="button" 
+                onClick={onCancel} 
+                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button 
+                type="button" 
+                onClick={handleNextPage}
+                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center"
+              >
+                Next: Ingredients
+                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </>
+          ) : (
+            <>
+              <button 
+                type="button" 
+                onClick={handlePreviousPage}
+                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors font-medium flex items-center"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back
+              </button>
+              <button 
+                type="submit" 
+                onClick={handleSubmit}
+                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center"
+                disabled={componentIngredients.main.length === 0}
+              >
+                <span className="mr-2">✨</span>
+                Create Dish
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EditDishForm({ dish, onSubmit, onCancel, availableIngredients }: { 
+  dish: Dish; 
+  onSubmit: (data: Partial<CreateDishRequest>) => void; 
+  onCancel: () => void;
+  availableIngredients: any[];
+}) {
   const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -716,9 +1123,10 @@ interface IngredientSelectorProps {
   selectedIngredients: string[];
   availableIngredients: any[];
   onChange: (ingredients: string[]) => void;
+  placeholder?: string;
 }
 
-function IngredientSelector({ selectedIngredients, availableIngredients, onChange }: IngredientSelectorProps) {
+function IngredientSelector({ selectedIngredients, availableIngredients, onChange, placeholder = "Search and select ingredients..." }: IngredientSelectorProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -752,7 +1160,7 @@ function IngredientSelector({ selectedIngredients, availableIngredients, onChang
             }}
             onFocus={() => setShowDropdown(true)}
             className="w-full pl-10 pr-4 py-3 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
-            placeholder="Search ingredients... (e.g., salmon, tomato, cheese)"
+            placeholder={placeholder}
           />
         </div>
         
