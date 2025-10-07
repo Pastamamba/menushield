@@ -72,6 +72,7 @@ function initializeDatabase() {
         allergen_tags: ["gluten", "dairy"],
         modification_note: "Can be made dairy-free by removing cheese",
         is_modifiable: true,
+        is_active: true,
         components: [
           {
             id: "1-base",
@@ -128,6 +129,7 @@ function initializeDatabase() {
         allergen_tags: ["nuts", "mustard"],
         modification_note: "Can remove nuts upon request",
         is_modifiable: true,
+        is_active: true,
         components: [
           {
             id: "2-base",
@@ -180,6 +182,7 @@ function initializeDatabase() {
         allergen_tags: ["fish", "dairy"],
         modification_note: "Can be prepared without butter (olive oil instead)",
         is_modifiable: true,
+        is_active: true,
         components: [
           {
             id: "4-protein",
