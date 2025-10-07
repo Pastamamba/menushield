@@ -5,7 +5,7 @@ import DishManager from "./DishManager";
 import QRCodeManager from "./QRCodeManager";
 import CacheManager from "./CacheManager";
 
-type TabType = "dashboard" | "dishes" | "qr-code" | "settings";
+type TabType = "dashboard" | "qr-code" | "settings";
 
 export default function AdminMenu() {
   const { logout } = useAuth();
@@ -14,7 +14,7 @@ export default function AdminMenu() {
   const [activeTab, setActiveTab] = useState<TabType>(() => {
     try {
       const saved = localStorage.getItem('admin-active-tab');
-      const validTabs: TabType[] = ["dashboard", "dishes", "qr-code", "settings"];
+      const validTabs: TabType[] = ["dashboard", "qr-code", "settings"];
       if (saved && validTabs.includes(saved as TabType)) {
         return saved as TabType;
       }
@@ -32,8 +32,7 @@ export default function AdminMenu() {
   }, [activeTab]);
 
   const menuItems = [
-    { id: "dashboard" as const, label: "Dish Administration", icon: "🍽️" },
-    { id: "dishes" as const, label: "All Dishes", icon: "📋" },
+    { id: "dashboard" as const, label: "Dish Management", icon: "🍽️" },
     { id: "qr-code" as const, label: "QR Code", icon: "📱" },
     { id: "settings" as const, label: "Settings", icon: "⚙️" },
   ];
@@ -136,7 +135,6 @@ export default function AdminMenu() {
         <div className="p-4 lg:p-8">
           {/* Dashboard = DishManager */}
           {activeTab === "dashboard" && <DishManager />}
-          {activeTab === "dishes" && <DishManager />}
           {activeTab === "qr-code" && <QRCodeManager />}
           {activeTab === "settings" && <AdminSettings />}
         </div>
