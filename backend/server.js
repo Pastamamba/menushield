@@ -534,6 +534,7 @@ app.get("/api/admin/menu", requireAuth, async (req, res) => {
           allergen_tags: Array.isArray(allergenTags) ? allergenTags : [],
           modification_note: dish.modificationNote,
           is_modifiable: dish.isModifiable,
+          is_active: dish.isActive,
           components: Array.isArray(components) ? components : [],
           created_at: dish.createdAt,
           updated_at: dish.updatedAt,
@@ -550,6 +551,7 @@ app.get("/api/admin/menu", requireAuth, async (req, res) => {
           allergen_tags: [],
           modification_note: dish.modificationNote,
           is_modifiable: dish.isModifiable,
+          is_active: dish.isActive,
           components: [],
           created_at: dish.createdAt,
           updated_at: dish.updatedAt,
@@ -576,6 +578,7 @@ app.post("/api/admin/menu", requireAuth, validateDishInput, handleValidationErro
       allergen_tags,
       modification_note,
       is_modifiable,
+      is_active,
       components,
     } = req.body;
 
@@ -593,6 +596,7 @@ app.post("/api/admin/menu", requireAuth, validateDishInput, handleValidationErro
         allergenTags: JSON.stringify(allergen_tags),
         modificationNote: modification_note || null,
         isModifiable: is_modifiable || false,
+        isActive: is_active !== undefined ? is_active : true,
         components: JSON.stringify(components || []),
       },
     });
@@ -613,6 +617,7 @@ app.post("/api/admin/menu", requireAuth, validateDishInput, handleValidationErro
       allergen_tags: JSON.parse(newDish.allergenTags),
       modification_note: newDish.modificationNote,
       is_modifiable: newDish.isModifiable,
+      is_active: newDish.isActive,
       components: JSON.parse(newDish.components || "[]"),
       created_at: newDish.createdAt,
       updated_at: newDish.updatedAt,
@@ -643,6 +648,7 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
       allergenTags: JSON.stringify(updateData.allergen_tags || []),
       modificationNote: updateData.modification_note,
       isModifiable: updateData.is_modifiable,
+      isActive: updateData.is_active,
       components: JSON.stringify(updateData.components || []),
     };
 
@@ -665,6 +671,7 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
       allergen_tags: JSON.parse(updatedDish.allergenTags),
       modification_note: updatedDish.modificationNote,
       is_modifiable: updatedDish.isModifiable,
+      is_active: updatedDish.isActive,
       components: JSON.parse(updatedDish.components || "[]"),
       created_at: updatedDish.createdAt,
       updated_at: updatedDish.updatedAt,
