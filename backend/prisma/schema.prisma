@@ -74,6 +74,7 @@ model Dish {
   allergenTags     String   @map("allergen_tags") // JSON array as string
   modificationNote String?  @map("modification_note")
   isModifiable     Boolean  @default(false) @map("is_modifiable")
+  isActive         Boolean  @default(true) @map("is_active")
   components       String?  // JSON array as string
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
