@@ -2,6 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Finnish mobile optimization styles */
+@layer utilities {
+  .touch-target-44 {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .touch-target-48 {
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  .finnish-text-base {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  
+  .finnish-button {
+    @apply min-h-[48px] px-4 py-3 rounded-xl font-medium transition-all active:scale-95;
+  }
+}
+
 /* Mobile drawer slide-in animation */
 @keyframes slideInLeft {
   from {

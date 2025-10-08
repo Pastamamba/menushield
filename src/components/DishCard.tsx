@@ -55,6 +55,13 @@ export default function DishCard({
     });
   };
 
+  // Mobile haptic feedback helper
+  const handleTouchFeedback = () => {
+    if ('vibrate' in navigator) {
+      navigator.vibrate(50);
+    }
+  };
+
   const userAvoidedAllergens = getUserAvoidedAllergens();
 
   return (
@@ -92,16 +99,19 @@ export default function DishCard({
           <div className="space-y-2">
             {userAvoidedAllergens.map((allergen) => (
               <div key={allergen.name} className="flex items-center gap-2 text-sm">
-                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${allergen.color}`}>
+                <span 
+                  className={`inline-flex items-center gap-1 px-3 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all active:scale-95 ${allergen.color}`}
+                  onClick={handleTouchFeedback}
+                >
                   <span className="capitalize">{allergen.name}</span>
                 </span>
-                <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-1 rounded-md">
+                <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-3 py-2 min-h-[40px] rounded-lg flex items-center">
                   in {allergen.component || 'Base'}
                   {allergen.canModify && (
-                    <span className="text-green-600 ml-1 font-medium">(removable)</span>
+                    <span className="text-green-600 ml-1 font-medium">(poistettavissa)</span>
                   )}
                   {!allergen.canModify && allergen.component && (
-                    <span className="text-red-600 ml-1 font-medium">(required)</span>
+                    <span className="text-red-600 ml-1 font-medium">(pakollinen)</span>
                   )}
                 </span>
               </div>
@@ -110,16 +120,16 @@ export default function DishCard({
           
           {/* Action suggestion */}
           {safetyStatus.status === "modifiable" && safetyStatus.modificationSuggestion && (
-            <div className="mt-3 p-2 bg-orange-50 border border-orange-200 rounded-md">
-              <div className="text-xs text-orange-700 font-medium">
+            <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+              <div className="text-sm text-orange-700 font-medium">
                 💡 {safetyStatus.modificationSuggestion}
               </div>
             </div>
           )}
           {safetyStatus.status === "unsafe" && (
-            <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded-md">
-              <div className="text-xs text-red-700 font-medium">
-                ⚠️ Contains allergens in required components - cannot be safely modified
+            <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="text-sm text-red-700 font-medium">
+                ⚠️ Sisältää allergeeneja pakollisissa osissa - ei voida turvallisesti muokata
               </div>
             </div>
           )}
@@ -129,8 +139,8 @@ export default function DishCard({
       {/* Safe status message */}
       {safetyStatus.status === "safe" && (
         <div className="border-t border-gray-100 pt-3">
-          <div className="text-sm text-green-600 font-medium">
-            ✅ Safe for your allergies
+          <div className="text-base text-green-600 font-medium py-2">
+            ✅ Turvallinen allergeeneillesi
           </div>
         </div>
       )}

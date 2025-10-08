@@ -104,7 +104,7 @@ export default function GuestMenu() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold text-white">MenuShield</h1>
-              <p className="text-green-100 text-sm">Safe dining for everyone</p>
+              <p className="text-green-100 text-sm">Turvallinen ruokailu kaikille</p>
             </div>
             <button
               onClick={() => setShowMobileFilter(true)}
@@ -113,7 +113,7 @@ export default function GuestMenu() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586a1 1 0 01-.293.707l-2 2A1 1 0 0110 21v-8.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
               </svg>
-              <span className="font-medium">Filter</span>
+              <span className="font-medium">Suodata</span>
               {selectedAllergens.length > 0 && (
                 <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] font-semibold">
                   {selectedAllergens.length}
@@ -151,8 +151,8 @@ export default function GuestMenu() {
               <div className="bg-gradient-to-r from-green-500 to-blue-600 p-6 rounded-tl-2xl">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-bold text-white">Filter Menu</h2>
-                    <p className="text-green-100 text-sm mt-1">Find safe dishes for you</p>
+                    <h2 className="text-xl font-bold text-white">Suodata menu</h2>
+                    <p className="text-green-100 text-sm mt-1">Löydä turvallisia ruokia itsellesi</p>
                   </div>
                   <button
                     onClick={() => setShowMobileFilter(false)}
@@ -184,17 +184,15 @@ export default function GuestMenu() {
 
               {/* Drawer Footer */}
               <div className="border-t border-gray-200 p-6 bg-gray-50 rounded-br-2xl">
-                <button
-                  onClick={scrollToMenu}
-                  className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-4 rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transition-all shadow-lg active:scale-95 flex items-center justify-center"
-                >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                  Show My Safe Dishes
-                </button>
-                
-                {selectedAllergens.length > 0 && (
+                  <button
+                    onClick={scrollToMenu}
+                    className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-4 rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transition-all shadow-lg active:scale-95 flex items-center justify-center min-h-[48px]"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                    Näytä turvalliset ruokani
+                  </button>                {selectedAllergens.length > 0 && (
                   <button
                     onClick={() => setSelectedAllergens([])}
                     className="w-full mt-3 text-gray-600 py-2 text-sm hover:text-gray-800 font-medium"

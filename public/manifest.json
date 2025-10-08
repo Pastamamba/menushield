@@ -1,13 +1,15 @@
 {
-  "name": "MenuShield",
+  "name": "MenuShield - Turvallinen ruokailu",
   "short_name": "MenuShield",
-  "description": "Digital allergen-filtering platform for safer, private dining.",
+  "description": "Digitaalinen allergeenejä suodattava alusta turvallisempaan, yksityisempään ruokailuun.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
   "background_color": "#ffffff",
-  "theme_color": "#22c55e",
+  "theme_color": "#059669",
+  "categories": ["food", "health", "lifestyle"],
+  "lang": "fi",
   "icons": [
     {
       "src": "/pwa-192.png",
@@ -16,16 +18,22 @@
       "purpose": "any"
     },
     {
-      "src": "/pwa-512.png",
+      "src": "/pwa-512.png", 
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
       "src": "/pwa-maskable.png",
-      "sizes": "512x512",
+      "sizes": "512x512", 
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }

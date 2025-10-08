@@ -5,6 +5,13 @@ import {
   searchAllergens,
 } from "../utils/dishAnalyzer";
 
+// Mobile haptic feedback helper
+const handleTouchFeedback = () => {
+  if ('vibrate' in navigator) {
+    navigator.vibrate(50);
+  }
+};
+
 interface AllergenFilterProps {
   avoid?: string[];
   setAvoid?: (allergens: string[]) => void;
@@ -34,6 +41,8 @@ export default function AllergenFilter({
   const currentAllergens = onAllergenToggle ? selectedAllergens : avoid;
   
   const handleToggle = (allergen: string) => {
+    handleTouchFeedback(); // Add haptic feedback
+    
     if (onAllergenToggle) {
       onAllergenToggle(allergen);
     } else if (onSelectionChange) {
@@ -68,10 +77,10 @@ export default function AllergenFilter({
         <div className="relative">
           <input
             type="text"
-            placeholder="Search allergens..."
+            placeholder="Etsi allergeeneja..."
             value={currentSearchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50"
+            className="w-full px-4 py-4 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50 min-h-[48px]"
           />
           <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -79,7 +88,7 @@ export default function AllergenFilter({
         </div>
 
         {/* Allergen Grid - Mobile Optimized */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-4">
           {displayAllergens.map((allergen) => {
             const selected = isSelected(allergen.id);
             return (
@@ -87,14 +96,14 @@ export default function AllergenFilter({
                 key={allergen.id}
                 onClick={() => toggleAllergen(allergen.id)}
                 className={`
-                  relative p-4 rounded-xl text-left transition-all duration-200 active:scale-95
+                  relative p-4 rounded-xl text-left transition-all duration-200 active:scale-95 min-h-[48px] flex items-center
                   ${selected 
                     ? 'bg-red-500 text-white shadow-lg border-2 border-red-600' 
                     : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-gray-300'
                   }
                 `}
               >
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3 w-full">
                   <div className="flex-1 min-w-0">
                     <div className={`font-medium text-sm ${selected ? 'text-white' : 'text-gray-900'}`}>
                       {allergen.name}
@@ -145,7 +154,7 @@ export default function AllergenFilter({
                     <span>{allergen.name}</span>
                     <button
                       onClick={() => toggleAllergen(allergenId)}
-                      className="text-red-600 hover:text-red-800 ml-1"
+                      className="text-red-600 hover:text-red-800 ml-1 p-1 min-h-[32px] min-w-[32px] flex items-center justify-center rounded-full hover:bg-red-200 transition-colors"
                     >
                       ✕
                     </button>
@@ -165,10 +174,10 @@ export default function AllergenFilter({
       <div className="relative">
         <input
           type="text"
-          placeholder="Search allergens..."
+          placeholder="Etsi allergeeneja..."
           value={currentSearchTerm}
           onChange={(e) => handleSearchChange(e.target.value)}
-          className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50"
+          className="w-full px-4 py-4 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50 min-h-[48px]"
         />
         <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -192,7 +201,7 @@ export default function AllergenFilter({
             key={allergen.id}
             onClick={() => toggleAllergen(allergen.id)}
             className={`
-              p-3 rounded-lg border-2 transition-all duration-200 text-left
+              p-4 rounded-xl border-2 transition-all duration-200 text-left min-h-[48px] flex items-center active:scale-95
               ${
                 isSelected(allergen.id)
                   ? "border-red-500 bg-red-50 text-red-800"
@@ -200,10 +209,10 @@ export default function AllergenFilter({
               }
             `}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3 w-full">
               <span className="font-medium text-sm">{allergen.name}</span>
               {isSelected(allergen.id) && (
-                <span className="text-xs text-red-600">✓</span>
+                <span className="text-red-600 ml-auto">✓</span>
               )}
             </div>
           </button>
@@ -212,10 +221,10 @@ export default function AllergenFilter({
 
       {/* Selected Allergens Summary */}
       {currentAllergens.length > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-          <div className="flex items-center justify-between mb-2">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+          <div className="flex items-center justify-between mb-3">
             <h4 className="text-sm font-medium text-red-800">
-              Currently Avoiding ({currentAllergens.length})
+              Vältät allergeeneja ({currentAllergens.length})
             </h4>
             <button
               onClick={() => {
