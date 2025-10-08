@@ -1,0 +1,87 @@
+// Extended Prisma schema with multilingual support
+// This shows the proposed changes to add translation support
+
+model Restaurant {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  contact     String?
+  showPrices  Boolean  @default(true) @map("show_prices")
+  currency    String   @default("EUR")
+  // New fields for multilingual support
+  defaultLanguage String @default("en") @map("default_language")
+  supportedLanguages String @default("[\"en\"]") @map("supported_languages") // JSON array
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("restaurants")
+}
+
+model Category {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  description String?
+  color       String
+  icon        String?
+  // New translation field
+  translations String? // JSON object with language-specific names and descriptions
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  ingredients Ingredient[]
+
+  @@map("categories")
+}
+
+model Ingredient {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  name         String    // Keep as primary/default name
+  categoryId   String?   @map("category_id") @db.ObjectId
+  parentId     String?   @map("parent_id") @db.ObjectId
+  allergenTags String    @map("allergen_tags") // JSON array as string
+  // New translation field
+  translations String?   // JSON object with language-specific names
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  category Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  parent   Ingredient? @relation("IngredientHierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children Ingredient[] @relation("IngredientHierarchy")
+
+  dishIngredients DishIngredient[]
+
+  @@map("ingredients")
+}
+
+model Dish {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  name             String   // Keep as primary/default name
+  description      String?  // Keep as primary/default description
+  price            Float?
+  category         String?
+  ingredients      String?  // JSON array as string
+  allergenTags     String   @map("allergen_tags") // JSON array as string
+  modificationNote String?  @map("modification_note")
+  isModifiable     Boolean  @default(false) @map("is_modifiable")
+  isActive         Boolean  @default(true) @map("is_active")
+  components       String?  // JSON array as string
+  // New translation field
+  translations     String?  // JSON object with language-specific names, descriptions, and modification notes
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  dishIngredients DishIngredient[]
+
+  @@map("dishes")
+}
+
+// New model for standardized allergen translations
+model AllergenTranslation {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  allergenKey  String @unique @map("allergen_key") // e.g., "dairy", "gluten"
+  translations String // JSON object with language-specific names and descriptions
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("allergen_translations")
+}

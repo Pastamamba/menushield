@@ -21,6 +21,8 @@ export interface Dish {
   modification_note: string | null;
   is_modifiable: boolean;
   is_active?: boolean; // For dish activation toggle
+  // Multilingual support
+  translations?: string; // JSON string containing translations
   created_at?: string;
   updated_at?: string;
 }
@@ -71,6 +73,8 @@ export interface Ingredient {
   category?: string;
   parentId?: string; // For hierarchical ingredients (e.g., "Salmon" parent is "Fish")
   allergen_tags: string[];
+  // Multilingual support
+  translations?: string; // JSON string containing translations
   created_at: string;
   updated_at: string;
 }
@@ -81,6 +85,8 @@ export interface IngredientCategory {
   description?: string;
   color: string;
   icon?: string;
+  // Multilingual support
+  translations?: string; // JSON string containing translations
   created_at: string;
   updated_at: string;
 }
@@ -106,4 +112,27 @@ export interface CreateCategoryRequest {
 
 export interface UpdateCategoryRequest extends Partial<CreateCategoryRequest> {
   id: string;
+}
+
+// Multilingual Support Types
+export interface AllergenTranslation {
+  id: string;
+  allergen_key: string; // e.g., "dairy", "gluten"
+  translations: string; // JSON string containing language translations
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Restaurant {
+  id: string;
+  name: string;
+  description?: string;
+  contact?: string;
+  show_prices: boolean;
+  currency: string;
+  // Multilingual support
+  default_language: string;
+  supported_languages: string; // JSON array of supported language codes
+  created_at: string;
+  updated_at: string;
 }

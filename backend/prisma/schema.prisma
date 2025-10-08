@@ -6,12 +6,12 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  id              String   @id @default(cuid())
   email           String   @unique
   passwordHash    String   @map("password_hash")
   restaurantName  String   @map("restaurant_name")
@@ -22,26 +22,29 @@ model User {
 }
 
 model Restaurant {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  description String?
-  contact     String?
-  showPrices  Boolean  @default(true) @map("show_prices")
-  currency    String   @default("EUR")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id                 String   @id @default(cuid())
+  name               String
+  description        String?
+  contact            String?
+  showPrices         Boolean  @default(true) @map("show_prices")
+  currency           String   @default("EUR")
+  defaultLanguage    String   @default("en") @map("default_language")
+  supportedLanguages String   @default("[\"en\"]") @map("supported_languages") @db.Text // JSON array
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
 
   @@map("restaurants")
 }
 
 model Category {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  name        String   @unique
-  description String?
-  color       String
-  icon        String?
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id           String   @id @default(cuid())
+  name         String   @unique
+  description  String?
+  color        String
+  icon         String?
+  translations String?  @db.Text // JSON object with language-specific names and descriptions
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   ingredients Ingredient[]
 
@@ -49,11 +52,12 @@ model Category {
 }
 
 model Ingredient {
-  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  id           String    @id @default(cuid())
   name         String
-  categoryId   String?   @map("category_id") @db.ObjectId
-  parentId     String?   @map("parent_id") @db.ObjectId
-  allergenTags String    @map("allergen_tags") // JSON array as string
+  categoryId   String?   @map("category_id")
+  parentId     String?   @map("parent_id")
+  allergenTags String    @map("allergen_tags") @db.Text // JSON array as string
+  translations String?   @db.Text // JSON object with language-specific names
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
@@ -67,17 +71,18 @@ model Ingredient {
 }
 
 model Dish {
-  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  id               String   @id @default(cuid())
   name             String
-  description      String?
+  description      String?  @db.Text
   price            Float?
   category         String?
-  ingredients      String?  // JSON array as string
-  allergenTags     String   @map("allergen_tags") // JSON array as string
-  modificationNote String?  @map("modification_note")
+  ingredients      String?  @db.Text // JSON array as string
+  allergenTags     String   @map("allergen_tags") @db.Text // JSON array as string
+  modificationNote String?  @map("modification_note") @db.Text
   isModifiable     Boolean  @default(false) @map("is_modifiable")
   isActive         Boolean  @default(true) @map("is_active")
-  components       String?  // JSON array as string
+  components       String?  @db.Text // JSON array as string
+  translations     String?  @db.Text // JSON object with language-specific names, descriptions, and modification notes
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
@@ -87,13 +92,23 @@ model Dish {
 }
 
 model DishIngredient {
-  id           String @id @default(auto()) @map("_id") @db.ObjectId
-  dishId       String @map("dish_id") @db.ObjectId
-  ingredientId String @map("ingredient_id") @db.ObjectId
+  id           String @id @default(cuid())
+  dishId       String @map("dish_id")
+  ingredientId String @map("ingredient_id")
 
   dish       Dish       @relation(fields: [dishId], references: [id], onDelete: Cascade)
   ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([dishId, ingredientId])
   @@map("dish_ingredients")
+}
+
+model AllergenTranslation {
+  id           String   @id @default(cuid())
+  allergenKey  String   @unique @map("allergen_key") // e.g., "dairy", "gluten"
+  translations String   @db.Text // JSON object with language-specific names and descriptions
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("allergen_translations")
 }

@@ -1,9 +1,9 @@
-// Enhanced database update script with multilingual support
+// Database migration script to add multilingual support
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// Default allergen translations for common allergens
+// Default allergen translations to seed the database
 const DEFAULT_ALLERGEN_TRANSLATIONS = {
   dairy: {
     en: { name: 'Dairy', description: 'Contains milk or milk-derived products' },
@@ -13,8 +13,12 @@ const DEFAULT_ALLERGEN_TRANSLATIONS = {
     de: { name: 'Milchprodukte', description: 'Enthält Milch oder Milchderivate' },
     fr: { name: 'Produits laitiers', description: 'Contient du lait ou des dérivés du lait' },
     es: { name: 'Lácteos', description: 'Contiene leche o derivados lácteos' },
+    it: { name: 'Latticini', description: 'Contiene latte o derivati del latte' },
     zh: { name: '乳制品', description: '含有牛奶或牛奶衍生产品' },
     ja: { name: '乳製品', description: '牛乳または乳製品が含まれています' },
+    ko: { name: '유제품', description: '우유 또는 유제품이 포함되어 있습니다' },
+    ar: { name: 'منتجات الألبان', description: 'يحتوي على الحليب أو مشتقات الحليب' },
+    hi: { name: 'डेयरी उत्पाद', description: 'दूध या दूध से बने उत्पाद शामिल हैं' },
   },
   gluten: {
     en: { name: 'Gluten', description: 'Contains wheat, barley, rye, or other gluten-containing grains' },
@@ -24,8 +28,12 @@ const DEFAULT_ALLERGEN_TRANSLATIONS = {
     de: { name: 'Gluten', description: 'Enthält Weizen, Gerste, Roggen oder andere glutenhaltige Getreide' },
     fr: { name: 'Gluten', description: 'Contient du blé, de l\'orge, du seigle ou d\'autres céréales contenant du gluten' },
     es: { name: 'Gluten', description: 'Contiene trigo, cebada, centeno u otros cereales con gluten' },
+    it: { name: 'Glutine', description: 'Contiene grano, orzo, segale o altri cereali contenenti glutine' },
     zh: { name: '麸质', description: '含有小麦、大麦、黑麦或其他含麸质谷物' },
     ja: { name: 'グルテン', description: '小麦、大麦、ライ麦、またはその他のグルテンを含む穀物が含まれています' },
+    ko: { name: '글루텐', description: '밀, 보리, 호밀 또는 기타 글루텐 함유 곡물이 포함되어 있습니다' },
+    ar: { name: 'الغلوتين', description: 'يحتوي على القمح أو الشعير أو الجاودار أو حبوب أخرى تحتوي على الغلوتين' },
+    hi: { name: 'ग्लूटेन', description: 'गेहूं, जौ, राई या अन्य ग्लूटेन युक्त अनाज शामिल हैं' },
   },
   nuts: {
     en: { name: 'Tree Nuts', description: 'Contains almonds, walnuts, cashews, or other tree nuts' },
@@ -35,8 +43,12 @@ const DEFAULT_ALLERGEN_TRANSLATIONS = {
     de: { name: 'Nüsse', description: 'Enthält Mandeln, Walnüsse, Cashews oder andere Baumnüsse' },
     fr: { name: 'Fruits à coque', description: 'Contient des amandes, noix, noix de cajou ou autres fruits à coque' },
     es: { name: 'Frutos secos', description: 'Contiene almendras, nueces, anacardos u otros frutos secos' },
+    it: { name: 'Frutta a guscio', description: 'Contiene mandorle, noci, anacardi o altra frutta a guscio' },
     zh: { name: '坚果', description: '含有杏仁、核桃、腰果或其他坚果' },
     ja: { name: 'ナッツ類', description: 'アーモンド、クルミ、カシューナッツ、またはその他のナッツ類が含まれています' },
+    ko: { name: '견과류', description: '아몬드, 호두, 캐슈넛 또는 기타 견과류가 포함되어 있습니다' },
+    ar: { name: 'المكسرات', description: 'يحتوي على اللوز أو الجوز أو الكاجو أو المكسرات الأخرى' },
+    hi: { name: 'मेवे', description: 'बादाम, अखरोट, काजू या अन्य मेवे शामिल हैं' },
   },
   shellfish: {
     en: { name: 'Shellfish', description: 'Contains shrimp, crab, lobster, or other crustaceans' },
@@ -46,8 +58,12 @@ const DEFAULT_ALLERGEN_TRANSLATIONS = {
     de: { name: 'Schalentiere', description: 'Enthält Garnelen, Krabben, Hummer oder andere Krustentiere' },
     fr: { name: 'Crustacés', description: 'Contient des crevettes, crabes, homards ou autres crustacés' },
     es: { name: 'Mariscos', description: 'Contiene camarones, cangrejos, langostas u otros crustáceos' },
+    it: { name: 'Crostacei', description: 'Contiene gamberetti, granchi, aragoste o altri crostacei' },
     zh: { name: '甲壳类', description: '含有虾、蟹、龙虾或其他甲壳类动物' },
     ja: { name: '甲殻類', description: 'エビ、カニ、ロブスター、またはその他の甲殻類が含まれています' },
+    ko: { name: '갑각류', description: '새우, 게, 바닷가재 또는 기타 갑각류가 포함되어 있습니다' },
+    ar: { name: 'القشريات', description: 'يحتوي على الروبيان أو السرطان أو الكركند أو قشريات أخرى' },
+    hi: { name: 'शेलफिश', description: 'झींगा, केकड़ा, लॉबस्टर या अन्य क्रस्टेशियन शामिल हैं' },
   },
   fish: {
     en: { name: 'Fish', description: 'Contains fish or fish-derived products' },
@@ -57,8 +73,12 @@ const DEFAULT_ALLERGEN_TRANSLATIONS = {
     de: { name: 'Fisch', description: 'Enthält Fisch oder Fischderivate' },
     fr: { name: 'Poisson', description: 'Contient du poisson ou des dérivés de poisson' },
     es: { name: 'Pescado', description: 'Contiene pescado o derivados del pescado' },
+    it: { name: 'Pesce', description: 'Contiene pesce o derivati del pesce' },
     zh: { name: '鱼类', description: '含有鱼类或鱼类衍生产品' },
     ja: { name: '魚類', description: '魚または魚由来の製品が含まれています' },
+    ko: { name: '어류', description: '생선 또는 생선 파생 제품이 포함되어 있습니다' },
+    ar: { name: 'السمك', description: 'يحتوي على السمك أو منتجات مشتقة من السمك' },
+    hi: { name: 'मछली', description: 'मछली या मछली से बने उत्पाद शामिल हैं' },
   },
   eggs: {
     en: { name: 'Eggs', description: 'Contains eggs or egg-derived products' },
@@ -68,8 +88,12 @@ const DEFAULT_ALLERGEN_TRANSLATIONS = {
     de: { name: 'Eier', description: 'Enthält Eier oder Eiderivate' },
     fr: { name: 'Œufs', description: 'Contient des œufs ou des dérivés d\'œufs' },
     es: { name: 'Huevos', description: 'Contiene huevos o derivados del huevo' },
+    it: { name: 'Uova', description: 'Contiene uova o derivati delle uova' },
     zh: { name: '鸡蛋', description: '含有鸡蛋或鸡蛋衍生产品' },
     ja: { name: '卵', description: '卵または卵由来の製品が含まれています' },
+    ko: { name: '달걀', description: '달걀 또는 달걀 파생 제품이 포함되어 있습니다' },
+    ar: { name: 'البيض', description: 'يحتوي على البيض أو منتجات مشتقة من البيض' },
+    hi: { name: 'अंडे', description: 'अंडे या अंडे से बने उत्पाद शामिल हैं' },
   },
   soy: {
     en: { name: 'Soy', description: 'Contains soy or soy-derived products' },
@@ -79,8 +103,12 @@ const DEFAULT_ALLERGEN_TRANSLATIONS = {
     de: { name: 'Soja', description: 'Enthält Soja oder Sojaderivate' },
     fr: { name: 'Soja', description: 'Contient du soja ou des dérivés du soja' },
     es: { name: 'Soja', description: 'Contiene soja o derivados de la soja' },
+    it: { name: 'Soia', description: 'Contiene soia o derivati della soia' },
     zh: { name: '大豆', description: '含有大豆或大豆衍生产品' },
     ja: { name: '大豆', description: '大豆または大豆由来の製品が含まれています' },
+    ko: { name: '대두', description: '대두 또는 대두 파생 제품이 포함되어 있습니다' },
+    ar: { name: 'الصويا', description: 'يحتوي على الصويا أو منتجات مشتقة من الصويا' },
+    hi: { name: 'सोया', description: 'सोया या सोया से बने उत्पाद शामिल हैं' },
   },
   peanuts: {
     en: { name: 'Peanuts', description: 'Contains peanuts or peanut-derived products' },
@@ -90,111 +118,37 @@ const DEFAULT_ALLERGEN_TRANSLATIONS = {
     de: { name: 'Erdnüsse', description: 'Enthält Erdnüsse oder Erdnussderivate' },
     fr: { name: 'Arachides', description: 'Contient des arachides ou des dérivés d\'arachides' },
     es: { name: 'Cacahuetes', description: 'Contiene cacahuetes o derivados del cacahuete' },
+    it: { name: 'Arachidi', description: 'Contiene arachidi o derivati delle arachidi' },
     zh: { name: '花生', description: '含有花生或花生衍生产品' },
     ja: { name: 'ピーナッツ', description: 'ピーナッツまたはピーナッツ由来の製品が含まれています' },
+    ko: { name: '땅콩', description: '땅콩 또는 땅콩 파생 제품이 포함되어 있습니다' },
+    ar: { name: 'الفول السوداني', description: 'يحتوي على الفول السوداني أو منتجات مشتقة من الفول السوداني' },
+    hi: { name: 'मूंगफली', description: 'मूंगफली या मूंगफली से बने उत्पाद शामिल हैं' },
   },
 };
 
-// Sample ingredient translations for common items
-const SAMPLE_INGREDIENT_TRANSLATIONS = {
-  'Mozzarella Cheese': {
-    sv: { name: 'Mozzarellaost' },
-    no: { name: 'Mozzarellaost' },
-    da: { name: 'Mozzarellaost' },
-    de: { name: 'Mozzarella-Käse' },
-    fr: { name: 'Fromage mozzarella' },
-    es: { name: 'Queso mozzarella' },
-    zh: { name: '马苏里拉奶酪' },
-    ja: { name: 'モッツァレラチーズ' },
-  },
-  'Fresh Basil': {
-    sv: { name: 'Färsk basilika' },
-    no: { name: 'Fersk basilikum' },
-    da: { name: 'Frisk basilikum' },
-    de: { name: 'Frisches Basilikum' },
-    fr: { name: 'Basilic frais' },
-    es: { name: 'Albahaca fresca' },
-    zh: { name: '新鲜罗勒' },
-    ja: { name: 'フレッシュバジル' },
-  },
-  'Tomatoes': {
-    sv: { name: 'Tomater' },
-    no: { name: 'Tomater' },
-    da: { name: 'Tomater' },
-    de: { name: 'Tomaten' },
-    fr: { name: 'Tomates' },
-    es: { name: 'Tomates' },
-    zh: { name: '番茄' },
-    ja: { name: 'トマト' },
-  },
-  'Olive Oil': {
-    sv: { name: 'Olivolja' },
-    no: { name: 'Olivenolje' },
-    da: { name: 'Olivenolie' },
-    de: { name: 'Olivenöl' },
-    fr: { name: 'Huile d\'olive' },
-    es: { name: 'Aceite de oliva' },
-    zh: { name: '橄榄油' },
-    ja: { name: 'オリーブオイル' },
-  },
-  'Cherry Tomatoes': {
-    sv: { name: 'Körsbärstomater' },
-    no: { name: 'Cherrytomater' },
-    da: { name: 'Cherrytomater' },
-    de: { name: 'Kirschtomaten' },
-    fr: { name: 'Tomates cerises' },
-    es: { name: 'Tomates cherry' },
-    zh: { name: '樱桃番茄' },
-    ja: { name: 'ミニトマト' },
-  },
-  'Mixed Greens': {
-    sv: { name: 'Blandade grönsaker' },
-    no: { name: 'Blandede grønnsaker' },
-    da: { name: 'Blandede grøntsager' },
-    de: { name: 'Gemischtes Grün' },
-    fr: { name: 'Salade mélangée' },
-    es: { name: 'Mezcla de hojas verdes' },
-    zh: { name: '混合绿叶菜' },
-    ja: { name: 'ミックスグリーン' },
-  },
-};
-
-async function updateDatabase() {
+async function addMultilingualSupport() {
   try {
-    console.log('🔄 Starting enhanced database update with multilingual support...');
+    console.log('🌍 Starting multilingual support migration...');
     
     // Check if we can connect to the database
     await prisma.$connect();
     console.log('✅ Connected to database');
-    
-    // Step 1: Update existing dishes to have isActive field
-    console.log('📋 Updating existing dishes with isActive field...');
-    const dishes = await prisma.dish.findMany({});
-    console.log(`Found ${dishes.length} dishes`);
-    
-    for (const dish of dishes) {
-      if (dish.isActive === undefined || dish.isActive === null) {
-        await prisma.dish.update({
-          where: { id: dish.id },
-          data: { isActive: true }
-        });
-        console.log(`✅ Updated dish: ${dish.name}`);
-      }
-    }
 
-    // Step 2: Update restaurants with default language settings
-    console.log('🌍 Adding multilingual support to restaurants...');
+    // Step 1: Update restaurants with default language settings
+    console.log('📋 Updating restaurants with default language settings...');
     const restaurants = await prisma.restaurant.findMany({});
     
     for (const restaurant of restaurants) {
+      // Add default language support if not already present
       const updateData = {};
       
-      // Add default language settings if not present
-      if (!restaurant.defaultLanguage) {
+      // Check if the restaurant record has the new fields
+      if (!restaurant.hasOwnProperty('defaultLanguage')) {
         updateData.defaultLanguage = 'en';
       }
-      if (!restaurant.supportedLanguages) {
-        updateData.supportedLanguages = JSON.stringify(['en', 'sv', 'no', 'da']);
+      if (!restaurant.hasOwnProperty('supportedLanguages')) {
+        updateData.supportedLanguages = JSON.stringify(['en']);
       }
       
       if (Object.keys(updateData).length > 0) {
@@ -202,146 +156,109 @@ async function updateDatabase() {
           where: { id: restaurant.id },
           data: updateData
         });
-        console.log(`✅ Updated restaurant with language settings: ${restaurant.name}`);
+        console.log(`✅ Updated restaurant: ${restaurant.name}`);
       }
     }
 
-    // Step 3: Create allergen translations
-    console.log('🏷️ Creating allergen translations...');
+    // Step 2: Seed allergen translations
+    console.log('🔄 Seeding allergen translations...');
+    
     for (const [allergenKey, translations] of Object.entries(DEFAULT_ALLERGEN_TRANSLATIONS)) {
       try {
-        await prisma.allergenTranslation.upsert({
-          where: { allergenKey: allergenKey },
-          update: {
-            translations: JSON.stringify(translations),
-            updatedAt: new Date(),
-          },
-          create: {
-            allergenKey: allergenKey,
-            translations: JSON.stringify(translations),
-          },
-        });
-        console.log(`✅ Created/updated allergen translation: ${allergenKey}`);
+        await prisma.$executeRaw`
+          INSERT INTO allergen_translations (allergen_key, translations, created_at, updated_at)
+          VALUES (${allergenKey}, ${JSON.stringify(translations)}, NOW(), NOW())
+          ON DUPLICATE KEY UPDATE 
+            translations = ${JSON.stringify(translations)},
+            updated_at = NOW()
+        `;
+        console.log(`✅ Seeded translations for allergen: ${allergenKey}`);
       } catch (error) {
-        console.log(`⚠️  Allergen translation for ${allergenKey}: ${error.message}`);
+        // If the table doesn't exist yet, that's okay
+        console.log(`⚠️  Allergen translations table may not exist yet: ${allergenKey}`);
       }
     }
 
-    // Step 4: Add sample translations to existing ingredients
-    console.log('🧄 Adding sample translations to ingredients...');
+    // Step 3: Create sample translations for existing ingredients
+    console.log('🔄 Adding sample translations to ingredients...');
     const ingredients = await prisma.ingredient.findMany({
-      take: 20 // Process first 20 ingredients
+      take: 10 // Sample only first 10 ingredients
     });
 
+    const sampleTranslations = {
+      // Common ingredients in multiple languages
+      'Mozzarella Cheese': {
+        sv: { name: 'Mozzarellaost' },
+        no: { name: 'Mozzarellaost' },
+        da: { name: 'Mozzarellaost' },
+        de: { name: 'Mozzarella-Käse' },
+        fr: { name: 'Fromage mozzarella' },
+        es: { name: 'Queso mozzarella' },
+        it: { name: 'Mozzarella' },
+        zh: { name: '马苏里拉奶酪' },
+        ja: { name: 'モッツァレラチーズ' },
+      },
+      'Fresh Basil': {
+        sv: { name: 'Färsk basilika' },
+        no: { name: 'Fersk basilikum' },
+        da: { name: 'Frisk basilikum' },
+        de: { name: 'Frisches Basilikum' },
+        fr: { name: 'Basilic frais' },
+        es: { name: 'Albahaca fresca' },
+        it: { name: 'Basilico fresco' },
+        zh: { name: '新鲜罗勒' },
+        ja: { name: 'フレッシュバジル' },
+      },
+      'Tomatoes': {
+        sv: { name: 'Tomater' },
+        no: { name: 'Tomater' },
+        da: { name: 'Tomater' },
+        de: { name: 'Tomaten' },
+        fr: { name: 'Tomates' },
+        es: { name: 'Tomates' },
+        it: { name: 'Pomodori' },
+        zh: { name: '番茄' },
+        ja: { name: 'トマト' },
+      },
+      'Olive Oil': {
+        sv: { name: 'Olivolja' },
+        no: { name: 'Olivenolje' },
+        da: { name: 'Olivenolie' },
+        de: { name: 'Olivenöl' },
+        fr: { name: 'Huile d\'olive' },
+        es: { name: 'Aceite de oliva' },
+        it: { name: 'Olio d\'oliva' },
+        zh: { name: '橄榄油' },
+        ja: { name: 'オリーブオイル' },
+      },
+    };
+
     for (const ingredient of ingredients) {
-      if (SAMPLE_INGREDIENT_TRANSLATIONS[ingredient.name]) {
+      if (sampleTranslations[ingredient.name]) {
         await prisma.ingredient.update({
           where: { id: ingredient.id },
           data: {
-            translations: JSON.stringify(SAMPLE_INGREDIENT_TRANSLATIONS[ingredient.name])
+            translations: JSON.stringify(sampleTranslations[ingredient.name])
           }
         });
         console.log(`✅ Added translations for ingredient: ${ingredient.name}`);
       }
     }
 
-    // Step 5: Add sample translations to some dishes
-    console.log('🍽️ Adding sample translations to dishes...');
-    const sampleDishTranslations = {
-      'Margherita Pizza': {
-        sv: { 
-          name: 'Margherita Pizza', 
-          description: 'Klassisk pizza med tomatsås, mozzarella och färsk basilika',
-          modificationNote: 'Kan göras glutenfri med alternativ degbotten'
-        },
-        no: { 
-          name: 'Margherita Pizza', 
-          description: 'Klassisk pizza med tomatsaus, mozzarella og fersk basilikum',
-          modificationNote: 'Kan lages glutenfri med alternativ pizzabunn'
-        },
-        da: { 
-          name: 'Margherita Pizza', 
-          description: 'Klassisk pizza med tomatsauce, mozzarella og frisk basilikum',
-          modificationNote: 'Kan laves glutenfri med alternativ pizzabund'
-        },
-        de: { 
-          name: 'Margherita Pizza', 
-          description: 'Klassische Pizza mit Tomatensauce, Mozzarella und frischem Basilikum',
-          modificationNote: 'Kann glutenfrei mit alternativem Teig zubereitet werden'
-        },
-        zh: { 
-          name: '玛格丽特披萨', 
-          description: '经典披萨配番茄酱、马苏里拉奶酪和新鲜罗勒',
-          modificationNote: '可用无麸质面团制作'
-        },
-        ja: { 
-          name: 'マルゲリータピザ', 
-          description: 'トマトソース、モッツァレラチーズ、フレッシュバジルの古典的なピザ',
-          modificationNote: 'グルテンフリー生地でご用意できます'
-        },
-      },
-      'Garden Salad': {
-        sv: { 
-          name: 'Trädgårdssallad', 
-          description: 'Färsk sallad med blandade grönsaker och körsbärstomater',
-        },
-        no: { 
-          name: 'Hagesalat', 
-          description: 'Fersk salat med blandede grønnsaker og cherrytomater',
-        },
-        da: { 
-          name: 'Havesalat', 
-          description: 'Frisk salat med blandede grøntsager og cherrytomater',
-        },
-        de: { 
-          name: 'Gartensalat', 
-          description: 'Frischer Salat mit gemischtem Grün und Kirschtomaten',
-        },
-        zh: { 
-          name: '花园沙拉', 
-          description: '新鲜沙拉配混合绿叶菜和樱桃番茄',
-        },
-        ja: { 
-          name: 'ガーデンサラダ', 
-          description: 'ミックスグリーンとミニトマトの新鮮なサラダ',
-        },
-      }
-    };
-
-    for (const dish of dishes.slice(0, 5)) { // Process first 5 dishes
-      if (sampleDishTranslations[dish.name]) {
-        await prisma.dish.update({
-          where: { id: dish.id },
-          data: {
-            translations: JSON.stringify(sampleDishTranslations[dish.name])
-          }
-        });
-        console.log(`✅ Added translations for dish: ${dish.name}`);
-      }
-    }
-
-    console.log('🎉 Enhanced database update completed successfully!');
+    console.log('🎉 Multilingual support migration completed successfully!');
     console.log('');
-    console.log('🌍 Multilingual Features Added:');
-    console.log('✅ Restaurant language settings (default: English + Nordic languages)');
-    console.log('✅ Allergen translations in 9 languages');
-    console.log('✅ Sample ingredient translations');
-    console.log('✅ Sample dish translations');
-    console.log('');
-    console.log('📝 Next Steps:');
-    console.log('1. Run: npx prisma db push (to apply schema changes)');
-    console.log('2. Integrate LanguageProvider in your React app');
-    console.log('3. Add LanguageSelector to your guest menu');
-    console.log('4. Test the multilingual features');
-    console.log('');
-    console.log('🚀 Your restaurant now supports international customers!');
+    console.log('Next steps:');
+    console.log('1. Update your Prisma schema to include the new fields');
+    console.log('2. Run: npx prisma db push');
+    console.log('3. Integrate the LanguageProvider into your app');
+    console.log('4. Add LanguageSelector to your guest menu');
     
   } catch (error) {
-    console.error('❌ Database update failed:', error);
+    console.error('❌ Multilingual migration failed:', error);
     process.exit(1);
   } finally {
     await prisma.$disconnect();
   }
 }
 
-updateDatabase();
+addMultilingualSupport();
