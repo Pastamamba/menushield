@@ -1,12 +1,15 @@
 // src/admin/AdminMenu.tsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { useRestaurant } from "../contexts/RestaurantContext";
 import RestaurantSwitcher from "../components/RestaurantSwitcher";
-import DishManager from "./DishManager";
-import QRCodeManager from "./QRCodeManager";
-import CacheManager from "./CacheManager";
-import RestaurantSettings from "./RestaurantSettings";
+import { LoadingShimmer } from "../components/LoadingShimmer";
+
+// Lazy load heavy admin components for better performance
+const DishManager = lazy(() => import("./DishManager"));
+const QRCodeManager = lazy(() => import("./QRCodeManager"));
+const CacheManager = lazy(() => import("./CacheManager"));
+const RestaurantSettings = lazy(() => import("./RestaurantSettings"));
 
 type TabType = "dashboard" | "qr-code" | "restaurant" | "settings";
 
@@ -143,17 +146,33 @@ export default function AdminMenu() {
       <main className="flex-1 lg:ml-0 pt-16 lg:pt-0">
         <div className="p-4 lg:p-8">
           {/* Dashboard = DishManager */}
-          {activeTab === "dashboard" && <DishManager />}
-          {activeTab === "qr-code" && <QRCodeManager />}
-          {activeTab === "restaurant" && <RestaurantSettings />}
-          {activeTab === "settings" && <AdminSettings />}
+          {activeTab === "dashboard" && (
+            <Suspense fallback={<LoadingShimmer />}>
+              <DishManager />
+            </Suspense>
+          )}
+          {activeTab === "qr-code" && (
+            <Suspense fallback={<LoadingShimmer />}>
+              <QRCodeManager />
+            </Suspense>
+          )}
+          {activeTab === "restaurant" && (
+            <Suspense fallback={<LoadingShimmer />}>
+              <RestaurantSettings />
+            </Suspense>
+          )}
+          {activeTab === "settings" && (
+            <Suspense fallback={<LoadingShimmer />}>
+              <AdminSettings />
+            </Suspense>
+          )}
         </div>
       </main>
     </div>
   );
 }
 
-// Settings Component
+// Settings Component - Lazy loaded for better performance
 function AdminSettings() {
   return (
     <div className="space-y-6">
@@ -188,7 +207,9 @@ function AdminSettings() {
       <div className="bg-white p-6 rounded-lg shadow">
         <h3 className="text-lg font-semibold mb-4">Data Management</h3>
         <div className="space-y-4">
-          <CacheManager />
+          <Suspense fallback={<LoadingShimmer />}>
+            <CacheManager />
+          </Suspense>
         </div>
       </div>
     </div>

@@ -1,10 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { useMenu } from "../utils/dishApi";
 import { useRestaurant } from "../contexts/RestaurantContext";
-import AllergenFilter from "../components/AllergenFilter";
-import DishCard from "./DishCard";
 import { analyzeDishSafety } from "../utils/dishAnalyzer";
+import { MenuItemShimmer } from "./LoadingShimmer";
 import type { Dish } from "../types";
+
+// Lazy load heavy components for better performance
+const AllergenFilter = lazy(() => import("../components/AllergenFilter"));
+const DishCard = lazy(() => import("./DishCard"));
 
 export default function GuestMenu() {
   const { data: dishes = [], isLoading, error } = useMenu();
@@ -167,19 +170,21 @@ export default function GuestMenu() {
 
               {/* Drawer Content */}
               <div className="flex-1 overflow-y-auto p-4">
-                <AllergenFilter
-                  selectedAllergens={selectedAllergens}
-                  onAllergenToggle={(allergen) => {
-                    setSelectedAllergens(prev =>
-                      prev.includes(allergen)
-                        ? prev.filter(a => a !== allergen)
-                        : [...prev, allergen]
-                    );
-                  }}
-                  searchTerm={searchTerm}
-                  onSearchChange={setSearchTerm}
-                  isMobile={true}
-                />
+                <Suspense fallback={<MenuItemShimmer />}>
+                  <AllergenFilter
+                    selectedAllergens={selectedAllergens}
+                    onAllergenToggle={(allergen) => {
+                      setSelectedAllergens(prev =>
+                        prev.includes(allergen)
+                          ? prev.filter(a => a !== allergen)
+                          : [...prev, allergen]
+                      );
+                    }}
+                    searchTerm={searchTerm}
+                    onSearchChange={setSearchTerm}
+                    isMobile={true}
+                  />
+                </Suspense>
               </div>
 
               {/* Drawer Footer */}
@@ -211,16 +216,18 @@ export default function GuestMenu() {
         {/* Desktop Allergen Filter */}
         <div className="hidden lg:block mb-8">
           <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <AllergenFilter
-              selectedAllergens={selectedAllergens}
-              onAllergenToggle={(allergen) => {
-                setSelectedAllergens(prev => 
-                  prev.includes(allergen)
-                    ? prev.filter(a => a !== allergen)
-                    : [...prev, allergen]
-                );
-              }}
-            />
+            <Suspense fallback={<MenuItemShimmer />}>
+              <AllergenFilter
+                selectedAllergens={selectedAllergens}
+                onAllergenToggle={(allergen) => {
+                  setSelectedAllergens(prev => 
+                    prev.includes(allergen)
+                      ? prev.filter(a => a !== allergen)
+                      : [...prev, allergen]
+                  );
+                }}
+              />
+            </Suspense>
           </div>
         </div>
 
@@ -238,16 +245,17 @@ export default function GuestMenu() {
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredDishes.map((dish) => (
-                  <DishCard 
-                    key={dish.id} 
-                    dish={dish} 
-                    safetyStatus={{ 
-                      status: "safe", 
-                      allergens: [] 
-                    }}
-                    showPrices={restaurant?.showPrices !== false}
-                    currency={restaurant?.currency || 'EUR'}
-                  />
+                  <Suspense key={dish.id} fallback={<MenuItemShimmer />}>
+                    <DishCard 
+                      dish={dish} 
+                      safetyStatus={{ 
+                        status: "safe", 
+                        allergens: [] 
+                      }}
+                      showPrices={restaurant?.showPrices !== false}
+                      currency={restaurant?.currency || 'EUR'}
+                    />
+                  </Suspense>
                 ))}
               </div>
             </section>
@@ -262,13 +270,14 @@ export default function GuestMenu() {
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {categorizedDishes.safe.map(({ dish, safety }) => (
-                      <DishCard 
-                        key={dish.id} 
-                        dish={dish} 
-                        safetyStatus={safety}
-                        showPrices={restaurant?.showPrices !== false}
-                        currency={restaurant?.currency || 'EUR'}
-                      />
+                      <Suspense key={dish.id} fallback={<MenuItemShimmer />}>
+                        <DishCard 
+                          dish={dish} 
+                          safetyStatus={safety}
+                          showPrices={restaurant?.showPrices !== false}
+                          currency={restaurant?.currency || 'EUR'}
+                        />
+                      </Suspense>
                     ))}
                   </div>
                 </section>
@@ -287,23 +296,25 @@ export default function GuestMenu() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {/* Show modifiable dishes first */}
                     {categorizedDishes.modifiable.map(({ dish, safety }) => (
-                      <DishCard 
-                        key={dish.id} 
-                        dish={dish} 
-                        safetyStatus={safety}
-                        showPrices={restaurant?.showPrices !== false}
-                        currency={restaurant?.currency || 'EUR'}
-                      />
+                      <Suspense key={dish.id} fallback={<MenuItemShimmer />}>
+                        <DishCard 
+                          dish={dish} 
+                          safetyStatus={safety}
+                          showPrices={restaurant?.showPrices !== false}
+                          currency={restaurant?.currency || 'EUR'}
+                        />
+                      </Suspense>
                     ))}
                     {/* Then show unsafe dishes */}
                     {categorizedDishes.unsafe.map(({ dish, safety }) => (
-                      <DishCard 
-                        key={dish.id} 
-                        dish={dish} 
-                        safetyStatus={safety}
-                        showPrices={restaurant?.showPrices !== false}
-                        currency={restaurant?.currency || 'EUR'}
-                      />
+                      <Suspense key={dish.id} fallback={<MenuItemShimmer />}>
+                        <DishCard 
+                          dish={dish} 
+                          safetyStatus={safety}
+                          showPrices={restaurant?.showPrices !== false}
+                          currency={restaurant?.currency || 'EUR'}
+                        />
+                      </Suspense>
                     ))}
                   </div>
                 </section>

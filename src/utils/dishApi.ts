@@ -4,6 +4,15 @@ import { useRestaurant } from "../contexts/RestaurantContext";
 import { queryKeys } from "./queryClient";
 import type { Dish, CreateDishRequest } from "../types";
 
+// Background prefetch helper for menu data
+export const prefetchMenuData = (queryClient: any, restaurantSlug: string) => {
+  return queryClient.prefetchQuery({
+    queryKey: [...queryKeys.dishes, restaurantSlug],
+    queryFn: () => api.getMenuBySlug(restaurantSlug),
+    staleTime: 1000 * 60 * 5, // 5 minutes for background refresh
+  });
+};
+
 // API functions
 const api = {
   // Guest menu by restaurant slug
@@ -145,7 +154,12 @@ export const useMenu = () => {
       return api.getMenu();
     },
     enabled: !!restaurantSlug, // Only run if we have a restaurant slug
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 10, // 10 minutes (was 5) - reduce API calls
+    gcTime: 1000 * 60 * 30, // 30 minutes garbage collection
+    refetchOnWindowFocus: false, // Prevent unnecessary refetches
+    refetchOnMount: false, // Use cached data on component mount
+    retry: 3, // Retry failed requests 3 times
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 };
 
@@ -159,13 +173,17 @@ export const useAdminDishes = () => {
       return api.getAdminDishes(token);
     },
     enabled: !!token, // Only run query if token exists
-    staleTime: 1000 * 60 * 2, // 2 minutes (admin data changes more frequently)
+    staleTime: 1000 * 60 * 5, // 5 minutes (admin data changes more frequently)
+    gcTime: 1000 * 60 * 15, // 15 minutes garbage collection
+    refetchOnWindowFocus: false, // Reduce API calls for admin interface
+    retry: 2, // Fewer retries for admin (faster failure feedback)
   });
 };
 
 export const useCreateDish = () => {
   const { token } = useAuth();
   const queryClient = useQueryClient();
+  const { restaurantSlug } = useRestaurant();
 
   return useMutation({
     mutationFn: (dish: CreateDishRequest) => {
@@ -175,7 +193,12 @@ export const useCreateDish = () => {
     onSuccess: () => {
       // Invalidate and refetch dishes
       queryClient.invalidateQueries({ queryKey: queryKeys.adminDishes });
-      queryClient.invalidateQueries({ queryKey: queryKeys.dishes });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.dishes, restaurantSlug] });
+      
+      // Background prefetch updated menu data
+      if (restaurantSlug) {
+        prefetchMenuData(queryClient, restaurantSlug);
+      }
     },
   });
 };
@@ -183,6 +206,7 @@ export const useCreateDish = () => {
 export const useUpdateDish = () => {
   const { token } = useAuth();
   const queryClient = useQueryClient();
+  const { restaurantSlug } = useRestaurant();
 
   return useMutation({
     mutationFn: ({
@@ -198,7 +222,12 @@ export const useUpdateDish = () => {
     onSuccess: () => {
       // Invalidate and refetch dishes
       queryClient.invalidateQueries({ queryKey: queryKeys.adminDishes });
-      queryClient.invalidateQueries({ queryKey: queryKeys.dishes });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.dishes, restaurantSlug] });
+      
+      // Background prefetch updated menu data
+      if (restaurantSlug) {
+        prefetchMenuData(queryClient, restaurantSlug);
+      }
     },
   });
 };
@@ -206,6 +235,7 @@ export const useUpdateDish = () => {
 export const useDeleteDish = () => {
   const { token } = useAuth();
   const queryClient = useQueryClient();
+  const { restaurantSlug } = useRestaurant();
 
   return useMutation({
     mutationFn: (id: string) => {
@@ -215,7 +245,12 @@ export const useDeleteDish = () => {
     onSuccess: () => {
       // Invalidate and refetch dishes
       queryClient.invalidateQueries({ queryKey: queryKeys.adminDishes });
-      queryClient.invalidateQueries({ queryKey: queryKeys.dishes });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.dishes, restaurantSlug] });
+      
+      // Background prefetch updated menu data
+      if (restaurantSlug) {
+        prefetchMenuData(queryClient, restaurantSlug);
+      }
     },
   });
 };

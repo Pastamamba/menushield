@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { prefetchMenuData } from '../utils/dishApi';
+import { queryClient } from '../utils/queryClient';
 import type { Restaurant } from '../types';
 
 interface RestaurantContextType {
@@ -56,6 +58,14 @@ export function RestaurantProvider({ children }: RestaurantProviderProps) {
     try {
       const restaurantData = await fetchRestaurantBySlug(slug);
       setRestaurant(restaurantData);
+      
+      // Background prefetch menu data for better performance
+      setTimeout(() => {
+        prefetchMenuData(queryClient, slug).catch((err: any) => 
+          console.warn('Background menu prefetch failed:', err)
+        );
+      }, 100); // Small delay to not block restaurant loading
+      
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Tuntematon virhe';
       setError(errorMessage);

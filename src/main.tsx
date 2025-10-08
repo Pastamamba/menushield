@@ -6,10 +6,17 @@ import { RestaurantProvider } from "./contexts/RestaurantContext";
 import AppRoutes from "./routes/AppRoutes";
 import { offlineManager } from "./utils/offlineManager";
 import { queryClient } from "./utils/queryClient";
+import { performanceMonitor, initWebVitals } from "./utils/performanceMonitor";
 import "./index.css";
+
+// Initialize performance monitoring
+performanceMonitor.startTimer('App Bootstrap');
+initWebVitals();
 
 // Initialize offline manager (this will register the service worker)
 offlineManager;
+
+performanceMonitor.endTimer('App Bootstrap');
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
