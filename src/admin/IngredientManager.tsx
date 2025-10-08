@@ -39,10 +39,14 @@ export default function IngredientManager(_props: IngredientManagerProps) {
     );
   }
 
-  const filteredIngredients = ingredients.filter(ingredient =>
-    ingredient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    ingredient.category?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredIngredients = ingredients.filter(ingredient => {
+    const nameMatch = ingredient.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const categoryMatch = typeof ingredient.category === 'string' ? 
+      ingredient.category.toLowerCase().includes(searchTerm.toLowerCase()) :
+      ingredient.category?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    return nameMatch || categoryMatch;
+  });
 
   const handleCreateIngredient = async (ingredientData: CreateIngredientRequest) => {
     try {
@@ -107,16 +111,16 @@ export default function IngredientManager(_props: IngredientManagerProps) {
                   <h4 className="text-lg font-medium text-gray-900">{ingredient.name}</h4>
                   {ingredient.category && (
                     <span className="inline-flex px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                      {ingredient.category}
+                      {typeof ingredient.category === 'string' ? ingredient.category : ingredient.category.name}
                     </span>
                   )}
                 </div>
                 
                 {/* Allergen chips */}
                 <div className="mt-2">
-                  {ingredient.allergen_tags && ingredient.allergen_tags.length > 0 ? (
+                  {ingredient.allergenTags && ingredient.allergenTags.length > 0 ? (
                     <div className="flex flex-wrap gap-1">
-                      {getAllergenChips(ingredient.allergen_tags).map((allergen) => (
+                      {getAllergenChips(ingredient.allergenTags).map((allergen) => (
                         <span
                           key={allergen.name}
                           className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
@@ -358,8 +362,8 @@ function EditIngredientForm({ ingredient, onSubmit, onCancel }: {
 }) {
   const [form, setForm] = useState<Partial<CreateIngredientRequest>>({
     name: ingredient.name,
-    category: ingredient.category,
-    allergen_tags: ingredient.allergen_tags || [],
+    category: typeof ingredient.category === 'string' ? ingredient.category : ingredient.category?.name,
+    allergen_tags: ingredient.allergenTags || [],
   });
   const [error, setError] = useState("");
 

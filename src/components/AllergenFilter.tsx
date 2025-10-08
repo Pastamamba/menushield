@@ -10,8 +10,10 @@ interface AllergenFilterProps {
   setAvoid?: (allergens: string[]) => void;
   selectedAllergens?: string[];
   onAllergenToggle?: (allergen: string) => void;
+  onSelectionChange?: (allergens: string[]) => void; // Add this prop for compatibility
   searchTerm?: string;
   onSearchChange?: (searchTerm: string) => void;
+  searchPlaceholder?: string; // Add this prop for compatibility
   isMobile?: boolean;
 }
 
@@ -20,22 +22,32 @@ export default function AllergenFilter({
   setAvoid,
   selectedAllergens = [],
   onAllergenToggle,
+  onSelectionChange,
   searchTerm = "",
   onSearchChange,
+  searchPlaceholder = "Search allergens...",
   isMobile = false,
 }: AllergenFilterProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Use new props if available, fallback to old props
   const currentAllergens = onAllergenToggle ? selectedAllergens : avoid;
-  const handleToggle = onAllergenToggle || ((allergen: string) => {
-    if (setAvoid) {
+  
+  const handleToggle = (allergen: string) => {
+    if (onAllergenToggle) {
+      onAllergenToggle(allergen);
+    } else if (onSelectionChange) {
+      const newAllergens = currentAllergens.includes(allergen)
+        ? currentAllergens.filter(a => a !== allergen)
+        : [...currentAllergens, allergen];
+      onSelectionChange(newAllergens);
+    } else if (setAvoid) {
       const newAllergens = currentAllergens.includes(allergen)
         ? currentAllergens.filter(a => a !== allergen)
         : [...currentAllergens, allergen];
       setAvoid(newAllergens);
     }
-  });
+  };
   const currentSearchTerm = searchTerm || searchQuery;
   const handleSearchChange = onSearchChange || setSearchQuery;
 

@@ -1,15 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-
-interface Restaurant {
-  id?: string;
-  name: string;
-  description?: string;
-  contact?: string;
-  showPrices: boolean;
-  currency: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
+import type { Restaurant } from '../types';
 
 interface UpdateRestaurantRequest {
   name?: string;
@@ -17,6 +7,8 @@ interface UpdateRestaurantRequest {
   contact?: string;
   showPrices?: boolean;
   currency?: string;
+  defaultLanguage?: string;
+  supportedLanguages?: string;
 }
 
 const API_BASE = import.meta.env.VITE_API_URL || '';

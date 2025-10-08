@@ -1,5 +1,5 @@
 // Language support utilities and translation management
-import type { Ingredient, Dish, AllergenTranslation } from '../types';
+import type { Ingredient, Dish } from '../types';
 
 // Supported languages with their codes and names
 export const SUPPORTED_LANGUAGES = {

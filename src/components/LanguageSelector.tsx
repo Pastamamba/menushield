@@ -1,5 +1,5 @@
 // Language selector component for the guest menu
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import type { RefObject } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { SUPPORTED_LANGUAGES } from '../utils/multilingual';

@@ -15,23 +15,23 @@ export interface Dish {
   price?: number;
   category?: string;
   components: DishComponent[];
-  // Legacy fields for backward compatibility
+  // Legacy fields for backward compatibility - exact database field names
   ingredients: string[];
-  allergen_tags: string[] | any; // Allow any type for backward compatibility
-  modification_note: string | null;
-  is_modifiable: boolean;
-  is_active?: boolean; // For dish activation toggle
-  is_featured?: boolean; // Featured dish highlighting
-  display_order?: number; // Custom ordering
-  image_url?: string; // Dish image
+  allergen_tags: string[] | any; // Matches database: allergen_tags
+  modification_note: string | null; // Matches database: modification_note
+  is_modifiable: boolean; // Matches database: is_modifiable
+  is_active?: boolean; // Matches database: is_active
+  is_featured?: boolean; // Matches database: is_featured
+  display_order?: number; // Matches database: display_order
+  image_url?: string; // Matches database: image_url
   // Multi-tenant relationship
-  restaurantId: string;
+  restaurantId: string; // Matches database: restaurant_id
   restaurant?: Restaurant;
-  categoryId?: string;
+  categoryId?: string; // Matches database: category_id
   // Multilingual support
   translations?: string; // JSON string containing translations
-  created_at?: string;
-  updated_at?: string;
+  created_at?: string; // Matches database: created_at
+  updated_at?: string; // Matches database: updated_at
 }
 
 export interface AllergenTag {
@@ -78,21 +78,21 @@ export interface Ingredient {
   id: string;
   name: string;
   description?: string;
-  allergen_tags: string[];
-  isActive: boolean;
+  allergenTags: string[]; // Matches database: allergen_tags (will be parsed from JSON)
+  isActive: boolean; // Matches database: is_active
   // Multi-tenant relationship
-  restaurantId: string;
+  restaurantId: string; // Matches database: restaurant_id
   restaurant?: Restaurant;
-  categoryId?: string;
+  categoryId?: string; // Matches database: category_id
   category?: IngredientCategory;
   // Hierarchy support
-  parentId?: string;
+  parentId?: string; // Matches database: parent_id
   parent?: Ingredient;
   children?: Ingredient[];
   // Multilingual support
   translations?: string; // JSON string containing translations
-  created_at: string;
-  updated_at: string;
+  createdAt: string; // Matches database: created_at
+  updatedAt: string; // Matches database: updated_at
 }
 
 export interface IngredientCategory {
@@ -101,15 +101,15 @@ export interface IngredientCategory {
   description?: string;
   color: string;
   icon?: string;
-  displayOrder: number;
-  isActive: boolean;
+  displayOrder: number; // Matches database: display_order
+  isActive: boolean; // Matches database: is_active
   // Multi-tenant relationship
-  restaurantId: string;
+  restaurantId: string; // Matches database: restaurant_id
   restaurant?: Restaurant;
   // Multilingual support
   translations?: string; // JSON string containing translations
-  created_at: string;
-  updated_at: string;
+  createdAt: string; // Matches database: created_at
+  updatedAt: string; // Matches database: updated_at
   // Relationships
   ingredients?: Ingredient[];
   dishes?: Dish[];
@@ -172,17 +172,17 @@ export interface Restaurant {
   contact?: string;
   website?: string;
   address?: string;
-  showPrices: boolean;
+  showPrices: boolean; // Matches database: show_prices
   currency: string;
   timezone: string;
-  // Multilingual support
-  defaultLanguage: string;
-  supportedLanguages: string; // JSON array of supported language codes
+  // Multilingual support - exact database field names
+  defaultLanguage: string; // Matches database: default_language
+  supportedLanguages: string; // Matches database: supported_languages (JSON array)
   // Business settings
-  isActive: boolean;
-  subscriptionTier: 'free' | 'premium' | 'enterprise';
-  createdAt: string;
-  updatedAt: string;
+  isActive: boolean; // Matches database: is_active
+  subscriptionTier: 'free' | 'premium' | 'enterprise'; // Matches database: subscription_tier
+  createdAt: string; // Matches database: created_at
+  updatedAt: string; // Matches database: updated_at
   // Relationships
   users?: User[];
   dishes?: Dish[];

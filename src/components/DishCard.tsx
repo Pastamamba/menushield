@@ -1,4 +1,4 @@
-import type { Dish, DishSafetyStatus } from "../types";
+import type { Dish, DishSafetyStatus, Restaurant } from "../types";
 import { getAllergenChips } from "../utils/allergenCalculator";
 import { formatPrice } from "../utils/currency";
 
@@ -8,6 +8,8 @@ interface DishCardProps {
   isOffline?: boolean;
   showPrices?: boolean;
   currency?: string;
+  restaurant?: Restaurant; // Add restaurant prop for multilingual support
+  currentLanguage?: string; // Add language prop
 }
 
 export default function DishCard({
@@ -16,6 +18,8 @@ export default function DishCard({
   isOffline,
   showPrices = true,
   currency = 'EUR',
+  restaurant,
+  currentLanguage = 'en',
 }: DishCardProps) {
   const getStatusIcon = () => {
     switch (safetyStatus.status) {

@@ -11,8 +11,8 @@ export function calculateAllergensFromIngredients(
   
   selectedIngredients.forEach(ingredientName => {
     const ingredient = availableIngredients.find(ing => ing.name === ingredientName);
-    if (ingredient && Array.isArray(ingredient.allergen_tags)) {
-      ingredient.allergen_tags.forEach(allergen => allergens.add(allergen));
+    if (ingredient && Array.isArray(ingredient.allergenTags)) {
+      ingredient.allergenTags.forEach((allergen: string) => allergens.add(allergen));
     }
   });
   

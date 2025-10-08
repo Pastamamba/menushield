@@ -15,11 +15,11 @@ const App: React.FC = () => {
     }, []);
 
     const safeDishes = menu.filter(
-        d => !d.allergen_tags.some(tag => avoid.includes(tag))
+        d => !d.allergen_tags.some((tag: string) => avoid.includes(tag))
     );
     const modifiableDishes = menu.filter(
         d =>
-            d.allergen_tags.some(tag => avoid.includes(tag)) &&
+            d.allergen_tags.some((tag: string) => avoid.includes(tag)) &&
             Boolean(d.modification_note)
     );
 

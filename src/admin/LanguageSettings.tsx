@@ -17,10 +17,10 @@ export default function LanguageSettings({ className = '' }: LanguageSettingsPro
 
   useEffect(() => {
     if (restaurant) {
-      setDefaultLanguage((restaurant.default_language as LanguageCode) || 'en');
+      setDefaultLanguage((restaurant.defaultLanguage as LanguageCode) || 'en');
       
       try {
-        const parsed = JSON.parse(restaurant.supported_languages || '["en"]');
+        const parsed = JSON.parse(restaurant.supportedLanguages || '["en"]');
         setSupportedLanguages(parsed.filter((lang: string) => lang in SUPPORTED_LANGUAGES));
       } catch (error) {
         setSupportedLanguages(['en']);
