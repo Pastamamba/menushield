@@ -5,12 +5,14 @@ interface DishCardProps {
   dish: Dish;
   safetyStatus: DishSafetyStatus;
   isOffline?: boolean;
+  showPrices?: boolean;
 }
 
 export default function DishCard({
   dish,
   safetyStatus,
   isOffline,
+  showPrices = true,
 }: DishCardProps) {
   const getStatusIcon = () => {
     switch (safetyStatus.status) {
@@ -59,7 +61,7 @@ export default function DishCard({
           </div>
           
           {/* Price */}
-          {dish.price && (
+          {showPrices && dish.price && (
             <div className="text-base font-medium text-gray-700 mt-1">
               ${dish.price.toFixed(2)}
             </div>

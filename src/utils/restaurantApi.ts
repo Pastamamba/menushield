@@ -1,0 +1,64 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+interface Restaurant {
+  id?: string;
+  name: string;
+  description?: string;
+  contact?: string;
+  showPrices: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+interface UpdateRestaurantRequest {
+  name?: string;
+  description?: string;
+  contact?: string;
+  showPrices?: boolean;
+}
+
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
+// Fetch restaurant info (public)
+export const useRestaurant = () => {
+  return useQuery({
+    queryKey: ['restaurant'],
+    queryFn: async (): Promise<Restaurant> => {
+      const response = await fetch(`${API_BASE}/api/restaurant`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch restaurant info');
+      }
+      return response.json();
+    },
+  });
+};
+
+// Update restaurant settings (admin only)
+export const useUpdateRestaurant = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (data: UpdateRestaurantRequest): Promise<Restaurant> => {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE}/api/admin/restaurant`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update restaurant');
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      // Invalidate and refetch restaurant data
+      queryClient.invalidateQueries({ queryKey: ['restaurant'] });
+    },
+  });
+};

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useMenu } from "../utils/dishApi";
+import { useRestaurant } from "../utils/restaurantApi";
 import AllergenFilter from "../components/AllergenFilter";
 import DishCard from "./DishCard";
 import { analyzeDishSafety } from "../utils/dishAnalyzer";
@@ -7,6 +8,7 @@ import type { Dish } from "../types";
 
 export default function GuestMenu() {
   const { data: dishes = [], isLoading, error } = useMenu();
+  const { data: restaurant } = useRestaurant();
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showMobileFilter, setShowMobileFilter] = useState(false);
@@ -268,7 +270,8 @@ export default function GuestMenu() {
                     safetyStatus={{ 
                       status: "safe", 
                       allergens: [] 
-                    }} 
+                    }}
+                    showPrices={restaurant?.showPrices !== false}
                   />
                 ))}
               </div>
@@ -284,7 +287,12 @@ export default function GuestMenu() {
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {categorizedDishes.safe.map(({ dish, safety }) => (
-                      <DishCard key={dish.id} dish={dish} safetyStatus={safety} />
+                      <DishCard 
+                        key={dish.id} 
+                        dish={dish} 
+                        safetyStatus={safety}
+                        showPrices={restaurant?.showPrices !== false}
+                      />
                     ))}
                   </div>
                 </section>
@@ -303,11 +311,21 @@ export default function GuestMenu() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {/* Show modifiable dishes first */}
                     {categorizedDishes.modifiable.map(({ dish, safety }) => (
-                      <DishCard key={dish.id} dish={dish} safetyStatus={safety} />
+                      <DishCard 
+                        key={dish.id} 
+                        dish={dish} 
+                        safetyStatus={safety}
+                        showPrices={restaurant?.showPrices !== false}
+                      />
                     ))}
                     {/* Then show unsafe dishes */}
                     {categorizedDishes.unsafe.map(({ dish, safety }) => (
-                      <DishCard key={dish.id} dish={dish} safetyStatus={safety} />
+                      <DishCard 
+                        key={dish.id} 
+                        dish={dish} 
+                        safetyStatus={safety}
+                        showPrices={restaurant?.showPrices !== false}
+                      />
                     ))}
                   </div>
                 </section>

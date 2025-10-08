@@ -394,11 +394,48 @@ app.get("/api/restaurant", async (req, res) => {
       restaurant || {
         name: "MenuShield Restaurant",
         description: "Welcome to our restaurant",
+        showPrices: true,
       }
     );
   } catch (error) {
     console.error("Error fetching restaurant info:", error);
     res.status(500).json({ error: "Failed to fetch restaurant info" });
+  }
+});
+
+// Admin: update restaurant settings
+app.put("/api/admin/restaurant", requireAuth, async (req, res) => {
+  try {
+    const { name, description, contact, showPrices } = req.body;
+    
+    // Find existing restaurant or create new one
+    let restaurant = await prisma.restaurant.findFirst();
+    
+    if (restaurant) {
+      restaurant = await prisma.restaurant.update({
+        where: { id: restaurant.id },
+        data: {
+          name: name || restaurant.name,
+          description: description !== undefined ? description : restaurant.description,
+          contact: contact !== undefined ? contact : restaurant.contact,
+          showPrices: showPrices !== undefined ? showPrices : restaurant.showPrices,
+        }
+      });
+    } else {
+      restaurant = await prisma.restaurant.create({
+        data: {
+          name: name || "MenuShield Restaurant",
+          description: description || "Welcome to our restaurant",
+          contact: contact || null,
+          showPrices: showPrices !== undefined ? showPrices : true,
+        }
+      });
+    }
+    
+    res.json(restaurant);
+  } catch (error) {
+    console.error("Error updating restaurant:", error);
+    res.status(500).json({ error: "Failed to update restaurant settings" });
   }
 });
 

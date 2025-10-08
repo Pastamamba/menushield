@@ -26,6 +26,7 @@ model Restaurant {
   name        String
   description String?
   contact     String?
+  showPrices  Boolean  @default(true) @map("show_prices")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
