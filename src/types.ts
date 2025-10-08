@@ -21,6 +21,13 @@ export interface Dish {
   modification_note: string | null;
   is_modifiable: boolean;
   is_active?: boolean; // For dish activation toggle
+  is_featured?: boolean; // Featured dish highlighting
+  display_order?: number; // Custom ordering
+  image_url?: string; // Dish image
+  // Multi-tenant relationship
+  restaurantId: string;
+  restaurant?: Restaurant;
+  categoryId?: string;
   // Multilingual support
   translations?: string; // JSON string containing translations
   created_at?: string;
@@ -70,9 +77,18 @@ export interface UpdateDishRequest extends Partial<CreateDishRequest> {
 export interface Ingredient {
   id: string;
   name: string;
-  category?: string;
-  parentId?: string; // For hierarchical ingredients (e.g., "Salmon" parent is "Fish")
+  description?: string;
   allergen_tags: string[];
+  isActive: boolean;
+  // Multi-tenant relationship
+  restaurantId: string;
+  restaurant?: Restaurant;
+  categoryId?: string;
+  category?: IngredientCategory;
+  // Hierarchy support
+  parentId?: string;
+  parent?: Ingredient;
+  children?: Ingredient[];
   // Multilingual support
   translations?: string; // JSON string containing translations
   created_at: string;
@@ -85,10 +101,18 @@ export interface IngredientCategory {
   description?: string;
   color: string;
   icon?: string;
+  displayOrder: number;
+  isActive: boolean;
+  // Multi-tenant relationship
+  restaurantId: string;
+  restaurant?: Restaurant;
   // Multilingual support
   translations?: string; // JSON string containing translations
   created_at: string;
   updated_at: string;
+  // Relationships
+  ingredients?: Ingredient[];
+  dishes?: Dish[];
 }
 
 export interface CreateIngredientRequest {
@@ -123,16 +147,59 @@ export interface AllergenTranslation {
   updated_at: string;
 }
 
+// Multi-tenant User and Restaurant Types
+export type UserRole = 'OWNER' | 'ADMIN' | 'STAFF' | 'VIEWER';
+
+export interface User {
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  role: UserRole;
+  isActive: boolean;
+  lastLoginAt?: string;
+  restaurantId: string;
+  restaurant?: Restaurant;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Restaurant {
   id: string;
   name: string;
+  slug: string; // SEO-friendly URL identifier
   description?: string;
   contact?: string;
-  show_prices: boolean;
+  website?: string;
+  address?: string;
+  showPrices: boolean;
   currency: string;
+  timezone: string;
   // Multilingual support
-  default_language: string;
-  supported_languages: string; // JSON array of supported language codes
-  created_at: string;
-  updated_at: string;
+  defaultLanguage: string;
+  supportedLanguages: string; // JSON array of supported language codes
+  // Business settings
+  isActive: boolean;
+  subscriptionTier: 'free' | 'premium' | 'enterprise';
+  createdAt: string;
+  updatedAt: string;
+  // Relationships
+  users?: User[];
+  dishes?: Dish[];
+  categories?: IngredientCategory[];
+  ingredients?: Ingredient[];
+}
+
+export interface RestaurantInvitation {
+  id: string;
+  email: string;
+  role: UserRole;
+  token: string;
+  isUsed: boolean;
+  expiresAt: string;
+  restaurantId: string;
+  restaurant?: Restaurant;
+  invitedBy: string;
+  createdAt: string;
+  updatedAt: string;
 }
