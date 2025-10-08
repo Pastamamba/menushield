@@ -1,32 +1,49 @@
-// Service Worker for offline menu caching
-const CACHE_NAME = "menushield-v1";
-const MENU_CACHE_NAME = "menushield-menu-v1";
+// Service Worker for MenuShield PWA - Finnish Mobile Optimization
+const CACHE_NAME = "menushield-v2-fi";
+const MENU_CACHE_NAME = "menushield-menu-v2";
+const STATIC_CACHE_NAME = "menushield-static-v2";
 
-// Files to cache for offline functionality
+// Finnish PWA static assets to cache
 const STATIC_ASSETS = [
   "/",
   "/menu",
   "/manifest.json",
-  // Add other static assets as needed
+  "/browserconfig.xml",
+  // Icons for Finnish mobile experience
+  "/apple-touch-icon.png",
+  "/apple-touch-icon-120x120.png", 
+  "/apple-touch-icon-152x152.png",
+  "/favicon-16x16.png",
+  "/favicon-32x32.png",
+  "/pwa-192.png",
+  "/pwa-512.png",
+  "/pwa-maskable-192.png",
+  "/pwa-maskable-512.png",
+  // Shortcut icons
+  "/shortcut-filter-96x96.png",
+  "/shortcut-safe-96x96.png"
 ];
 
-// Install event - cache static assets
+// Install event - cache static assets for Finnish mobile PWA
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
-      .open(CACHE_NAME)
+      .open(STATIC_CACHE_NAME)
       .then((cache) => {
-        console.log("MenuShield SW: Caching static assets");
+        console.log("MenuShield SW (FI): Caching static PWA assets");
         return cache.addAll(STATIC_ASSETS);
       })
       .then(() => {
-        console.log("MenuShield SW: Static assets cached");
+        console.log("MenuShield SW (FI): PWA assets cached for Finnish mobile");
         return self.skipWaiting();
+      })
+      .catch((error) => {
+        console.log("MenuShield SW (FI): Error caching static assets:", error);
       })
   );
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up old caches for Finnish PWA
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
@@ -34,15 +51,19 @@ self.addEventListener("activate", (event) => {
       .then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME && cacheName !== MENU_CACHE_NAME) {
-              console.log("MenuShield SW: Deleting old cache:", cacheName);
+            if (
+              cacheName !== STATIC_CACHE_NAME && 
+              cacheName !== MENU_CACHE_NAME &&
+              cacheName !== CACHE_NAME
+            ) {
+              console.log("MenuShield SW (FI): Deleting old cache:", cacheName);
               return caches.delete(cacheName);
             }
           })
         );
       })
       .then(() => {
-        console.log("MenuShield SW: Activated");
+        console.log("MenuShield SW (FI): Activated for Finnish mobile PWA");
         return self.clients.claim();
       })
   );
@@ -136,11 +157,11 @@ async function handleApiRequest(request) {
   }
 }
 
-// Cache-first strategy for static assets
+// Cache-first strategy for static PWA assets (Finnish mobile optimization)
 async function handleStaticRequest(request) {
   try {
-    const cache = await caches.open(CACHE_NAME);
-    const cachedResponse = await cache.match(request);
+    const staticCache = await caches.open(STATIC_CACHE_NAME);
+    const cachedResponse = await staticCache.match(request);
 
     if (cachedResponse) {
       return cachedResponse;
@@ -149,18 +170,18 @@ async function handleStaticRequest(request) {
     // Fallback to network
     const response = await fetch(request);
 
-    // Cache successful responses
+    // Cache successful responses for PWA assets
     if (response.status === 200) {
       const clonedResponse = response.clone();
-      await cache.put(request, clonedResponse);
+      await staticCache.put(request, clonedResponse);
     }
 
     return response;
   } catch (error) {
-    // Return offline page for navigation requests
+    // Return offline page for navigation requests (Finnish PWA)
     if (request.mode === "navigate") {
-      const cache = await caches.open(CACHE_NAME);
-      const offlinePage = await cache.match("/");
+      const staticCache = await caches.open(STATIC_CACHE_NAME);
+      const offlinePage = await staticCache.match("/");
       if (offlinePage) {
         return offlinePage;
       }

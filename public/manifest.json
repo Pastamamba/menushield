@@ -1,19 +1,157 @@
 {
-  "name": "MenuShield - Turvallinen ruokailu",
+  "name": "MenuShield - Turvallinen ruokailu allergeenejä vältteleville",
   "short_name": "MenuShield",
-  "description": "Digitaalinen allergeenejä suodattava alusta turvallisempaan, yksityisempään ruokailuun.",
+  "description": "Digitaalinen allergeenejä suodattava alusta turvallisempaan, yksityisempään ruokailuun. Suodata menuita allergeenien mukaan ja nauti turvallisesta ruokailusta.",
   "start_url": "/",
   "scope": "/",
+  "id": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "orientation": "portrait-primary",
   "background_color": "#ffffff",
   "theme_color": "#059669",
-  "categories": ["food", "health", "lifestyle"],
+  "categories": ["food", "health", "lifestyle", "medical", "productivity"],
   "lang": "fi",
+  "dir": "ltr",
+  "shortcuts": [
+    {
+      "name": "Suodata menu",
+      "short_name": "Suodata",
+      "description": "Suodata menu allergeenien mukaan",
+      "url": "/?filter=open",
+      "icons": [
+        {
+          "src": "/shortcut-filter-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Turvalliset ruoat",
+      "short_name": "Turvalliset",
+      "description": "Näytä vain turvalliset ruoat",
+      "url": "/?safe=true",
+      "icons": [
+        {
+          "src": "/shortcut-safe-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile-1.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "platform": "narrow",
+      "label": "Mobiilinäkymä - Allergeenisuodatin"
+    },
+    {
+      "src": "/screenshot-mobile-2.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "platform": "narrow",
+      "label": "Mobiilinäkymä - Ruokalista"
+    },
+    {
+      "src": "/screenshot-desktop-1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "Työpöytänäkymä - Koko sovellus"
+    }
+  ],
   "icons": [
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon-57x57.png",
+      "sizes": "57x57",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon-60x60.png",
+      "sizes": "60x60",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon-76x76.png",
+      "sizes": "76x76",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon-114x114.png",
+      "sizes": "114x114",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon-120x120.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon-167x167.png",
+      "sizes": "167x167",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "/pwa-192.png",
       "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-256.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-384.png",
+      "sizes": "384x384",
       "type": "image/png",
       "purpose": "any"
     },
@@ -24,16 +162,30 @@
       "purpose": "any"
     },
     {
-      "src": "/pwa-maskable.png",
-      "sizes": "512x512", 
+      "src": "/pwa-maskable-192.png",
+      "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/apple-touch-icon.png",
-      "sizes": "180x180",
+      "src": "/pwa-maskable-512.png",
+      "sizes": "512x512", 
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "maskable"
     }
-  ]
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://menushield.fi/manifest.json"
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  }
 }

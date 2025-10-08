@@ -2,15 +2,75 @@
 <html lang="fi">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0" />
+    
+    <!-- Viewport optimization for all devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover" />
+    
+    <!-- PWA Theme and Status Bar -->
     <meta name="theme-color" content="#059669" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#059669" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#047857" />
+    <meta name="msapplication-navbutton-color" content="#059669" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    
+    <!-- Apple PWA Configuration -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="MenuShield" />
+    <meta name="apple-touch-fullscreen" content="yes" />
+    
+    <!-- Apple Touch Icons - Multiple sizes for different devices -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    
+    <!-- Favicon and Icons -->
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    
+    <!-- Microsoft Tiles -->
+    <meta name="msapplication-TileColor" content="#059669" />
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+    
+    <!-- Android/Chrome -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="MenuShield" />
+    
+    <!-- SEO and Social Media -->
+    <meta name="description" content="Turvallinen digitaalinen menu allergeenejä vältteleville. Suodata ruokia allergeenien mukaan yksityisesti ja turvallisesti." />
+    <meta name="keywords" content="allergeenit, menu, ravintola, turvallinen ruokailu, gluteeniton, laktoositon, vegaani" />
+    <meta name="author" content="MenuShield" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="MenuShield - Turvallinen ruokailu" />
+    <meta property="og:description" content="Digitaalinen allergeenejä suodattava alusta turvallisempaan ruokailuun" />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:url" content="https://menushield.fi" />
+    <meta property="og:site_name" content="MenuShield" />
+    <meta property="og:locale" content="fi_FI" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MenuShield - Turvallinen ruokailu" />
+    <meta name="twitter:description" content="Digitaalinen allergeenejä suodattava alusta turvallisempaan ruokailuun" />
+    <meta name="twitter:image" content="/twitter-image.png" />
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Preload critical CSS -->
     <link href="/src/index.css" rel="stylesheet">
-    <title>MenuShield - Turvallinen ruokailu</title>
+    
+    <title>MenuShield - Turvallinen ruokailu allergeenejä vältteleville</title>
   </head>
   <body>
     <div id="root"></div>
