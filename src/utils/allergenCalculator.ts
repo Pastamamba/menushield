@@ -22,28 +22,27 @@ export function calculateAllergensFromIngredients(
 /**
  * Get allergen chips for display
  */
-export function getAllergenChips(allergens: string[]): { name: string; color: string; icon: string }[] {
-  const allergenMap: Record<string, { color: string; icon: string }> = {
-    'gluten': { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: '🌾' },
-    'dairy': { color: 'bg-blue-100 text-blue-800 border-blue-200', icon: '🥛' },
-    'eggs': { color: 'bg-orange-100 text-orange-800 border-orange-200', icon: '🥚' },
-    'fish': { color: 'bg-cyan-100 text-cyan-800 border-cyan-200', icon: '🐟' },
-    'shellfish': { color: 'bg-red-100 text-red-800 border-red-200', icon: '🦐' },
-    'nuts': { color: 'bg-amber-100 text-amber-800 border-amber-200', icon: '🥜' },
-    'peanuts': { color: 'bg-brown-100 text-brown-800 border-brown-200', icon: '🥜' },
-    'soy': { color: 'bg-green-100 text-green-800 border-green-200', icon: '🫘' },
-    'sesame': { color: 'bg-stone-100 text-stone-800 border-stone-200', icon: '🌱' },
-    'sulfites': { color: 'bg-purple-100 text-purple-800 border-purple-200', icon: '🍷' },
-    'mustard': { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: '🌭' },
-    'celery': { color: 'bg-lime-100 text-lime-800 border-lime-200', icon: '🥬' },
-    'lupin': { color: 'bg-indigo-100 text-indigo-800 border-indigo-200', icon: '🌸' },
-    'molluscs': { color: 'bg-teal-100 text-teal-800 border-teal-200', icon: '🐚' },
+export function getAllergenChips(allergens: string[]): { name: string; color: string }[] {
+  const allergenMap: Record<string, { color: string }> = {
+    'gluten': { color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
+    'dairy': { color: 'bg-blue-100 text-blue-800 border-blue-200' },
+    'eggs': { color: 'bg-orange-100 text-orange-800 border-orange-200' },
+    'fish': { color: 'bg-cyan-100 text-cyan-800 border-cyan-200' },
+    'shellfish': { color: 'bg-red-100 text-red-800 border-red-200' },
+    'nuts': { color: 'bg-amber-100 text-amber-800 border-amber-200' },
+    'peanuts': { color: 'bg-brown-100 text-brown-800 border-brown-200' },
+    'soy': { color: 'bg-green-100 text-green-800 border-green-200' },
+    'sesame': { color: 'bg-stone-100 text-stone-800 border-stone-200' },
+    'sulfites': { color: 'bg-purple-100 text-purple-800 border-purple-200' },
+    'mustard': { color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
+    'celery': { color: 'bg-lime-100 text-lime-800 border-lime-200' },
+    'lupin': { color: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
+    'molluscs': { color: 'bg-teal-100 text-teal-800 border-teal-200' },
   };
 
   return allergens.map(allergen => ({
     name: allergen,
     color: allergenMap[allergen.toLowerCase()]?.color || 'bg-gray-100 text-gray-800 border-gray-200',
-    icon: allergenMap[allergen.toLowerCase()]?.icon || '⚠️',
   }));
 }
 

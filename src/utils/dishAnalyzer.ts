@@ -4,29 +4,29 @@ import { calculateAllergensFromIngredients } from "./allergenCalculator";
 
 // Top 8 most common allergens for main display
 export const COMMON_ALLERGENS = [
-  { id: "dairy", name: "Dairy", icon: "🥛", color: "blue" },
-  { id: "gluten", name: "Gluten", icon: "🌾", color: "yellow" },
-  { id: "nuts", name: "Tree Nuts", icon: "🥜", color: "brown" },
-  { id: "peanuts", name: "Peanuts", icon: "🥜", color: "orange" },
-  { id: "shellfish", name: "Shellfish", icon: "🦐", color: "red" },
-  { id: "fish", name: "Fish", icon: "🐟", color: "cyan" },
-  { id: "eggs", name: "Eggs", icon: "🥚", color: "yellow" },
-  { id: "soy", name: "Soy", icon: "🫘", color: "green" },
+  { id: "dairy", name: "Dairy", color: "blue" },
+  { id: "gluten", name: "Gluten", color: "yellow" },
+  { id: "nuts", name: "Tree Nuts", color: "brown" },
+  { id: "peanuts", name: "Peanuts", color: "orange" },
+  { id: "shellfish", name: "Shellfish", color: "red" },
+  { id: "fish", name: "Fish", color: "cyan" },
+  { id: "eggs", name: "Eggs", color: "yellow" },
+  { id: "soy", name: "Soy", color: "green" },
 ];
 
 // Extended allergen list for search
 export const ALL_ALLERGENS = [
   ...COMMON_ALLERGENS,
-  { id: "sesame", name: "Sesame", icon: "🫘", color: "tan" },
-  { id: "sulfites", name: "Sulfites", icon: "🍷", color: "purple" },
-  { id: "mustard", name: "Mustard", icon: "🟡", color: "yellow" },
-  { id: "celery", name: "Celery", icon: "🥬", color: "green" },
-  { id: "lupin", name: "Lupin", icon: "🌸", color: "pink" },
-  { id: "molluscs", name: "Molluscs", icon: "🐚", color: "teal" },
-  { id: "corn", name: "Corn", icon: "🌽", color: "yellow" },
-  { id: "coconut", name: "Coconut", icon: "🥥", color: "white" },
-  { id: "nightshades", name: "Nightshades", icon: "🍅", color: "red" },
-  { id: "citrus", name: "Citrus", icon: "🍊", color: "orange" },
+  { id: "sesame", name: "Sesame", color: "tan" },
+  { id: "sulfites", name: "Sulfites", color: "purple" },
+  { id: "mustard", name: "Mustard", color: "yellow" },
+  { id: "celery", name: "Celery", color: "green" },
+  { id: "lupin", name: "Lupin", color: "pink" },
+  { id: "molluscs", name: "Molluscs", color: "teal" },
+  { id: "corn", name: "Corn", color: "yellow" },
+  { id: "coconut", name: "Coconut", color: "white" },
+  { id: "nightshades", name: "Nightshades", color: "red" },
+  { id: "citrus", name: "Citrus", color: "orange" },
 ];
 
 /**

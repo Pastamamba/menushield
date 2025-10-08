@@ -30,7 +30,6 @@ async function main() {
         name: "Proteins",
         description: "Meat, fish, and plant-based proteins",
         color: "#ef4444",
-        icon: "🥩",
       },
     }),
     prisma.category.create({
@@ -38,7 +37,6 @@ async function main() {
         name: "Vegetables",
         description: "Fresh vegetables and herbs",
         color: "#22c55e",
-        icon: "🥬",
       },
     }),
     prisma.category.create({
@@ -46,7 +44,6 @@ async function main() {
         name: "Grains",
         description: "Bread, pasta, and cereals",
         color: "#f59e0b",
-        icon: "🌾",
       },
     }),
     prisma.category.create({
@@ -54,7 +51,6 @@ async function main() {
         name: "Dairy",
         description: "Milk, cheese, and dairy products",
         color: "#3b82f6",
-        icon: "🥛",
       },
     }),
   ]);

@@ -121,7 +121,6 @@ export default function IngredientManager(_props: IngredientManagerProps) {
                           key={allergen.name}
                           className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
                         >
-                          <span>{allergen.icon}</span>
                           <span className="capitalize">{allergen.name}</span>
                         </span>
                       ))}
@@ -138,14 +137,14 @@ export default function IngredientManager(_props: IngredientManagerProps) {
                   className="text-blue-600 hover:text-blue-800 p-2 hover:bg-blue-50 rounded transition-colors"
                   title="Edit ingredient"
                 >
-                  ✏️
+                  Edit
                 </button>
                 <button
                   onClick={() => handleDeleteIngredient(ingredient.id)}
                   className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded transition-colors"
                   title="Delete ingredient"
                 >
-                  🗑️
+                  Delete
                 </button>
               </div>
             </div>
@@ -308,9 +307,6 @@ function CreateIngredientForm({ onSubmit, onCancel }: {
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">
-                    {getAllergenChips([allergen])[0]?.icon || "⚠️"}
-                  </span>
                   <span className="text-sm font-medium capitalize">{allergen}</span>
                 </div>
               </button>
@@ -326,7 +322,6 @@ function CreateIngredientForm({ onSubmit, onCancel }: {
                     key={allergen.name}
                     className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
                   >
-                    <span>{allergen.icon}</span>
                     <span className="capitalize">{allergen.name}</span>
                   </span>
                 ))}
@@ -456,9 +451,6 @@ function EditIngredientForm({ ingredient, onSubmit, onCancel }: {
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">
-                    {getAllergenChips([allergen])[0]?.icon || "⚠️"}
-                  </span>
                   <span className="text-sm font-medium capitalize">{allergen}</span>
                 </div>
               </button>
@@ -474,7 +466,6 @@ function EditIngredientForm({ ingredient, onSubmit, onCancel }: {
                     key={allergen.name}
                     className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
                   >
-                    <span>{allergen.icon}</span>
                     <span className="capitalize">{allergen.name}</span>
                   </span>
                 ))}

@@ -247,7 +247,6 @@ export default function DishManager() {
                           key={allergen.name}
                           className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
                         >
-                          <span>{allergen.icon}</span>
                           <span className="capitalize">{allergen.name}</span>
                         </span>
                       ))}
@@ -262,10 +261,10 @@ export default function DishManager() {
 
                 <div className="flex items-center gap-4 mt-2">
                   <span className="text-xs text-gray-400">
-                    🥬 {Array.isArray(dish.ingredients) ? dish.ingredients.length : 0} ingredients
+                    {Array.isArray(dish.ingredients) ? dish.ingredients.length : 0} ingredients
                   </span>
                   <span className="text-xs text-gray-400">
-                    ⚠️ {Array.isArray(dish.allergen_tags) ? dish.allergen_tags.length : 0} allergens
+                    {Array.isArray(dish.allergen_tags) ? dish.allergen_tags.length : 0} allergens
                   </span>
                 </div>
               </div>
@@ -298,14 +297,14 @@ export default function DishManager() {
                   className="text-blue-600 hover:text-blue-800 p-2 hover:bg-blue-50 rounded transition-colors"
                   title="Edit dish"
                 >
-                  ✏️
+                  Edit
                 </button>
                 <button
                   onClick={() => handleDeleteDish(dish.id)}
                   className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded transition-colors"
                   title="Delete dish"
                 >
-                  🗑️
+                  Delete
                 </button>
               </div>
             </div>
@@ -708,7 +707,6 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
                 {/* Auto-calculated Allergens */}
                 <div className="bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-xl p-4">
                   <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
-                    <span className="mr-2">⚠️</span>
                     Detected Allergens
                     <span className="ml-2 px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full">
                       Auto-calculated
@@ -724,18 +722,16 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
                               key={allergen.name}
                               className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
                             >
-                              <span>{allergen.icon}</span>
                               <span className="capitalize">{allergen.name}</span>
                             </span>
                           ))}
                         </div>
                         <p className="text-xs text-orange-600 font-medium">
-                          ⚡ These allergens are automatically detected from your selected ingredients
+                          These allergens are automatically detected from your selected ingredients
                         </p>
                       </div>
                     ) : (
                       <div className="text-center py-2">
-                        <span className="text-2xl mb-1 block">✅</span>
                         <p className="text-green-600 font-medium text-sm">No allergens detected</p>
                         <p className="text-gray-500 text-xs">Add ingredients to see potential allergens</p>
                       </div>
@@ -938,7 +934,6 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
                     key={allergen.name}
                     className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
                   >
-                    <span>{allergen.icon}</span>
                     <span className="capitalize">{allergen.name}</span>
                   </span>
                 ))}
@@ -1031,7 +1026,6 @@ function IngredientSelector({ selectedIngredients, availableIngredients, onChang
                     className="w-full px-4 py-3 text-left hover:bg-green-50 hover:text-green-700 transition-colors flex items-center justify-between group"
                   >
                     <div className="flex items-center">
-                      <span className="text-lg mr-3">🥬</span>
                       <span className="font-medium">{ingredient.name}</span>
                       {ingredient.category && (
                         <span className="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
@@ -1078,7 +1072,6 @@ function IngredientSelector({ selectedIngredients, availableIngredients, onChang
                 className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2 group hover:bg-green-100 transition-colors"
               >
                 <div className="flex items-center">
-                  <span className="text-lg mr-2">🥬</span>
                   <span className="font-medium text-green-800">{ingredient}</span>
                 </div>
                 <button
@@ -1109,7 +1102,6 @@ function IngredientSelector({ selectedIngredients, availableIngredients, onChang
                 onClick={() => addIngredient(ingredient.name)}
                 className="flex items-center justify-center bg-gray-50 hover:bg-green-50 hover:border-green-300 border border-gray-200 rounded-lg px-3 py-2 transition-all duration-200 text-sm font-medium hover:text-green-700"
               >
-                <span className="mr-2">🥬</span>
                 {ingredient.name}
               </button>
             ))}

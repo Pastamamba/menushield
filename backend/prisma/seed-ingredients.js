@@ -11,43 +11,36 @@ async function seedIngredientsAndCategories() {
       name: "Proteins",
       description: "Meat, fish, and protein sources",
       color: "#DC2626",
-      icon: "🥩",
     },
     {
       name: "Dairy",
       description: "Milk, cheese, and dairy products",
       color: "#3B82F6",
-      icon: "🥛",
     },
     {
       name: "Grains",
       description: "Wheat, rice, and grain products",
       color: "#F59E0B",
-      icon: "🌾",
     },
     {
       name: "Vegetables",
       description: "Fresh vegetables and herbs",
       color: "#10B981",
-      icon: "🥬",
     },
     {
       name: "Fruits",
       description: "Fresh and dried fruits",
       color: "#8B5CF6",
-      icon: "🍎",
     },
     {
       name: "Nuts",
       description: "Tree nuts and seeds",
       color: "#92400E",
-      icon: "🥜",
     },
     {
       name: "Spices",
       description: "Herbs and spices",
       color: "#059669",
-      icon: "🌿",
     },
   ];
 
