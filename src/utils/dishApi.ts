@@ -1,11 +1,37 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../auth/AuthContext";
+import { useRestaurant } from "../contexts/RestaurantContext";
 import { queryKeys } from "./queryClient";
 import type { Dish, CreateDishRequest } from "../types";
 
 // API functions
 const api = {
-  // Guest menu
+  // Guest menu by restaurant slug
+  getMenuBySlug: async (slug: string): Promise<Dish[]> => {
+    const response = await fetch(`/api/menu/by-slug/${slug}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch menu: ${response.status}`);
+    }
+    const data = await response.json();
+    
+    // Force allergen_tags to be arrays for all dishes
+    return data.map((dish: any) => ({
+      ...dish,
+      allergen_tags: Array.isArray(dish.allergen_tags) 
+        ? dish.allergen_tags 
+        : dish.allergen_tags 
+          ? [dish.allergen_tags].flat()
+          : [],
+      components: Array.isArray(dish.components) 
+        ? dish.components 
+        : [],
+      ingredients: Array.isArray(dish.ingredients) 
+        ? dish.ingredients 
+        : []
+    }));
+  },
+
+  // Legacy guest menu (fallback)
   getMenu: async (): Promise<Dish[]> => {
     const response = await fetch("/api/menu");
     if (!response.ok) {
@@ -107,9 +133,18 @@ const api = {
 
 // Hooks
 export const useMenu = () => {
+  const { restaurantSlug } = useRestaurant();
+
   return useQuery({
-    queryKey: queryKeys.dishes,
-    queryFn: api.getMenu,
+    queryKey: [...queryKeys.dishes, restaurantSlug],
+    queryFn: () => {
+      if (restaurantSlug) {
+        return api.getMenuBySlug(restaurantSlug);
+      }
+      // Fallback to legacy API
+      return api.getMenu();
+    },
+    enabled: !!restaurantSlug, // Only run if we have a restaurant slug
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };

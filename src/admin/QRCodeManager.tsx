@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
+import { useRestaurant, useRestaurantUrl } from "../contexts/RestaurantContext";
 
 interface QRCodeOptions {
   size: number;
@@ -10,7 +11,8 @@ interface QRCodeOptions {
 }
 
 export default function QRCodeManager() {
-  const [restaurantId] = useState("abc123"); // This would come from auth context in real app
+  const { restaurant } = useRestaurant();
+  const { qrCodeUrl, shortUrl } = useRestaurantUrl();
   const [qrOptions, setQrOptions] = useState<QRCodeOptions>({
     size: 200,
     level: "M",
@@ -22,8 +24,8 @@ export default function QRCodeManager() {
   const qrRef = useRef<HTMLDivElement>(null);
   const [customText, setCustomText] = useState("");
 
-  const baseUrl = window.location.origin;
-  const menuUrl = `${baseUrl}/menu?rid=${restaurantId}`;
+  // Use new restaurant slug-based URL structure
+  const menuUrl = qrCodeUrl;
 
   const downloadQRCode = (format: "svg" | "png", size: number = 512) => {
     const svg = qrRef.current?.querySelector("svg");
@@ -389,12 +391,12 @@ export default function QRCodeManager() {
                   <input
                     type="text"
                     readOnly
-                    value={`${baseUrl}/m/${restaurantId}`}
+                    value={shortUrl}
                     className="flex-1 border rounded-l px-3 py-2 bg-gray-50 text-sm"
                   />
                   <button
                     onClick={() =>
-                      copyToClipboard(`${baseUrl}/m/${restaurantId}`)
+                      copyToClipboard(shortUrl)
                     }
                     className="bg-green-600 text-white px-4 py-2 rounded-r hover:bg-green-700"
                   >

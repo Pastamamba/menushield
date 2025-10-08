@@ -964,6 +964,148 @@ app.put("/api/admin/categories/:id", requireAuth, async (req, res) => {
   }
 });
 
+// ============== RESTAURANT SLUG ROUTING ENDPOINTS ==============
+
+// GET /api/restaurants/slug/:slug - Get restaurant by slug for new URL structure
+app.get("/api/restaurants/slug/:slug", async (req, res) => {
+  try {
+    const { slug } = req.params;
+
+    const restaurant = await prisma.restaurant.findUnique({
+      where: { slug },
+      include: {
+        dishes: {
+          where: { isActive: true },
+          orderBy: { displayOrder: 'asc' },
+        },
+        users: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            role: true,
+            isActive: true,
+          },
+        },
+      },
+    });
+
+    if (!restaurant) {
+      return res.status(404).json({ error: "Restaurant not found" });
+    }
+
+    // Transform for frontend compatibility
+    const transformedRestaurant = {
+      ...restaurant,
+      default_language: restaurant.defaultLanguage,
+      supported_languages: JSON.parse(restaurant.supportedLanguages || "[]"),
+      show_prices: restaurant.showPrices,
+      subscription_tier: restaurant.subscriptionTier,
+      is_active: restaurant.isActive,
+      created_at: restaurant.createdAt,
+      updated_at: restaurant.updatedAt,
+    };
+
+    res.json(transformedRestaurant);
+  } catch (error) {
+    console.error("Error fetching restaurant by slug:", error);
+    res.status(500).json({ error: "Failed to fetch restaurant" });
+  }
+});
+
+// GET /api/restaurants/my-restaurants - Get restaurants for current user (for restaurant switcher)
+app.get("/api/restaurants/my-restaurants", requireAuth, async (req, res) => {
+  try {
+    const user = req.user;
+
+    // Get restaurants based on user role
+    let restaurants = [];
+    
+    if (user.role === 'SUPERADMIN') {
+      // Superadmin can see all restaurants
+      restaurants = await prisma.restaurant.findMany({
+        where: { isActive: true },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          subscriptionTier: true,
+          isActive: true,
+        },
+        orderBy: { name: 'asc' },
+      });
+    } else {
+      // Regular users only see their restaurant
+      restaurants = await prisma.restaurant.findMany({
+        where: { 
+          id: user.restaurantId,
+          isActive: true,
+        },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          subscriptionTier: true,
+          isActive: true,
+        },
+      });
+    }
+
+    res.json(restaurants);
+  } catch (error) {
+    console.error("Error fetching user restaurants:", error);
+    res.status(500).json({ error: "Failed to fetch restaurants" });
+  }
+});
+
+// GET /api/menu/by-slug/:slug - Get menu by restaurant slug (for new URL structure)
+app.get("/api/menu/by-slug/:slug", async (req, res) => {
+  try {
+    const { slug } = req.params;
+
+    // First find the restaurant by slug
+    const restaurant = await prisma.restaurant.findUnique({
+      where: { slug },
+      select: { id: true },
+    });
+
+    if (!restaurant) {
+      return res.status(404).json({ error: "Restaurant not found" });
+    }
+
+    // Get dishes for this restaurant
+    const dishes = await prisma.dish.findMany({
+      where: {
+        restaurantId: restaurant.id,
+        isActive: true,
+      },
+      orderBy: { displayOrder: 'asc' },
+    });
+
+    // Transform dishes for frontend compatibility
+    const transformedDishes = dishes.map(dish => ({
+      ...dish,
+      allergen_tags: JSON.parse(dish.allergenTags || "[]"),
+      modification_note: dish.modificationNote,
+      is_modifiable: dish.isModifiable,
+      is_active: dish.isActive,
+      is_featured: dish.isFeatured,
+      display_order: dish.displayOrder,
+      image_url: dish.imageUrl,
+      restaurant_id: dish.restaurantId,
+      category_id: dish.categoryId,
+      created_at: dish.createdAt,
+      updated_at: dish.updatedAt,
+    }));
+
+    res.json(transformedDishes);
+  } catch (error) {
+    console.error("Error fetching menu by slug:", error);
+    res.status(500).json({ error: "Failed to fetch menu" });
+  }
+});
+
 // DELETE /api/admin/categories/:id - Delete category
 app.delete("/api/admin/categories/:id", requireAuth, async (req, res) => {
   try {

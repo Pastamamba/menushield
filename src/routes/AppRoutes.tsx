@@ -12,13 +12,39 @@ export default function AppRoutes() {
   return (
     <ErrorBoundary>
       <Routes>
-        {/* Public routes */}
+        {/* Public restaurant menu routes - NEW URL STRUCTURE */}
+        <Route path="/r/:restaurantSlug" element={<GuestMenu />} />
+        <Route path="/r/:restaurantSlug/menu" element={<GuestMenu />} />
+        <Route path="/restaurant/:restaurantSlug" element={<GuestMenu />} />
+        <Route path="/restaurant/:restaurantSlug/menu" element={<GuestMenu />} />
+        
+        {/* Legacy routes - redirect to new structure */}
+        <Route path="/menu" element={<Navigate to="/" replace />} />
+        <Route path="/menu/:restaurantId" element={<Navigate to="/" replace />} />
+        
+        {/* Authentication routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
-        <Route path="/menu" element={<GuestMenu />} />
-        <Route path="/menu/:restaurantId" element={<GuestMenu />} />
         
-        {/* Protected admin routes */}
+        {/* Protected admin routes - restaurant-specific */}
+        <Route 
+          path="/r/:restaurantSlug/admin" 
+          element={
+            <RouteGuard requireAuth adminOnly>
+              <AdminMenu />
+            </RouteGuard>
+          } 
+        />
+        <Route 
+          path="/r/:restaurantSlug/admin/:section" 
+          element={
+            <RouteGuard requireAuth adminOnly>
+              <AdminMenu />
+            </RouteGuard>
+          } 
+        />
+        
+        {/* Legacy admin routes - redirect to restaurant-specific */}
         <Route 
           path="/admin" 
           element={
@@ -35,11 +61,10 @@ export default function AppRoutes() {
             </RouteGuard>
           } 
         />
-  {/* IngredientManager route removed for restaurants. Only available for superadmin if needed. */}
         
-        {/* Default redirect */}
-        <Route path="/" element={<Navigate to="/menu" replace />} />
-        <Route path="*" element={<Navigate to="/menu" replace />} />
+        {/* Default redirect to demo restaurant or restaurant selection */}
+        <Route path="/" element={<Navigate to="/r/demo-restaurant" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </ErrorBoundary>
   );

@@ -1,6 +1,8 @@
 // src/admin/AdminMenu.tsx
 import { useState, useEffect } from "react";
 import { useAuth } from "../auth/AuthContext";
+import { useRestaurant } from "../contexts/RestaurantContext";
+import RestaurantSwitcher from "../components/RestaurantSwitcher";
 import DishManager from "./DishManager";
 import QRCodeManager from "./QRCodeManager";
 import CacheManager from "./CacheManager";
@@ -86,6 +88,11 @@ export default function AdminMenu() {
         <div className="hidden lg:block p-6 border-b">
           <h1 className="text-xl font-bold text-gray-800">MenuShield</h1>
           <p className="text-sm text-gray-500">Admin Panel</p>
+        </div>
+
+        {/* Restaurant Switcher */}
+        <div className="p-4 border-b bg-gray-50">
+          <RestaurantSwitcher />
         </div>
 
         {/* Mobile Header */}

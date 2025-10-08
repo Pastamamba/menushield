@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useMenu } from "../utils/dishApi";
-import { useRestaurant } from "../utils/restaurantApi";
+import { useRestaurant } from "../contexts/RestaurantContext";
 import AllergenFilter from "../components/AllergenFilter";
 import DishCard from "./DishCard";
 import { analyzeDishSafety } from "../utils/dishAnalyzer";
@@ -8,7 +8,7 @@ import type { Dish } from "../types";
 
 export default function GuestMenu() {
   const { data: dishes = [], isLoading, error } = useMenu();
-  const { data: restaurant } = useRestaurant();
+  const { restaurant, restaurantSlug, isLoading: restaurantLoading } = useRestaurant();
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showMobileFilter, setShowMobileFilter] = useState(false);
