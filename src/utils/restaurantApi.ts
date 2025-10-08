@@ -6,6 +6,7 @@ interface Restaurant {
   description?: string;
   contact?: string;
   showPrices: boolean;
+  currency: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -15,6 +16,7 @@ interface UpdateRestaurantRequest {
   description?: string;
   contact?: string;
   showPrices?: boolean;
+  currency?: string;
 }
 
 const API_BASE = import.meta.env.VITE_API_URL || '';

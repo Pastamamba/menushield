@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useAdminDishes, useCreateDish, useUpdateDish, useDeleteDish } from "../utils/dishApi";
 import { useAdminIngredients } from "../utils/ingredientApi";
+import { useRestaurant } from "../utils/restaurantApi";
 import { calculateAllergensFromIngredients, getAllergenChips } from "../utils/allergenCalculator";
+import { formatPrice, getCurrencySymbol } from "../utils/currency";
 import type { Dish, CreateDishRequest } from "../types";
 
 export default function DishManager() {
@@ -40,6 +42,7 @@ export default function DishManager() {
   
   const { data: dishes = [], isLoading, error } = useAdminDishes();
   const { data: availableIngredients = [] } = useAdminIngredients();
+  const { data: restaurant } = useRestaurant();
   const [editingDish, setEditingDish] = useState<Dish | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -208,7 +211,7 @@ export default function DishManager() {
                   )}
                   {dish.price && (
                     <span className="text-lg font-semibold text-green-600">
-                      ${dish.price.toFixed(2)}
+                      {formatPrice(dish.price, restaurant?.currency || 'EUR')}
                     </span>
                   )}
                 </div>
@@ -338,6 +341,7 @@ export default function DishManager() {
           onSubmit={handleCreateDish}
           onCancel={() => setShowCreateForm(false)}
           availableIngredients={availableIngredients}
+          restaurant={restaurant}
         />
       )}
 
@@ -355,6 +359,7 @@ export default function DishManager() {
               onSubmit={(data) => handleUpdateDish(editingDish.id, data)}
               onCancel={() => setEditingDish(null)}
               availableIngredients={availableIngredients}
+              restaurant={restaurant}
             />
           </div>
         </div>
@@ -364,10 +369,11 @@ export default function DishManager() {
 }
 
 // Two-page centered modal for creating dishes
-function CreateDishModal({ onSubmit, onCancel, availableIngredients }: { 
+function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant }: { 
   onSubmit: (data: CreateDishRequest) => void; 
   onCancel: () => void;
   availableIngredients: any[];
+  restaurant?: any;
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   
@@ -600,7 +606,9 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients }: {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Price ($)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Price ({getCurrencySymbol(restaurant?.currency || 'EUR')})
+                    </label>
                     <input 
                       name="price" 
                       type="number" 
@@ -790,11 +798,12 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients }: {
   );
 }
 
-function EditDishForm({ dish, onSubmit, onCancel, availableIngredients }: { 
+function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaurant }: { 
   dish: Dish; 
   onSubmit: (data: Partial<CreateDishRequest>) => void; 
   onCancel: () => void;
   availableIngredients: any[];
+  restaurant?: any;
 }) {
   const [form, setForm] = useState<Partial<CreateDishRequest>>({
     name: dish.name,
@@ -893,7 +902,9 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients }: {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Price ($)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Price ({getCurrencySymbol(restaurant?.currency || 'EUR')})
+          </label>
           <input 
             name="price" 
             type="number" 

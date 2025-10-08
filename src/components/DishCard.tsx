@@ -1,11 +1,13 @@
 import type { Dish, DishSafetyStatus } from "../types";
 import { getAllergenChips } from "../utils/allergenCalculator";
+import { formatPrice } from "../utils/currency";
 
 interface DishCardProps {
   dish: Dish;
   safetyStatus: DishSafetyStatus;
   isOffline?: boolean;
   showPrices?: boolean;
+  currency?: string;
 }
 
 export default function DishCard({
@@ -13,6 +15,7 @@ export default function DishCard({
   safetyStatus,
   isOffline,
   showPrices = true,
+  currency = 'EUR',
 }: DishCardProps) {
   const getStatusIcon = () => {
     switch (safetyStatus.status) {
@@ -63,7 +66,7 @@ export default function DishCard({
           {/* Price */}
           {showPrices && dish.price && (
             <div className="text-base font-medium text-gray-700 mt-1">
-              ${dish.price.toFixed(2)}
+              {formatPrice(dish.price, currency)}
             </div>
           )}
         </div>

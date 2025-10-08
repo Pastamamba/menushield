@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRestaurant, useUpdateRestaurant } from '../utils/restaurantApi';
+import { getCurrencyOptions } from '../utils/currency';
 
 export default function RestaurantSettings() {
   const { data: restaurant, isLoading } = useRestaurant();
@@ -10,6 +11,7 @@ export default function RestaurantSettings() {
     description: '',
     contact: '',
     showPrices: true,
+    currency: 'EUR',
   });
 
   // Update form when restaurant data loads
@@ -20,6 +22,7 @@ export default function RestaurantSettings() {
         description: restaurant.description || '',
         contact: restaurant.contact || '',
         showPrices: restaurant.showPrices !== undefined ? restaurant.showPrices : true,
+        currency: restaurant.currency || 'EUR',
       });
     }
   }, [restaurant]);
@@ -35,7 +38,7 @@ export default function RestaurantSettings() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     setForm(prev => ({
       ...prev,
@@ -128,7 +131,30 @@ export default function RestaurantSettings() {
             Menu Display Settings
           </h3>
           
-          <div className="space-y-4">
+          <div className="space-y-6">
+            {/* Currency Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Currency
+              </label>
+              <select
+                name="currency"
+                value={form.currency}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white"
+              >
+                {getCurrencyOptions().map((currency) => (
+                  <option key={currency.value} value={currency.value}>
+                    {currency.label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-sm text-gray-500 mt-1">
+                This currency will be used for all dish prices on your menu
+              </p>
+            </div>
+
+            {/* Show Prices Toggle */}
             <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center h-5">
                 <input

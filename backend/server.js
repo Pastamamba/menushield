@@ -395,6 +395,7 @@ app.get("/api/restaurant", async (req, res) => {
         name: "MenuShield Restaurant",
         description: "Welcome to our restaurant",
         showPrices: true,
+        currency: "EUR",
       }
     );
   } catch (error) {
@@ -406,7 +407,7 @@ app.get("/api/restaurant", async (req, res) => {
 // Admin: update restaurant settings
 app.put("/api/admin/restaurant", requireAuth, async (req, res) => {
   try {
-    const { name, description, contact, showPrices } = req.body;
+    const { name, description, contact, showPrices, currency } = req.body;
     
     // Find existing restaurant or create new one
     let restaurant = await prisma.restaurant.findFirst();
@@ -419,6 +420,7 @@ app.put("/api/admin/restaurant", requireAuth, async (req, res) => {
           description: description !== undefined ? description : restaurant.description,
           contact: contact !== undefined ? contact : restaurant.contact,
           showPrices: showPrices !== undefined ? showPrices : restaurant.showPrices,
+          currency: currency || restaurant.currency,
         }
       });
     } else {
@@ -428,6 +430,7 @@ app.put("/api/admin/restaurant", requireAuth, async (req, res) => {
           description: description || "Welcome to our restaurant",
           contact: contact || null,
           showPrices: showPrices !== undefined ? showPrices : true,
+          currency: currency || "EUR",
         }
       });
     }

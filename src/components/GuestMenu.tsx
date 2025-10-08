@@ -272,6 +272,7 @@ export default function GuestMenu() {
                       allergens: [] 
                     }}
                     showPrices={restaurant?.showPrices !== false}
+                    currency={restaurant?.currency || 'EUR'}
                   />
                 ))}
               </div>
@@ -292,6 +293,7 @@ export default function GuestMenu() {
                         dish={dish} 
                         safetyStatus={safety}
                         showPrices={restaurant?.showPrices !== false}
+                        currency={restaurant?.currency || 'EUR'}
                       />
                     ))}
                   </div>
@@ -316,6 +318,7 @@ export default function GuestMenu() {
                         dish={dish} 
                         safetyStatus={safety}
                         showPrices={restaurant?.showPrices !== false}
+                        currency={restaurant?.currency || 'EUR'}
                       />
                     ))}
                     {/* Then show unsafe dishes */}
@@ -325,6 +328,7 @@ export default function GuestMenu() {
                         dish={dish} 
                         safetyStatus={safety}
                         showPrices={restaurant?.showPrices !== false}
+                        currency={restaurant?.currency || 'EUR'}
                       />
                     ))}
                   </div>
