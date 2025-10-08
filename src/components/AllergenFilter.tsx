@@ -24,7 +24,6 @@ export default function AllergenFilter({
   onSearchChange,
   isMobile = false,
 }: AllergenFilterProps) {
-  const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   // Use new props if available, fallback to old props
@@ -84,7 +83,6 @@ export default function AllergenFilter({
                 `}
               >
                 <div className="flex items-center space-x-3">
-                  <span className="text-2xl">{allergen.icon}</span>
                   <div className="flex-1 min-w-0">
                     <div className={`font-medium text-sm ${selected ? 'text-white' : 'text-gray-900'}`}>
                       {allergen.name}
@@ -132,7 +130,6 @@ export default function AllergenFilter({
                     key={allergenId}
                     className="inline-flex items-center gap-1 bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium"
                   >
-                    <span>{allergen.icon}</span>
                     <span>{allergen.name}</span>
                     <button
                       onClick={() => toggleAllergen(allergenId)}
@@ -151,15 +148,39 @@ export default function AllergenFilter({
   }
 
   return (
-    <div className="space-y-3">
-      {/* Compact Common Allergens Grid */}
+    <div className="space-y-4">
+      {/* Always Visible Search Input */}
+      <div className="relative">
+        <input
+          type="text"
+          placeholder="Search allergens..."
+          value={currentSearchTerm}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50"
+        />
+        <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        {currentSearchTerm && (
+          <button
+            onClick={() => handleSearchChange("")}
+            className="absolute right-10 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 hover:text-gray-600"
+          >
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+      </div>
+
+      {/* Compact Allergens Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {displayAllergens.map((allergen) => (
           <button
             key={allergen.id}
             onClick={() => toggleAllergen(allergen.id)}
             className={`
-              p-2 rounded-lg border-2 transition-all duration-200 text-left
+              p-3 rounded-lg border-2 transition-all duration-200 text-left
               ${
                 isSelected(allergen.id)
                   ? "border-red-500 bg-red-50 text-red-800"
@@ -168,7 +189,6 @@ export default function AllergenFilter({
             `}
           >
             <div className="flex items-center gap-2">
-              <span className="text-sm">{allergen.icon}</span>
               <span className="font-medium text-sm">{allergen.name}</span>
               {isSelected(allergen.id) && (
                 <span className="text-xs text-red-600">✓</span>
@@ -177,45 +197,6 @@ export default function AllergenFilter({
           </button>
         ))}
       </div>
-
-      {/* Compact Search Toggle and Search Box */}
-      {!showSearch ? (
-        <div className="text-center">
-          <button
-            onClick={() => setShowSearch(true)}
-            className="text-xs text-blue-600 hover:text-blue-800 underline"
-          >
-            🔍 Search more
-          </button>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              placeholder="Search allergens..."
-              value={currentSearchTerm}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-            />
-            <button
-              onClick={() => {
-                setShowSearch(false);
-                handleSearchChange("");
-              }}
-              className="px-2 py-1 text-gray-600 hover:text-gray-800 text-sm"
-            >
-              ✕
-            </button>
-          </div>
-
-          {searchQuery && searchResults.length === 0 && (
-            <p className="text-xs text-gray-500 text-center">
-              No allergens found
-            </p>
-          )}
-        </div>
-      )}
 
       {/* Selected Allergens Summary */}
       {currentAllergens.length > 0 && (
@@ -246,7 +227,6 @@ export default function AllergenFilter({
                   key={allergenId}
                   className="inline-flex items-center gap-1 bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs"
                 >
-                  <span>{allergen.icon}</span>
                   <span>{allergen.name}</span>
                   <button
                     onClick={() => toggleAllergen(allergenId)}
