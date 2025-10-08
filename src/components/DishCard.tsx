@@ -89,30 +89,34 @@ export default function DishCard({
             {userAvoidedAllergens.map((allergen) => (
               <div key={allergen.name} className="flex items-center gap-2 text-sm">
                 <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${allergen.color}`}>
-                  <span>{allergen.icon}</span>
                   <span className="capitalize">{allergen.name}</span>
                 </span>
-                {allergen.component && (
-                  <span className="text-xs text-gray-500">
-                    from: {allergen.component}
-                    {allergen.canModify && (
-                      <span className="text-green-600 ml-1">(removable)</span>
-                    )}
-                  </span>
-                )}
+                <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-1 rounded-md">
+                  in {allergen.component || 'Base'}
+                  {allergen.canModify && (
+                    <span className="text-green-600 ml-1 font-medium">(removable)</span>
+                  )}
+                  {!allergen.canModify && allergen.component && (
+                    <span className="text-red-600 ml-1 font-medium">(required)</span>
+                  )}
+                </span>
               </div>
             ))}
           </div>
           
           {/* Action suggestion */}
-          {safetyStatus.status === "modifiable" && (
-            <div className="mt-2 text-xs text-orange-600 font-medium">
-              💡 Ask your server about removing allergen ingredients
+          {safetyStatus.status === "modifiable" && safetyStatus.modificationSuggestion && (
+            <div className="mt-3 p-2 bg-orange-50 border border-orange-200 rounded-md">
+              <div className="text-xs text-orange-700 font-medium">
+                💡 {safetyStatus.modificationSuggestion}
+              </div>
             </div>
           )}
           {safetyStatus.status === "unsafe" && (
-            <div className="mt-2 text-xs text-red-600 font-medium">
-              ⚠️ Not recommended - contains multiple allergens
+            <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded-md">
+              <div className="text-xs text-red-700 font-medium">
+                ⚠️ Contains allergens in required components - cannot be safely modified
+              </div>
             </div>
           )}
         </div>
