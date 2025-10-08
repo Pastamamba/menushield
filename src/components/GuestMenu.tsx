@@ -226,30 +226,6 @@ export default function GuestMenu() {
           </div>
         </div>
 
-        {/* Summary */}
-        <div className="mb-6 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">Menu Overview</h3>
-          {selectedAllergens.length === 0 ? (
-            <div className="text-center">
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-gray-600">{filteredDishes.length}</div>
-                <div className="text-sm text-gray-600 font-medium">All dishes</div>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="p-3 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">{categorizedDishes.safe.length}</div>
-                <div className="text-sm text-gray-600 font-medium">Safe dishes</div>
-              </div>
-              <div className="p-3 bg-orange-50 rounded-lg">
-                <div className="text-2xl font-bold text-orange-600">{categorizedDishes.modifiable.length + categorizedDishes.unsafe.length}</div>
-                <div className="text-sm text-gray-600 font-medium">Contains allergens</div>
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* Dishes by Safety Level */}
         <div className="space-y-8">
           {selectedAllergens.length === 0 ? (
