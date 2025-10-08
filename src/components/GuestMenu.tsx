@@ -76,8 +76,11 @@ export default function GuestMenu() {
 
   // Filter dishes based on search term
   const filteredDishes = dishes.filter(dish =>
-    dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    dish.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    dish.is_active !== false &&
+    (
+      dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      dish.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
   );
 
   // Categorize dishes by safety level
