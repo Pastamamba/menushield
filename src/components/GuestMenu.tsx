@@ -233,7 +233,7 @@ export default function GuestMenu() {
             <section>
               <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
                 <span className="w-3 h-3 bg-gray-500 rounded-full mr-3"></span>
-                All dishes
+                All dishes ({filteredDishes.length})
               </h2>
               <p className="text-gray-600 mb-4">
                 Select allergens to see safe options
@@ -260,7 +260,7 @@ export default function GuestMenu() {
                 <section>
                   <h2 className="text-2xl font-bold text-green-700 mb-4 flex items-center">
                     <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
-                    Safe dishes
+                    Safe dishes ({categorizedDishes.safe.length})
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {categorizedDishes.safe.map(({ dish, safety }) => (
@@ -281,7 +281,7 @@ export default function GuestMenu() {
                 <section>
                   <h2 className="text-2xl font-bold text-orange-700 mb-4 flex items-center">
                     <span className="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
-                    Contains allergens
+                    Contains allergens ({categorizedDishes.modifiable.length + categorizedDishes.unsafe.length})
                   </h2>
                   <p className="text-orange-600 mb-4 p-3 bg-orange-50 rounded-lg border border-orange-200">
                     ⚠️ These dishes contain your selected allergens. Ask the server if allergens can be modified or removed.
