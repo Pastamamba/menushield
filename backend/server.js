@@ -409,31 +409,17 @@ app.put("/api/admin/restaurant", requireAuth, async (req, res) => {
   try {
     const { name, description, contact, showPrices, currency } = req.body;
     
-    // Find existing restaurant or create new one
-    let restaurant = await prisma.restaurant.findFirst();
-    
-    if (restaurant) {
-      restaurant = await prisma.restaurant.update({
-        where: { id: restaurant.id },
-        data: {
-          name: name || restaurant.name,
-          description: description !== undefined ? description : restaurant.description,
-          contact: contact !== undefined ? contact : restaurant.contact,
-          showPrices: showPrices !== undefined ? showPrices : restaurant.showPrices,
-          currency: currency || restaurant.currency,
-        }
-      });
-    } else {
-      restaurant = await prisma.restaurant.create({
-        data: {
-          name: name || "MenuShield Restaurant",
-          description: description || "Welcome to our restaurant",
-          contact: contact || null,
-          showPrices: showPrices !== undefined ? showPrices : true,
-          currency: currency || "EUR",
-        }
-      });
-    }
+    // Update the user's restaurant
+    const restaurant = await prisma.restaurant.update({
+      where: { id: req.user.restaurantId },
+      data: {
+        ...(name && { name }),
+        ...(description !== undefined && { description }),
+        ...(contact !== undefined && { contact }),
+        ...(showPrices !== undefined && { showPrices }),
+        ...(currency && { currency }),
+      }
+    });
     
     res.json(restaurant);
   } catch (error) {
@@ -475,17 +461,32 @@ app.post("/api/login", authLimiter, [validateEmail, validatePassword], handleVal
 
     // Check demo credentials
     if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-      const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: "1h" });
+      // Find the demo restaurant for demo login
+      const demoRestaurant = await prisma.restaurant.findUnique({
+        where: { slug: 'demo-restaurant' }
+      });
+      
+      const token = jwt.sign({ 
+        email,
+        restaurantId: demoRestaurant?.id || null,
+        role: 'OWNER'
+      }, JWT_SECRET, { expiresIn: "1h" });
       return res.json({ token });
     }
 
     // Check database users
     const user = await prisma.user.findUnique({
       where: { email },
+      include: { restaurant: true }, // Include restaurant data
     });
 
     if (user && (await bcrypt.compare(password, user.passwordHash))) {
-      const token = jwt.sign({ email: user.email }, JWT_SECRET, {
+      const token = jwt.sign({ 
+        email: user.email,
+        userId: user.id,
+        restaurantId: user.restaurantId,
+        role: user.role 
+      }, JWT_SECRET, {
         expiresIn: "1h",
       });
       return res.json({ token });
@@ -546,7 +547,8 @@ function requireAuth(req, res, next) {
   }
   const token = auth.slice(7);
   try {
-    jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded; // Store user data in request
     next();
   } catch {
     res.status(401).json({ error: "Invalid or expired token" });
@@ -556,7 +558,15 @@ function requireAuth(req, res, next) {
 // Admin: list all dishes
 app.get("/api/admin/menu", requireAuth, async (req, res) => {
   try {
-    const dishes = await prisma.dish.findMany({});
+    const dishes = await prisma.dish.findMany({
+      where: {
+        restaurantId: req.user.restaurantId, // Only dishes for this restaurant
+      },
+      include: {
+        category: true,
+      },
+      orderBy: { displayOrder: 'asc' },
+    });
 
     const formattedDishes = dishes.map((dish) => {
       try {
@@ -745,10 +755,11 @@ app.delete("/api/admin/menu/:id", requireAuth, async (req, res) => {
 app.get("/api/admin/ingredients", requireAuth, async (req, res) => {
   try {
     const ingredients = await prisma.ingredient.findMany({
+      where: {
+        restaurantId: req.user.restaurantId, // Only ingredients for this restaurant
+      },
       include: {
         category: true,
-        parent: true,
-        children: true,
       },
       orderBy: [{ name: "asc" }],
     });
@@ -758,7 +769,6 @@ app.get("/api/admin/ingredients", requireAuth, async (req, res) => {
       id: ingredient.id,
       name: ingredient.name,
       category: ingredient.category?.name?.toLowerCase() || "other",
-      parentId: ingredient.parentId,
       allergen_tags: JSON.parse(ingredient.allergenTags || "[]"),
       createdAt: ingredient.createdAt,
       updatedAt: ingredient.updatedAt,
@@ -1055,6 +1065,30 @@ app.get("/api/restaurants/my-restaurants", requireAuth, async (req, res) => {
     res.json(restaurants);
   } catch (error) {
     console.error("Error fetching user restaurants:", error);
+    res.status(500).json({ error: "Failed to fetch restaurants" });
+  }
+});
+
+// Alias for /api/my-restaurants
+app.get("/api/my-restaurants", requireAuth, async (req, res) => {
+  try {
+    const user = req.user;
+    
+    // Just return the user's restaurant
+    const restaurant = await prisma.restaurant.findUnique({
+      where: { id: user.restaurantId },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        subscriptionTier: true,
+        isActive: true,
+      },
+    });
+
+    res.json([restaurant]); // Return as array for frontend compatibility
+  } catch (error) {
+    console.error("Error fetching my restaurants:", error);
     res.status(500).json({ error: "Failed to fetch restaurants" });
   }
 });
