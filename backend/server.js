@@ -86,6 +86,9 @@ app.use(helmet({
   },
 }));
 
+// Trust proxy for proper rate limiting in production (Netlify, Heroku, etc.)
+app.set('trust proxy', 1);
+
 app.use(compression());
 app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
@@ -718,7 +721,11 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
       where: {
         id,
         restaurant: {
-          userId: userId
+          users: {
+            some: {
+              id: userId
+            }
+          }
         }
       }
     });
@@ -728,19 +735,19 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
       return res.status(404).json({ error: "Dish not found or unauthorized" });
     }
 
-    // Transform data for Prisma
-    const prismaData = {
-      name: updateData.name,
-      description: updateData.description,
-      price: updateData.price,
-      category: updateData.category,
-      ingredients: JSON.stringify(updateData.ingredients || []),
-      allergenTags: JSON.stringify(updateData.allergen_tags || []),
-      modificationNote: updateData.modification_note,
-      isModifiable: updateData.is_modifiable,
-      isActive: updateData.is_active,
-      components: JSON.stringify(updateData.components || []),
-    };
+    // Transform data for Prisma - only include fields that exist in schema
+    const prismaData = {};
+    
+    if (updateData.name !== undefined) prismaData.name = updateData.name;
+    if (updateData.description !== undefined) prismaData.description = updateData.description;
+    if (updateData.price !== undefined) prismaData.price = updateData.price;
+    if (updateData.allergen_tags !== undefined) prismaData.allergenTags = JSON.stringify(updateData.allergen_tags || []);
+    if (updateData.modification_note !== undefined) prismaData.modificationNote = updateData.modification_note;
+    if (updateData.is_modifiable !== undefined) prismaData.isModifiable = updateData.is_modifiable;
+    if (updateData.is_active !== undefined) prismaData.isActive = updateData.is_active;
+    if (updateData.is_featured !== undefined) prismaData.isFeatured = updateData.is_featured;
+    if (updateData.display_order !== undefined) prismaData.displayOrder = updateData.display_order;
+    if (updateData.image_url !== undefined) prismaData.imageUrl = updateData.image_url;
 
     console.log('PUT /api/admin/menu/:id - Prisma update data:', JSON.stringify(prismaData, null, 2));
 
@@ -757,12 +764,15 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
       description: updatedDish.description,
       price: updatedDish.price,
       category: updatedDish.category,
-      ingredients: JSON.parse(updatedDish.ingredients || "[]"),
-      allergen_tags: JSON.parse(updatedDish.allergenTags),
+      ingredients: [], // Legacy compatibility - ingredients are handled separately
+      allergen_tags: JSON.parse(updatedDish.allergenTags || "[]"),
       modification_note: updatedDish.modificationNote,
       is_modifiable: updatedDish.isModifiable,
       is_active: updatedDish.isActive,
-      components: JSON.parse(updatedDish.components || "[]"),
+      is_featured: updatedDish.isFeatured,
+      display_order: updatedDish.displayOrder,
+      image_url: updatedDish.imageUrl,
+      components: [], // Legacy compatibility
       created_at: updatedDish.createdAt,
       updated_at: updatedDish.updatedAt,
     });
