@@ -891,6 +891,9 @@ app.delete("/api/admin/ingredients/:id", requireAuth, async (req, res) => {
 app.get("/api/admin/categories", requireAuth, async (req, res) => {
   try {
     const categories = await prisma.category.findMany({
+      where: {
+        restaurantId: req.user.restaurantId, // Only categories for this restaurant
+      },
       include: {
         _count: {
           select: { ingredients: true },
@@ -941,6 +944,7 @@ app.post("/api/admin/categories", requireAuth, async (req, res) => {
         description: description || "",
         color: color || "#3B82F6",
         icon: icon || "🥄",
+        restaurantId: req.user.restaurantId, // Associate with restaurant
       },
     });
 
@@ -956,6 +960,18 @@ app.put("/api/admin/categories/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { name, description, color, icon } = req.body;
+
+    // First verify the category belongs to the user's restaurant
+    const existingCategory = await prisma.category.findFirst({
+      where: { 
+        id,
+        restaurantId: req.user.restaurantId,
+      },
+    });
+
+    if (!existingCategory) {
+      return res.status(404).json({ error: "Category not found" });
+    }
 
     const category = await prisma.category.update({
       where: { id },
@@ -1145,9 +1161,24 @@ app.delete("/api/admin/categories/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
 
+    // First verify the category belongs to the user's restaurant
+    const existingCategory = await prisma.category.findFirst({
+      where: { 
+        id,
+        restaurantId: req.user.restaurantId,
+      },
+    });
+
+    if (!existingCategory) {
+      return res.status(404).json({ error: "Category not found" });
+    }
+
     // Check if category has any ingredients
     const ingredientsCount = await prisma.ingredient.count({
-      where: { categoryId: id },
+      where: { 
+        categoryId: id,
+        restaurantId: req.user.restaurantId,
+      },
     });
 
     if (ingredientsCount > 0) {

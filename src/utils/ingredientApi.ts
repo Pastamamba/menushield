@@ -79,13 +79,13 @@ async function fetchCategories(token: string): Promise<IngredientCategory[]> {
   return response.json();
 }
 
-async function createCategory(data: CreateCategoryRequest): Promise<IngredientCategory> {
+async function createCategory(data: CreateCategoryRequest, token: string): Promise<IngredientCategory> {
   const response = await fetch(getApiUrl('/api/admin/categories'), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
     },
-    credentials: 'include',
     body: JSON.stringify(data),
   });
   
@@ -96,13 +96,13 @@ async function createCategory(data: CreateCategoryRequest): Promise<IngredientCa
   return response.json();
 }
 
-async function updateCategory(id: string, data: Partial<UpdateCategoryRequest>): Promise<IngredientCategory> {
+async function updateCategory(id: string, data: Partial<UpdateCategoryRequest>, token: string): Promise<IngredientCategory> {
   const response = await fetch(getApiUrl(`/api/admin/categories/${id}`), {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
     },
-    credentials: 'include',
     body: JSON.stringify(data),
   });
   
@@ -113,10 +113,10 @@ async function updateCategory(id: string, data: Partial<UpdateCategoryRequest>):
   return response.json();
 }
 
-async function deleteCategory(id: string): Promise<void> {
+async function deleteCategory(id: string, token: string): Promise<void> {
   const response = await fetch(getApiUrl(`/api/admin/categories/${id}`), {
     method: 'DELETE',
-    credentials: 'include',
+    headers: { Authorization: `Bearer ${token}` },
   });
   
   if (!response.ok) {
@@ -201,9 +201,13 @@ export function useAdminCategories() {
 
 export function useCreateCategory() {
   const queryClient = useQueryClient();
+  const { token } = useAuth();
   
   return useMutation({
-    mutationFn: createCategory,
+    mutationFn: (data: CreateCategoryRequest) => {
+      if (!token) throw new Error('No authentication token');
+      return createCategory(data, token);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'categories'] });
     },
@@ -212,10 +216,13 @@ export function useCreateCategory() {
 
 export function useUpdateCategory() {
   const queryClient = useQueryClient();
+  const { token } = useAuth();
   
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<UpdateCategoryRequest> }) =>
-      updateCategory(id, data),
+    mutationFn: ({ id, data }: { id: string; data: Partial<UpdateCategoryRequest> }) => {
+      if (!token) throw new Error('No authentication token');
+      return updateCategory(id, data, token);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'categories'] });
     },
@@ -224,9 +231,13 @@ export function useUpdateCategory() {
 
 export function useDeleteCategory() {
   const queryClient = useQueryClient();
+  const { token } = useAuth();
   
   return useMutation({
-    mutationFn: deleteCategory,
+    mutationFn: (id: string) => {
+      if (!token) throw new Error('No authentication token');
+      return deleteCategory(id, token);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'categories'] });
     },
