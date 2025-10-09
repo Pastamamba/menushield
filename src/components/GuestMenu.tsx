@@ -3,7 +3,6 @@ import { useMenu } from "../utils/dishApi";
 import { useRestaurant } from "../contexts/RestaurantContext";
 import { analyzeDishSafety } from "../utils/dishAnalyzer";
 import { MenuItemShimmer } from "./LoadingShimmer";
-import { VirtualizedDishList } from "./VirtualizedDishList";
 import { useSwipeNavigation } from "../hooks/useEnhancedTouchGestures";
 import type { Dish } from "../types";
 
@@ -118,16 +117,6 @@ export default function GuestMenu() {
     modifiable: [] as Array<{ dish: Dish; safety: ReturnType<typeof analyzeDishSafety> }>,
     unsafe: [] as Array<{ dish: Dish; safety: ReturnType<typeof analyzeDishSafety> }>
   });
-
-  // Determine if we should use virtualized scrolling for better performance
-  // Temporarily disable virtualization due to react-window import issues  
-  const shouldUseVirtualized = false; // useVirtualizedScrolling(filteredDishes.length);
-  
-  // Create dish data for virtualized list (when no allergens selected)
-  const allDishesForVirtualized = filteredDishes.map(dish => ({
-    dish,
-    safety: { status: "safe" as const, allergens: [] }
-  }));
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -274,34 +263,23 @@ export default function GuestMenu() {
               <p className="text-gray-600 mb-4">
                 Select allergens to see safe options
               </p>
-              {shouldUseVirtualized ? (
-                <VirtualizedDishList
-                  dishes={allDishesForVirtualized}
-                  showPrices={restaurant?.showPrices !== false}
-                  currency={restaurant?.currency || 'EUR'}
-                  className="min-h-[400px]"
-                  onCardSelect={handleCardSelect}
-                  onCardLongPress={handleCardLongPress}
-                />
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredDishes.map((dish) => (
-                    <Suspense key={dish.id} fallback={<MenuItemShimmer />}>
-                      <DishCard 
-                        dish={dish} 
-                        safetyStatus={{ 
-                          status: "safe", 
-                          allergens: [] 
-                        }}
-                        showPrices={restaurant?.showPrices !== false}
-                        currency={restaurant?.currency || 'EUR'}
-                        onCardSelect={handleCardSelect}
-                        onCardLongPress={handleCardLongPress}
-                      />
-                    </Suspense>
-                  ))}
-                </div>
-              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredDishes.map((dish) => (
+                  <Suspense key={dish.id} fallback={<MenuItemShimmer />}>
+                    <DishCard 
+                      dish={dish} 
+                      safetyStatus={{ 
+                        status: "safe", 
+                        allergens: [] 
+                      }}
+                      showPrices={restaurant?.showPrices !== false}
+                      currency={restaurant?.currency || 'EUR'}
+                      onCardSelect={handleCardSelect}
+                      onCardLongPress={handleCardLongPress}
+                    />
+                  </Suspense>
+                ))}
+              </div>
             </section>
           ) : (
             <>
@@ -312,32 +290,20 @@ export default function GuestMenu() {
                     <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
                     Safe dishes ({categorizedDishes.safe.length})
                   </h2>
-                  {shouldUseVirtualized && categorizedDishes.safe.length > 15 ? (
-                    <VirtualizedDishList
-                      dishes={categorizedDishes.safe}
-                      showPrices={restaurant?.showPrices !== false}
-                      currency={restaurant?.currency || 'EUR'}
-                      height={400}
-                      className="mb-6"
-                      onCardSelect={handleCardSelect}
-                      onCardLongPress={handleCardLongPress}
-                    />
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {categorizedDishes.safe.map(({ dish, safety }) => (
-                        <Suspense key={dish.id} fallback={<MenuItemShimmer />}>
-                          <DishCard 
-                            dish={dish} 
-                            safetyStatus={safety}
-                            showPrices={restaurant?.showPrices !== false}
-                            currency={restaurant?.currency || 'EUR'}
-                            onCardSelect={handleCardSelect}
-                            onCardLongPress={handleCardLongPress}
-                          />
-                        </Suspense>
-                      ))}
-                    </div>
-                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {categorizedDishes.safe.map(({ dish, safety }) => (
+                      <Suspense key={dish.id} fallback={<MenuItemShimmer />}>
+                        <DishCard 
+                          dish={dish} 
+                          safetyStatus={safety}
+                          showPrices={restaurant?.showPrices !== false}
+                          currency={restaurant?.currency || 'EUR'}
+                          onCardSelect={handleCardSelect}
+                          onCardLongPress={handleCardLongPress}
+                        />
+                      </Suspense>
+                    ))}
+                  </div>
                 </section>
               )}
 
