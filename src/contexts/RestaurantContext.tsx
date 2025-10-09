@@ -27,6 +27,10 @@ export function RestaurantProvider({ children }: RestaurantProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Debug logging
+  console.log('RestaurantProvider - useParams result:', { restaurantSlug });
+  console.log('RestaurantProvider - current location:', window.location.pathname);
+
   const fetchRestaurantBySlug = async (slug: string): Promise<Restaurant | null> => {
     try {
       const response = await fetch(`/api/restaurants/slug/${slug}`);

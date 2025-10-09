@@ -296,9 +296,27 @@ app.get("/m/:restaurantId", (req, res) => {
 // Public: fetch menu (filtered for guest view)
 app.get("/api/menu", async (req, res) => {
   try {
-    const restaurantId = req.query.rid || req.query.r;
+    // Legacy endpoint - default to demo-restaurant if no restaurant specified
+    const restaurantSlug = req.query.r || req.query.restaurant || 'demo-restaurant';
 
-    const dishes = await prisma.dish.findMany({});
+    // Find restaurant by slug
+    const restaurant = await prisma.restaurant.findUnique({
+      where: { slug: restaurantSlug },
+      select: { id: true },
+    });
+
+    if (!restaurant) {
+      return res.status(404).json({ error: "Restaurant not found" });
+    }
+
+    // Get dishes only for this restaurant
+    const dishes = await prisma.dish.findMany({
+      where: {
+        restaurantId: restaurant.id,
+        isActive: true,
+      },
+      orderBy: { displayOrder: 'asc' },
+    });
 
     // Transform for guest view with EXTRA safety
     const guestMenu = dishes.map((dish) => {
