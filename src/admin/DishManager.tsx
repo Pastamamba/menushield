@@ -82,15 +82,23 @@ export default function DishManager() {
   const filteredDishes = dishes.filter(dish => {
     const matchesSearch = dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          dish.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || dish.category === selectedCategory;
+    
+    // Handle category as either string or object
+    const categoryName = (dish.category as any)?.name || dish.category || "Uncategorized";
+    const matchesCategory = selectedCategory === "all" || categoryName === selectedCategory;
+    
     const matchesStatus = statusFilter === "all" || 
                          (statusFilter === "active" && dish.is_active !== false) ||
                          (statusFilter === "inactive" && dish.is_active === false);
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
-  // Get unique categories for filter dropdown
-  const allCategories = ["all", ...Array.from(new Set(dishes.map(d => d.category || "Uncategorized")))];
+  // Get unique categories for filter dropdown - handle both string and object categories
+  const allCategories = ["all", ...Array.from(new Set(dishes.map(d => {
+    return (d.category as any)?.name || d.category || "Uncategorized";
+  })))];
+
+  console.log('Categories for dropdown:', allCategories); // Debug log
 
   const handleCreateDish = async (dishData: CreateDishRequest) => {
     try {
@@ -207,9 +215,9 @@ export default function DishManager() {
                       Inactive
                     </span>
                   )}
-                  {dish.category && (
+                  {((dish.category as any)?.name || dish.category) && (
                     <span className="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
-                      {dish.category}
+                      {(dish.category as any)?.name || dish.category}
                     </span>
                   )}
                   {dish.price && (
@@ -808,7 +816,7 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
     name: dish.name,
     description: dish.description,
     price: dish.price,
-    category: dish.category,
+    category: (dish.category as any)?.name || dish.category,
     ingredients: dish.ingredients,
     allergen_tags: dish.allergen_tags,
     is_modifiable: dish.is_modifiable,
