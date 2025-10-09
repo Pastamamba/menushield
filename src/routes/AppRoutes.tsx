@@ -6,6 +6,7 @@ import SignupPage from "../admin/SignupPage";
 import AdminMenu from "../admin/AdminMenu";
 import { RouteGuard } from "../components/RouteGuard";
 import { ErrorBoundary } from "../components/ErrorBoundary";
+import { RestaurantLayout } from "../components/RestaurantLayout";
 
 export default function AppRoutes() {
   
@@ -13,10 +14,26 @@ export default function AppRoutes() {
     <ErrorBoundary>
       <Routes>
         {/* Public restaurant menu routes - NEW URL STRUCTURE */}
-        <Route path="/r/:restaurantSlug" element={<GuestMenu />} />
-        <Route path="/r/:restaurantSlug/menu" element={<GuestMenu />} />
-        <Route path="/restaurant/:restaurantSlug" element={<GuestMenu />} />
-        <Route path="/restaurant/:restaurantSlug/menu" element={<GuestMenu />} />
+        <Route path="/r/:restaurantSlug" element={
+          <RestaurantLayout>
+            <GuestMenu />
+          </RestaurantLayout>
+        } />
+        <Route path="/r/:restaurantSlug/menu" element={
+          <RestaurantLayout>
+            <GuestMenu />
+          </RestaurantLayout>
+        } />
+        <Route path="/restaurant/:restaurantSlug" element={
+          <RestaurantLayout>
+            <GuestMenu />
+          </RestaurantLayout>
+        } />
+        <Route path="/restaurant/:restaurantSlug/menu" element={
+          <RestaurantLayout>
+            <GuestMenu />
+          </RestaurantLayout>
+        } />
         
         {/* Legacy routes - redirect to new structure */}
         <Route path="/menu" element={<Navigate to="/" replace />} />
@@ -30,17 +47,21 @@ export default function AppRoutes() {
         <Route 
           path="/r/:restaurantSlug/admin" 
           element={
-            <RouteGuard requireAuth adminOnly>
-              <AdminMenu />
-            </RouteGuard>
+            <RestaurantLayout>
+              <RouteGuard requireAuth adminOnly>
+                <AdminMenu />
+              </RouteGuard>
+            </RestaurantLayout>
           } 
         />
         <Route 
           path="/r/:restaurantSlug/admin/:section" 
           element={
-            <RouteGuard requireAuth adminOnly>
-              <AdminMenu />
-            </RouteGuard>
+            <RestaurantLayout>
+              <RouteGuard requireAuth adminOnly>
+                <AdminMenu />
+              </RouteGuard>
+            </RestaurantLayout>
           } 
         />
         

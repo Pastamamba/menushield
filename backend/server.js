@@ -705,6 +705,28 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
+    const userId = req.user.id;
+
+    console.log('PUT /api/admin/menu/:id - Update dish request:', {
+      dishId: id,
+      userId,
+      updateData: JSON.stringify(updateData, null, 2)
+    });
+
+    // Check if user owns this dish through restaurant association
+    const existingDish = await prisma.dish.findFirst({
+      where: {
+        id,
+        restaurant: {
+          userId: userId
+        }
+      }
+    });
+
+    if (!existingDish) {
+      console.log('PUT /api/admin/menu/:id - Dish not found or unauthorized:', { dishId: id, userId });
+      return res.status(404).json({ error: "Dish not found or unauthorized" });
+    }
 
     // Transform data for Prisma
     const prismaData = {
@@ -720,14 +742,14 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
       components: JSON.stringify(updateData.components || []),
     };
 
+    console.log('PUT /api/admin/menu/:id - Prisma update data:', JSON.stringify(prismaData, null, 2));
+
     const updatedDish = await prisma.dish.update({
       where: { id },
       data: prismaData,
     });
 
-    if (!updatedDish) {
-      return res.status(404).json({ error: "Dish not found" });
-    }
+    console.log('PUT /api/admin/menu/:id - Dish updated successfully:', updatedDish.id);
 
     res.json({
       id: updatedDish.id,
@@ -746,7 +768,8 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating dish:", error);
-    res.status(500).json({ error: "Failed to update dish" });
+    console.error("Error stack:", error.stack);
+    res.status(500).json({ error: "Failed to update dish", details: error.message });
   }
 });
 
