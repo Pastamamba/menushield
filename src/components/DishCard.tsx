@@ -123,10 +123,10 @@ export default function DishCard({
                 <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-3 py-2 min-h-[40px] rounded-lg flex items-center">
                   in {allergen.component || 'Base'}
                   {allergen.canModify && (
-                    <span className="text-green-600 ml-1 font-medium">(poistettavissa)</span>
+                    <span className="text-green-600 ml-1 font-medium">(removable)</span>
                   )}
                   {!allergen.canModify && allergen.component && (
-                    <span className="text-red-600 ml-1 font-medium">(pakollinen)</span>
+                    <span className="text-red-600 ml-1 font-medium">(required)</span>
                   )}
                 </span>
               </div>
@@ -144,7 +144,7 @@ export default function DishCard({
           {safetyStatus.status === "unsafe" && (
             <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
               <div className="text-sm text-red-700 font-medium">
-                ⚠️ Sisältää allergeeneja pakollisissa osissa - ei voida turvallisesti muokata
+                ⚠️ Contains allergens in required components - cannot be safely modified
               </div>
             </div>
           )}
@@ -155,7 +155,7 @@ export default function DishCard({
       {safetyStatus.status === "safe" && (
         <div className="border-t border-gray-100 pt-3">
           <div className="text-base text-green-600 font-medium py-2">
-            ✅ Turvallinen allergeeneillesi
+            ✅ Safe for your allergens
           </div>
         </div>
       )}

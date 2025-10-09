@@ -2,12 +2,12 @@
   "name": "menu-shield-backend",
   "type": "module",
   "scripts": {
-    "start": "npx prisma db push --accept-data-loss && node prisma/seed-mongodb.js && node server.js",
+    "start": "npx prisma db push --accept-data-loss && node prisma/seed-mongodb-fixed.js && node server.js",
     "dev": "node --watch server.js",
     "build": "npx prisma generate",
     "migrate:deploy": "npx prisma db push",
     "generate": "npx prisma generate",
-    "db:seed": "node prisma/seed-mongodb.js"
+    "db:seed": "node prisma/seed-mongodb-fixed.js"
   },
   "dependencies": {
     "@paralleldrive/cuid2": "^2.2.2",

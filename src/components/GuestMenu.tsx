@@ -126,7 +126,7 @@ export default function GuestMenu() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold text-white">MenuShield</h1>
-              <p className="text-green-100 text-sm">Turvallinen ruokailu kaikille</p>
+              <p className="text-green-100 text-sm">Safe dining for everyone</p>
             </div>
             <button
               onClick={() => setShowMobileFilter(true)}
