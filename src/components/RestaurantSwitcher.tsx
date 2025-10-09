@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useRestaurant } from '../contexts/RestaurantContext';
+import { useAuth } from '../auth/AuthContext';
 import type { Restaurant } from '../types';
 
 interface RestaurantSwitcherProps {
@@ -8,6 +9,7 @@ interface RestaurantSwitcherProps {
 
 export default function RestaurantSwitcher({ className = '' }: RestaurantSwitcherProps) {
   const { restaurant, switchRestaurant, isLoading } = useRestaurant();
+  const { token } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [availableRestaurants, setAvailableRestaurants] = useState<Restaurant[]>([]);
   const [loadingRestaurants, setLoadingRestaurants] = useState(false);
@@ -17,10 +19,21 @@ export default function RestaurantSwitcher({ className = '' }: RestaurantSwitche
     
     setLoadingRestaurants(true);
     try {
-      const response = await fetch('/api/restaurants/my-restaurants');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      // Add auth header if token exists
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch('/api/restaurants/my-restaurants', { headers });
       if (response.ok) {
         const restaurants = await response.json();
         setAvailableRestaurants(restaurants);
+      } else {
+        console.error('Failed to load restaurants:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Error loading restaurants:', error);

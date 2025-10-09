@@ -149,16 +149,20 @@ const api = {
 export const useMenu = () => {
   const { restaurantSlug } = useRestaurant();
 
+  console.log('useMenu hook - restaurantSlug:', restaurantSlug); // Debug log
+
   return useQuery({
     queryKey: [...queryKeys.dishes, restaurantSlug],
     queryFn: () => {
+      console.log('useMenu queryFn - fetching for slug:', restaurantSlug); // Debug log
       if (restaurantSlug) {
         return api.getMenuBySlug(restaurantSlug);
       }
       // Fallback to legacy API
+      console.log('useMenu queryFn - using legacy API'); // Debug log
       return api.getMenu();
     },
-    enabled: !!restaurantSlug, // Only run if we have a restaurant slug
+    enabled: true, // Always run the query - let the queryFn handle the logic
     staleTime: 1000 * 60 * 10, // 10 minutes (was 5) - reduce API calls
     gcTime: 1000 * 60 * 30, // 30 minutes garbage collection
     refetchOnWindowFocus: false, // Prevent unnecessary refetches
