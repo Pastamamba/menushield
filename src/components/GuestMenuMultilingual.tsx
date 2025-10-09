@@ -250,8 +250,8 @@ export default function GuestMenuMultilingual() {
               key={dish.id}
               dish={dish}
               safetyStatus={safety}
-              restaurant={restaurant}
-              currentLanguage={currentLanguage}
+              showPrices={restaurant?.showPrices !== false}
+              currency={restaurant?.currency || 'EUR'}
             />
           ))}
         </div>
@@ -316,8 +316,8 @@ export default function GuestMenuMultilingual() {
                       key={dish.id}
                       dish={dish}
                       safetyStatus={{ status: "safe", allergens: [] }}
-                      restaurant={restaurant}
-                      currentLanguage={currentLanguage}
+                      showPrices={restaurant?.showPrices !== false}
+                      currency={restaurant?.currency || 'EUR'}
                     />
                   ))}
                 </div>

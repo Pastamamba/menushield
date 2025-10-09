@@ -1,6 +1,7 @@
-import type { Dish, DishSafetyStatus, Restaurant } from "../types";
+import type { Dish, DishSafetyStatus } from "../types";
 import { getAllergenChips } from "../utils/allergenCalculator";
 import { formatPrice } from "../utils/currency";
+import { useCardGestures } from "../hooks/useEnhancedTouchGestures";
 
 interface DishCardProps {
   dish: Dish;
@@ -8,8 +9,8 @@ interface DishCardProps {
   isOffline?: boolean;
   showPrices?: boolean;
   currency?: string;
-  restaurant?: Restaurant; // Add restaurant prop for multilingual support
-  currentLanguage?: string; // Add language prop
+  onCardSelect?: (dish: Dish) => void;
+  onCardLongPress?: (dish: Dish) => void;
 }
 
 export default function DishCard({
@@ -18,8 +19,8 @@ export default function DishCard({
   isOffline,
   showPrices = true,
   currency = 'EUR',
-  restaurant,
-  currentLanguage = 'en',
+  onCardSelect,
+  onCardLongPress,
 }: DishCardProps) {
   const getStatusIcon = () => {
     switch (safetyStatus.status) {
@@ -62,10 +63,24 @@ export default function DishCard({
     }
   };
 
+  // Enhanced touch gestures for native mobile feel
+  const cardGestures = useCardGestures(
+    () => {
+      onCardSelect?.(dish);
+    },
+    () => {
+      onCardLongPress?.(dish);
+    },
+    true // Enable haptic feedback
+  );
+
   const userAvoidedAllergens = getUserAvoidedAllergens();
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200">
+    <div 
+      className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200 active:scale-[0.98] transition-transform"
+      {...cardGestures}
+    >
       {/* Traditional Menu Header */}
       <div className="flex items-start justify-between mb-2">
         <div className="flex-1">
@@ -101,7 +116,7 @@ export default function DishCard({
               <div key={allergen.name} className="flex items-center gap-2 text-sm">
                 <span 
                   className={`inline-flex items-center gap-1 px-3 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all active:scale-95 ${allergen.color}`}
-                  onClick={handleTouchFeedback}
+                  onTouchStart={handleTouchFeedback}
                 >
                   <span className="capitalize">{allergen.name}</span>
                 </span>

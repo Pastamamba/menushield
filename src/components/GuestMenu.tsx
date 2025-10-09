@@ -3,6 +3,8 @@ import { useMenu } from "../utils/dishApi";
 import { useRestaurant } from "../contexts/RestaurantContext";
 import { analyzeDishSafety } from "../utils/dishAnalyzer";
 import { MenuItemShimmer } from "./LoadingShimmer";
+import { VirtualizedDishList } from "./VirtualizedDishList";
+import { useSwipeNavigation } from "../hooks/useEnhancedTouchGestures";
 import type { Dish } from "../types";
 
 // Lazy load heavy components for better performance
@@ -11,11 +13,18 @@ const DishCard = lazy(() => import("./DishCard"));
 
 export default function GuestMenu() {
   const { data: dishes = [], isLoading, error } = useMenu();
-  const { restaurant, restaurantSlug, isLoading: restaurantLoading } = useRestaurant();
+  const { restaurant } = useRestaurant();
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showMobileFilter, setShowMobileFilter] = useState(false);
   const menuSectionRef = useRef<HTMLDivElement>(null);
+
+  // Enhanced touch gestures for mobile filter
+  const swipeRef = useSwipeNavigation(
+    () => setShowMobileFilter(false), // Swipe left to close
+    undefined,
+    75
+  );
 
   // Close mobile filter when clicking outside
   useEffect(() => {
@@ -50,6 +59,17 @@ export default function GuestMenu() {
         });
       }
     }, 300); // Wait for drawer close animation
+  };
+
+  // Enhanced card interactions for native mobile feel
+  const handleCardSelect = (dish: any) => {
+    // Could show dish details modal or add to order
+    console.log('Card selected:', dish.name);
+  };
+
+  const handleCardLongPress = (dish: any) => {
+    // Could show context menu or quick actions
+    console.log('Card long pressed:', dish.name);
   };
 
   if (isLoading) {
@@ -99,6 +119,16 @@ export default function GuestMenu() {
     unsafe: [] as Array<{ dish: Dish; safety: ReturnType<typeof analyzeDishSafety> }>
   });
 
+  // Determine if we should use virtualized scrolling for better performance
+  // Temporarily disable virtualization due to react-window import issues  
+  const shouldUseVirtualized = false; // useVirtualizedScrolling(filteredDishes.length);
+  
+  // Create dish data for virtualized list (when no allergens selected)
+  const allDishesForVirtualized = filteredDishes.map(dish => ({
+    dish,
+    safety: { status: "safe" as const, allergens: [] }
+  }));
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile Header - Always visible on mobile */}
@@ -145,6 +175,7 @@ export default function GuestMenu() {
           
           {/* Drawer */}
           <div 
+            ref={swipeRef as any}
             data-drawer="mobile-filter"
             className="lg:hidden fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white z-50 shadow-2xl transform transition-transform translate-x-0 rounded-l-2xl animate-slide-in-right"
             style={{ animationDuration: '0.3s', animationTimingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)' }}
@@ -243,21 +274,34 @@ export default function GuestMenu() {
               <p className="text-gray-600 mb-4">
                 Select allergens to see safe options
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredDishes.map((dish) => (
-                  <Suspense key={dish.id} fallback={<MenuItemShimmer />}>
-                    <DishCard 
-                      dish={dish} 
-                      safetyStatus={{ 
-                        status: "safe", 
-                        allergens: [] 
-                      }}
-                      showPrices={restaurant?.showPrices !== false}
-                      currency={restaurant?.currency || 'EUR'}
-                    />
-                  </Suspense>
-                ))}
-              </div>
+              {shouldUseVirtualized ? (
+                <VirtualizedDishList
+                  dishes={allDishesForVirtualized}
+                  showPrices={restaurant?.showPrices !== false}
+                  currency={restaurant?.currency || 'EUR'}
+                  className="min-h-[400px]"
+                  onCardSelect={handleCardSelect}
+                  onCardLongPress={handleCardLongPress}
+                />
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredDishes.map((dish) => (
+                    <Suspense key={dish.id} fallback={<MenuItemShimmer />}>
+                      <DishCard 
+                        dish={dish} 
+                        safetyStatus={{ 
+                          status: "safe", 
+                          allergens: [] 
+                        }}
+                        showPrices={restaurant?.showPrices !== false}
+                        currency={restaurant?.currency || 'EUR'}
+                        onCardSelect={handleCardSelect}
+                        onCardLongPress={handleCardLongPress}
+                      />
+                    </Suspense>
+                  ))}
+                </div>
+              )}
             </section>
           ) : (
             <>
@@ -268,18 +312,32 @@ export default function GuestMenu() {
                     <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
                     Safe dishes ({categorizedDishes.safe.length})
                   </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {categorizedDishes.safe.map(({ dish, safety }) => (
-                      <Suspense key={dish.id} fallback={<MenuItemShimmer />}>
-                        <DishCard 
-                          dish={dish} 
-                          safetyStatus={safety}
-                          showPrices={restaurant?.showPrices !== false}
-                          currency={restaurant?.currency || 'EUR'}
-                        />
-                      </Suspense>
-                    ))}
-                  </div>
+                  {shouldUseVirtualized && categorizedDishes.safe.length > 15 ? (
+                    <VirtualizedDishList
+                      dishes={categorizedDishes.safe}
+                      showPrices={restaurant?.showPrices !== false}
+                      currency={restaurant?.currency || 'EUR'}
+                      height={400}
+                      className="mb-6"
+                      onCardSelect={handleCardSelect}
+                      onCardLongPress={handleCardLongPress}
+                    />
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {categorizedDishes.safe.map(({ dish, safety }) => (
+                        <Suspense key={dish.id} fallback={<MenuItemShimmer />}>
+                          <DishCard 
+                            dish={dish} 
+                            safetyStatus={safety}
+                            showPrices={restaurant?.showPrices !== false}
+                            currency={restaurant?.currency || 'EUR'}
+                            onCardSelect={handleCardSelect}
+                            onCardLongPress={handleCardLongPress}
+                          />
+                        </Suspense>
+                      ))}
+                    </div>
+                  )}
                 </section>
               )}
 
@@ -302,6 +360,8 @@ export default function GuestMenu() {
                           safetyStatus={safety}
                           showPrices={restaurant?.showPrices !== false}
                           currency={restaurant?.currency || 'EUR'}
+                          onCardSelect={handleCardSelect}
+                          onCardLongPress={handleCardLongPress}
                         />
                       </Suspense>
                     ))}
@@ -313,6 +373,8 @@ export default function GuestMenu() {
                           safetyStatus={safety}
                           showPrices={restaurant?.showPrices !== false}
                           currency={restaurant?.currency || 'EUR'}
+                          onCardSelect={handleCardSelect}
+                          onCardLongPress={handleCardLongPress}
                         />
                       </Suspense>
                     ))}

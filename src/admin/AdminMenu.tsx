@@ -1,7 +1,6 @@
 // src/admin/AdminMenu.tsx
 import { useState, useEffect, lazy, Suspense } from "react";
 import { useAuth } from "../auth/AuthContext";
-import { useRestaurant } from "../contexts/RestaurantContext";
 import RestaurantSwitcher from "../components/RestaurantSwitcher";
 import { LoadingShimmer } from "../components/LoadingShimmer";
 

@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import AllergenFilter from './components/AllergenFilter';
-import LanguageSelector from './components/LanguageSelector';
-import { LanguageProvider } from './contexts/LanguageContext';
 import type { Dish } from './types';
 
 const App: React.FC = () => {
