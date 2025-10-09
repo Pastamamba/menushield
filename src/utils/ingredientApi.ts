@@ -76,7 +76,22 @@ async function fetchCategories(token: string): Promise<IngredientCategory[]> {
     throw new Error(`Failed to fetch categories: ${response.statusText}`);
   }
   
-  return response.json();
+  const data = await response.json();
+  console.log('Raw categories data from API:', data); // Debug log
+  
+  // Ensure data is properly structured
+  const processedData = Array.isArray(data) ? data.map(category => ({
+    ...category,
+    // Ensure all required fields exist
+    id: category.id,
+    name: category.name || '',
+    description: category.description || '',
+    color: category.color || '#3B82F6',
+    icon: category.icon || '🥄',
+  })) : [];
+  
+  console.log('Processed categories data:', processedData); // Debug log
+  return processedData;
 }
 
 async function createCategory(data: CreateCategoryRequest, token: string): Promise<IngredientCategory> {

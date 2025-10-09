@@ -52,6 +52,9 @@ export default function DishManager() {
   const createDishMutation = useCreateDish();
   const updateDishMutation = useUpdateDish();
   const deleteDishMutation = useDeleteDish();
+  
+  // Debug logs to trace the data
+  console.log('DishManager data:', { dishes, availableIngredients, restaurant });
 
   if (isLoading) {
     return (
@@ -979,19 +982,23 @@ function IngredientSelector({ selectedIngredients, availableIngredients, onChang
   const [searchTerm, setSearchTerm] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const filteredIngredients = availableIngredients.filter(ingredient =>
-    ingredient.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    !selectedIngredients.includes(ingredient.name)
+  // Safety checks for props
+  const safeSelectedIngredients = Array.isArray(selectedIngredients) ? selectedIngredients : [];
+  const safeAvailableIngredients = Array.isArray(availableIngredients) ? availableIngredients : [];
+
+  const filteredIngredients = safeAvailableIngredients.filter(ingredient =>
+    ingredient?.name?.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    !safeSelectedIngredients.includes(ingredient.name)
   );
 
   const addIngredient = (ingredientName: string) => {
-    onChange([...selectedIngredients, ingredientName]);
+    onChange([...safeSelectedIngredients, ingredientName]);
     setSearchTerm("");
     setShowDropdown(false);
   };
 
   const removeIngredient = (ingredientName: string) => {
-    onChange(selectedIngredients.filter(name => name !== ingredientName));
+    onChange(safeSelectedIngredients.filter(name => name !== ingredientName));
   };
 
   return (
@@ -1056,17 +1063,17 @@ function IngredientSelector({ selectedIngredients, availableIngredients, onChang
       </div>
 
       {/* Selected Ingredients */}
-      {selectedIngredients.length > 0 && (
+      {safeSelectedIngredients.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h5 className="font-medium text-gray-700">Selected Ingredients</h5>
             <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-              {selectedIngredients.length} ingredient{selectedIngredients.length !== 1 ? 's' : ''}
+              {safeSelectedIngredients.length} ingredient{safeSelectedIngredients.length !== 1 ? 's' : ''}
             </span>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            {selectedIngredients.map((ingredient) => (
+            {safeSelectedIngredients.map((ingredient) => (
               <div
                 key={ingredient}
                 className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2 group hover:bg-green-100 transition-colors"
@@ -1091,11 +1098,11 @@ function IngredientSelector({ selectedIngredients, availableIngredients, onChang
       )}
 
       {/* Quick Add Suggestions */}
-      {selectedIngredients.length === 0 && !searchTerm && (
+      {safeSelectedIngredients.length === 0 && !searchTerm && (
         <div className="space-y-3">
           <h5 className="font-medium text-gray-700">Popular Ingredients</h5>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-            {availableIngredients.slice(0, 8).map((ingredient) => (
+            {safeAvailableIngredients.slice(0, 8).map((ingredient) => (
               <button
                 key={ingredient.id}
                 type="button"

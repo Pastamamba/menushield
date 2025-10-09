@@ -75,8 +75,10 @@ const api = {
     }
     const data = await response.json();
     
+    console.log('Raw admin dishes data from API:', data); // Debug log
+    
     // Force allergen_tags to be arrays for all dishes
-    return data.map((dish: any) => ({
+    const processedData = data.map((dish: any) => ({
       ...dish,
       allergen_tags: Array.isArray(dish.allergen_tags) 
         ? dish.allergen_tags 
@@ -90,6 +92,9 @@ const api = {
         ? dish.ingredients 
         : []
     }));
+    
+    console.log('Processed admin dishes data:', processedData); // Debug log
+    return processedData;
   },
 
   // Create dish

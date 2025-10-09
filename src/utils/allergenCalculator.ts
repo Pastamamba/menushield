@@ -7,6 +7,17 @@ export function calculateAllergensFromIngredients(
   selectedIngredients: string[],
   availableIngredients: Ingredient[]
 ): string[] {
+  // Safety checks
+  if (!Array.isArray(selectedIngredients)) {
+    console.error('calculateAllergensFromIngredients received non-array selectedIngredients:', selectedIngredients);
+    return [];
+  }
+  
+  if (!Array.isArray(availableIngredients)) {
+    console.error('calculateAllergensFromIngredients received non-array availableIngredients:', availableIngredients);
+    return [];
+  }
+  
   const allergens = new Set<string>();
   
   selectedIngredients.forEach(ingredientName => {
@@ -23,6 +34,12 @@ export function calculateAllergensFromIngredients(
  * Get allergen chips for display
  */
 export function getAllergenChips(allergens: string[]): { name: string; color: string }[] {
+  // Safety check: ensure allergens is an array
+  if (!Array.isArray(allergens)) {
+    console.error('getAllergenChips received non-array:', allergens);
+    return [];
+  }
+  
   const allergenMap: Record<string, { color: string }> = {
     'gluten': { color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
     'dairy': { color: 'bg-blue-100 text-blue-800 border-blue-200' },
