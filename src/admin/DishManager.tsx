@@ -4,6 +4,7 @@ import { useAdminIngredients } from "../utils/ingredientApi";
 import { useRestaurant } from "../utils/restaurantApi";
 import { calculateAllergensFromIngredients, getAllergenChips } from "../utils/allergenCalculator";
 import { formatPrice, getCurrencySymbol } from "../utils/currency";
+import logger from "../utils/logger";
 import type { Dish, CreateDishRequest } from "../types";
 
 export default function DishManager() {
@@ -54,7 +55,7 @@ export default function DishManager() {
   const deleteDishMutation = useDeleteDish();
   
   // Debug logs to trace the data
-  console.log('DishManager data:', { dishes, availableIngredients, restaurant });
+  logger.debug('DishManager data:', { dishes, availableIngredients, restaurant });
 
   if (isLoading) {
     return (
@@ -98,7 +99,7 @@ export default function DishManager() {
     return (d.category as any)?.name || d.category || "Uncategorized";
   })))];
 
-  console.log('Categories for dropdown:', allCategories); // Debug log
+  logger.debug('Categories for dropdown:', allCategories);
 
   const handleCreateDish = async (dishData: CreateDishRequest) => {
     try {

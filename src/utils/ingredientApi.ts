@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/AuthContext';
+import logger from './logger';
 import type { Ingredient, CreateIngredientRequest, UpdateIngredientRequest, IngredientCategory, CreateCategoryRequest, UpdateCategoryRequest } from '../types';
 
 // API base URL (same as dishApi)
@@ -77,7 +78,7 @@ async function fetchCategories(token: string): Promise<IngredientCategory[]> {
   }
   
   const data = await response.json();
-  console.log('Raw categories data from API:', data); // Debug log
+  logger.debug('Raw categories data from API:', data);
   
   // Ensure data is properly structured
   const processedData = Array.isArray(data) ? data.map(category => ({
@@ -90,7 +91,7 @@ async function fetchCategories(token: string): Promise<IngredientCategory[]> {
     icon: category.icon || '🥄',
   })) : [];
   
-  console.log('Processed categories data:', processedData); // Debug log
+  logger.debug('Processed categories data:', processedData);
   return processedData;
 }
 

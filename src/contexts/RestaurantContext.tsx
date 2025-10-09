@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { prefetchMenuData } from '../utils/dishApi';
 import { queryClient } from '../utils/queryClient';
+import logger from '../utils/logger';
 import type { Restaurant } from '../types';
 
 interface RestaurantContextType {
@@ -28,8 +29,8 @@ export function RestaurantProvider({ children }: RestaurantProviderProps) {
   const [error, setError] = useState<string | null>(null);
 
   // Debug logging
-  console.log('RestaurantProvider - useParams result:', { restaurantSlug });
-  console.log('RestaurantProvider - current location:', window.location.pathname);
+  logger.debug('RestaurantProvider - useParams result:', { restaurantSlug });
+  logger.debug('RestaurantProvider - current location:', window.location.pathname);
 
   const fetchRestaurantBySlug = async (slug: string): Promise<Restaurant | null> => {
     try {
@@ -45,7 +46,7 @@ export function RestaurantProvider({ children }: RestaurantProviderProps) {
       const data = await response.json();
       return data;
     } catch (err) {
-      console.error('Error fetching restaurant by slug:', err);
+      logger.error('Error fetching restaurant by slug:', err);
       throw err;
     }
   };

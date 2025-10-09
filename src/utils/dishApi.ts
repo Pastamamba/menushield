@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../auth/AuthContext";
 import { useRestaurant } from "../contexts/RestaurantContext";
 import { queryKeys } from "./queryClient";
+import logger from "./logger";
 import type { Dish, CreateDishRequest } from "../types";
 
 // Background prefetch helper for menu data
@@ -75,7 +76,7 @@ const api = {
     }
     const data = await response.json();
     
-    console.log('Raw admin dishes data from API:', data); // Debug log
+    logger.debug('Raw admin dishes data from API:', data);
     
     // Force allergen_tags to be arrays for all dishes
     const processedData = data.map((dish: any) => ({
@@ -93,7 +94,7 @@ const api = {
         : []
     }));
     
-    console.log('Processed admin dishes data:', processedData); // Debug log
+    logger.debug('Processed admin dishes data:', processedData);
     return processedData;
   },
 
@@ -149,17 +150,17 @@ const api = {
 export const useMenu = () => {
   const { restaurantSlug } = useRestaurant();
 
-  console.log('useMenu hook - restaurantSlug:', restaurantSlug); // Debug log
+  logger.debug('useMenu hook - restaurantSlug:', restaurantSlug);
 
   return useQuery({
     queryKey: [...queryKeys.dishes, restaurantSlug],
     queryFn: () => {
-      console.log('useMenu queryFn - fetching for slug:', restaurantSlug); // Debug log
+      logger.debug('useMenu queryFn - fetching for slug:', restaurantSlug);
       if (restaurantSlug) {
         return api.getMenuBySlug(restaurantSlug);
       }
       // Fallback to legacy API
-      console.log('useMenu queryFn - using legacy API'); // Debug log
+      logger.debug('useMenu queryFn - using legacy API');
       return api.getMenu();
     },
     enabled: true, // Always run the query - let the queryFn handle the logic
