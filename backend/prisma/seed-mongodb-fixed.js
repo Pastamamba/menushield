@@ -6,6 +6,17 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting MongoDB seed...');
 
+  // Check if demo restaurant already exists
+  const existingRestaurant = await prisma.restaurant.findUnique({
+    where: { slug: 'demo-restaurant' }
+  });
+
+  if (existingRestaurant) {
+    console.log('✅ Demo restaurant already exists, skipping seed...');
+    console.log('🚀 Server starting with existing data!');
+    return; // Exit early if restaurant exists
+  }
+
   // Clean existing data (in development)
   if (process.env.NODE_ENV !== 'production') {
     console.log('🧹 Cleaning existing data...');
@@ -34,22 +45,32 @@ async function main() {
 
   console.log(`✅ Restaurant created: ${restaurant.name} (${restaurant.slug})`);
 
-  // Create admin user
+  // Create admin user (check if exists first)
   console.log('👤 Creating admin user...');
-  const hashedPassword = await bcrypt.hash('admin123', 12);
   
-  const adminUser = await prisma.user.create({
-    data: {
-      email: 'admin@demo-restaurant.com',
-      passwordHash: hashedPassword,
-      firstName: 'Admin',
-      lastName: 'User',
-      role: 'OWNER',
-      restaurantId: restaurant.id,
-    },
+  const existingUser = await prisma.user.findUnique({
+    where: { email: 'admin@demo-restaurant.com' }
   });
 
-  console.log(`✅ Admin user created: ${adminUser.email}`);
+  let adminUser;
+  if (existingUser) {
+    console.log('✅ Admin user already exists');
+    adminUser = existingUser;
+  } else {
+    const hashedPassword = await bcrypt.hash('admin123', 12);
+    
+    adminUser = await prisma.user.create({
+      data: {
+        email: 'admin@demo-restaurant.com',
+        passwordHash: hashedPassword,
+        firstName: 'Admin',
+        lastName: 'User',
+        role: 'OWNER',
+        restaurantId: restaurant.id,
+      },
+    });
+    console.log(`✅ Admin user created: ${adminUser.email}`);
+  }
 
   // Create categories
   console.log('📂 Creating categories...');
