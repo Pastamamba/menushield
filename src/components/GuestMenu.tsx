@@ -150,6 +150,7 @@ export default function GuestMenu() {
           </div>
         </div>
       </div>
+      </div>
 
       {/* Desktop Header - Always visible on desktop */}
       <div className="hidden lg:block sticky top-0 z-40 bg-gradient-to-r from-green-500 to-blue-600 shadow-lg">
