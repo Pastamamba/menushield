@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LanguageSelector from "../components/LanguageSelector";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -68,6 +69,9 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="absolute top-4 right-4">
+        <LanguageSelector variant="compact" />
+      </div>
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-bold text-gray-800">MenuShield</h2>

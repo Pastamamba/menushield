@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import LanguageSelector from "../components/LanguageSelector";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -40,6 +41,9 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="absolute top-4 right-4">
+        <LanguageSelector variant="compact" />
+      </div>
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-bold text-gray-800">MenuShield</h2>

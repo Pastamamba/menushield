@@ -155,9 +155,15 @@ export default function GuestMenu() {
       {/* Desktop Header - Always visible on desktop */}
       <div className="hidden lg:block sticky top-0 z-40 bg-gradient-to-r from-green-500 to-blue-600 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-white mb-2">MenuShield</h1>
-            <p className="text-green-100">Safe dining for everyone</p>
+          <div className="flex items-center justify-between">
+            <div className="flex-1"></div>
+            <div className="text-center">
+              <h1 className="text-3xl font-bold text-white mb-2">MenuShield</h1>
+              <p className="text-green-100">Safe dining for everyone</p>
+            </div>
+            <div className="flex-1 flex justify-end">
+              <LanguageSelector variant="compact" className="z-50" />
+            </div>
           </div>
         </div>
       </div>

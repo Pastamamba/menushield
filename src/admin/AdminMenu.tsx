@@ -2,6 +2,7 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { useAuth } from "../auth/AuthContext";
 import RestaurantSwitcher from "../components/RestaurantSwitcher";
+import LanguageSelector from "../components/LanguageSelector";
 import { LoadingShimmer } from "../components/LoadingShimmer";
 
 // Lazy load heavy admin components for better performance
@@ -88,8 +89,13 @@ export default function AdminMenu() {
       `}>
         {/* Desktop Header */}
         <div className="hidden lg:block p-6 border-b">
-          <h1 className="text-xl font-bold text-gray-800">MenuShield</h1>
-          <p className="text-sm text-gray-500">Admin Panel</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-xl font-bold text-gray-800">MenuShield</h1>
+              <p className="text-sm text-gray-500">Admin Panel</p>
+            </div>
+            <LanguageSelector variant="compact" />
+          </div>
         </div>
 
         {/* Restaurant Switcher */}
@@ -103,6 +109,7 @@ export default function AdminMenu() {
             <h1 className="text-lg font-bold text-gray-800">MenuShield</h1>
             <p className="text-sm text-gray-500">Admin Panel</p>
           </div>
+          <LanguageSelector variant="compact" />
           <button
             onClick={() => setIsSidebarOpen(false)}
             className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
