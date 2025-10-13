@@ -357,14 +357,12 @@ export default function DishManager() {
       )}
 
       {editingDish && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
-          {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-            onClick={() => setEditingDish(null)}
-          />
-          {/* Slide-up panel */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl transform transition-transform duration-300 ease-out translate-y-0 max-h-[80vh] overflow-y-auto">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm"
+          onClick={(e) => e.target === e.currentTarget && setEditingDish(null)}
+        >
+          {/* Centered professional modal */}
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden transform transition-all">
             <EditDishForm
               dish={editingDish}
               onSubmit={(data) => handleUpdateDish(editingDish.id, data)}
