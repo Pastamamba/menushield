@@ -65,6 +65,11 @@ export function useMenuTranslations() {
       fi: 'Löydä turvallisia ruokia itsellesi',
       sv: 'Hitta säkra rätter för dig själv'
     },
+    safeDining: {
+      en: 'Safe dining for everyone',
+      fi: 'Turvallista ruokailua kaikille',
+      sv: 'Säker matupplevelse för alla'
+    },
     showSafeDishes: {
       en: 'Show my safe dishes',
       fi: 'Näytä turvalliset ruokani',

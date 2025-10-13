@@ -129,7 +129,7 @@ export default function GuestMenu() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold text-white">MenuShield</h1>
-              <p className="text-green-100 text-sm">Safe dining for everyone</p>
+              <p className="text-green-100 text-sm">{t('safeDining')}</p>
             </div>
             <div className="flex items-center gap-3">
               <LanguageSelector variant="compact" className="z-50" />
@@ -159,7 +159,7 @@ export default function GuestMenu() {
             <div className="flex-1"></div>
             <div className="text-center">
               <h1 className="text-3xl font-bold text-white mb-2">MenuShield</h1>
-              <p className="text-green-100">Safe dining for everyone</p>
+              <p className="text-green-100">{t('safeDining')}</p>
             </div>
             <div className="flex-1 flex justify-end">
               <LanguageSelector variant="compact" className="z-50" />

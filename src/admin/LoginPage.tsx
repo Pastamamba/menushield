@@ -3,8 +3,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import LanguageSelector from "../components/LanguageSelector";
+import { useAdminTranslations } from "../hooks/useAdminTranslations";
 
 export default function LoginPage() {
+  const { t } = useAdminTranslations();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -47,7 +49,7 @@ export default function LoginPage() {
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-bold text-gray-800">MenuShield</h2>
-          <p className="text-gray-600 mt-2">Admin Login</p>
+          <p className="text-gray-600 mt-2">{t('adminLogin')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -65,7 +67,7 @@ export default function LoginPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
+              {t('email')}
             </label>
             <input
               type="email"
@@ -79,7 +81,7 @@ export default function LoginPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
+              {t('password')}
             </label>
             <input
               type="password"
@@ -95,18 +97,18 @@ export default function LoginPage() {
             type="submit"
             className="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-colors"
           >
-            Log In
+            {t('login')}
           </button>
         </form>
 
         <div className="mt-6 text-center">
           <p className="text-gray-600">
-            Don't have an account?{" "}
+            {t('noAccount')}{" "}
             <button
               onClick={() => navigate("/admin/signup")}
               className="text-green-600 hover:text-green-800 font-medium"
             >
-              Sign up here
+              {t('signUpHere')}
             </button>
           </p>
         </div>

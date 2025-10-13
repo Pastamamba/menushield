@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LanguageSelector from "../components/LanguageSelector";
+import { useAdminTranslations } from "../hooks/useAdminTranslations";
 
 export default function SignupPage() {
+  const { t } = useAdminTranslations();
   const [formData, setFormData] = useState({
     restaurantName: "",
     username: "",
@@ -76,7 +78,7 @@ export default function SignupPage() {
         <div className="text-center mb-6">
           <h2 className="text-3xl font-bold text-gray-800">MenuShield</h2>
           <p className="text-gray-600 mt-2">
-            Create your restaurant admin account
+            {t('createAccount')}
           </p>
         </div>
 

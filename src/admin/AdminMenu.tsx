@@ -4,6 +4,7 @@ import { useAuth } from "../auth/AuthContext";
 import RestaurantSwitcher from "../components/RestaurantSwitcher";
 import LanguageSelector from "../components/LanguageSelector";
 import { LoadingShimmer } from "../components/LoadingShimmer";
+import { useAdminTranslations } from "../hooks/useAdminTranslations";
 
 // Lazy load heavy admin components for better performance
 const DishManager = lazy(() => import("./DishManager"));
@@ -15,6 +16,7 @@ type TabType = "dashboard" | "qr-code" | "restaurant" | "settings";
 
 export default function AdminMenu() {
   const { logout } = useAuth();
+  const { t } = useAdminTranslations();
   
   // Initialize activeTab from localStorage or default to "dashboard"
   const [activeTab, setActiveTab] = useState<TabType>(() => {
@@ -38,10 +40,10 @@ export default function AdminMenu() {
   }, [activeTab]);
 
   const menuItems = [
-    { id: "dashboard" as const, label: "Dish Management", icon: "🍽️" },
-    { id: "qr-code" as const, label: "QR Code", icon: "📱" },
-    { id: "restaurant" as const, label: "Restaurant", icon: "🏪" },
-    { id: "settings" as const, label: "Settings", icon: "⚙️" },
+    { id: "dashboard" as const, label: t('dishes'), icon: "🍽️" },
+    { id: "qr-code" as const, label: t('qrCode'), icon: "📱" },
+    { id: "restaurant" as const, label: t('restaurantName'), icon: "🏪" },
+    { id: "settings" as const, label: t('settings'), icon: "⚙️" },
   ];
 
   const handleMenuClick = (tabId: TabType) => {
@@ -92,7 +94,7 @@ export default function AdminMenu() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold text-gray-800">MenuShield</h1>
-              <p className="text-sm text-gray-500">Admin Panel</p>
+              <p className="text-sm text-gray-500">{t('adminPanel')}</p>
             </div>
             <LanguageSelector variant="compact" />
           </div>
@@ -107,7 +109,7 @@ export default function AdminMenu() {
         <div className="lg:hidden p-4 border-b flex items-center justify-between">
           <div>
             <h1 className="text-lg font-bold text-gray-800">MenuShield</h1>
-            <p className="text-sm text-gray-500">Admin Panel</p>
+            <p className="text-sm text-gray-500">{t('adminPanel')}</p>
           </div>
           <LanguageSelector variant="compact" />
           <button
@@ -143,7 +145,7 @@ export default function AdminMenu() {
             onClick={logout}
             className="w-full bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition-colors font-medium"
           >
-            🚪 Logout
+            🚪 {t('logout')}
           </button>
         </div>
       </aside>
