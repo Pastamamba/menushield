@@ -1104,24 +1104,7 @@ function IngredientSelector({ selectedIngredients, availableIngredients, onChang
         </div>
       )}
 
-      {/* Quick Add Suggestions */}
-      {safeSelectedIngredients.length === 0 && !searchTerm && (
-        <div className="space-y-3">
-          <h5 className="font-medium text-gray-700">Popular Ingredients</h5>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-            {safeAvailableIngredients.slice(0, 8).map((ingredient) => (
-              <button
-                key={ingredient.id}
-                type="button"
-                onClick={() => addIngredient(ingredient.name)}
-                className="flex items-center justify-center bg-gray-50 hover:bg-green-50 hover:border-green-300 border border-gray-200 rounded-lg px-3 py-2 transition-all duration-200 text-sm font-medium hover:text-green-700"
-              >
-                {ingredient.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }
