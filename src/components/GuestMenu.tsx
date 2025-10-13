@@ -4,6 +4,8 @@ import { useRestaurant } from "../contexts/RestaurantContext";
 import { analyzeDishSafety } from "../utils/dishAnalyzer";
 import { MenuItemShimmer } from "./LoadingShimmer";
 import { useSwipeNavigation } from "../hooks/useEnhancedTouchGestures";
+import { useMenuTranslations } from "../hooks/useMenuTranslations";
+import LanguageSelector from "./LanguageSelector";
 import type { Dish } from "../types";
 
 // Lazy load heavy components for better performance
@@ -13,6 +15,7 @@ const DishCard = lazy(() => import("./DishCard"));
 export default function GuestMenu() {
   const { data: dishes = [], isLoading, error } = useMenu();
   const { restaurant } = useRestaurant();
+  const { t } = useMenuTranslations();
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showMobileFilter, setShowMobileFilter] = useState(false);
@@ -76,7 +79,7 @@ export default function GuestMenu() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading menu...</p>
+          <p className="text-gray-600">{t('loadingMenu')}</p>
         </div>
       </div>
     );
@@ -86,12 +89,12 @@ export default function GuestMenu() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 mb-4">Error loading menu: {error.message}</p>
+          <p className="text-red-600 mb-4">{t('errorLoading')}: {error.message}</p>
           <button 
             onClick={() => window.location.reload()} 
             className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
           >
-            Try Again
+            {t('tryAgain')}
           </button>
         </div>
       </div>
@@ -128,14 +131,16 @@ export default function GuestMenu() {
               <h1 className="text-xl font-bold text-white">MenuShield</h1>
               <p className="text-green-100 text-sm">Safe dining for everyone</p>
             </div>
-            <button
+            <div className="flex items-center gap-3">
+              <LanguageSelector variant="compact" className="z-50" />
+              <button
               onClick={() => setShowMobileFilter(true)}
               className="bg-white/20 backdrop-blur-sm text-white px-4 py-3 rounded-xl flex items-center gap-2 hover:bg-white/30 transition-all active:scale-95 shadow-md"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586a1 1 0 01-.293.707l-2 2A1 1 0 0110 21v-8.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
               </svg>
-              <span className="font-medium">Suodata</span>
+              <span className="font-medium">{t('filter')}</span>
               {selectedAllergens.length > 0 && (
                 <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] font-semibold">
                   {selectedAllergens.length}
@@ -174,8 +179,8 @@ export default function GuestMenu() {
               <div className="bg-gradient-to-r from-green-500 to-blue-600 p-6 rounded-tl-2xl">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-bold text-white">Suodata menu</h2>
-                    <p className="text-green-100 text-sm mt-1">Löydä turvallisia ruokia itsellesi</p>
+                    <h2 className="text-xl font-bold text-white">{t('filterMenu')}</h2>
+                    <p className="text-green-100 text-sm mt-1">{t('findSafeDishes')}</p>
                   </div>
                   <button
                     onClick={() => setShowMobileFilter(false)}
@@ -216,7 +221,7 @@ export default function GuestMenu() {
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
-                    Näytä turvalliset ruokani
+                    {t('showSafeDishes')}
                   </button>                {selectedAllergens.length > 0 && (
                   <button
                     onClick={() => setSelectedAllergens([])}
