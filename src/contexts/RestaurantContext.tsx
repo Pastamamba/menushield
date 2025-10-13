@@ -38,9 +38,9 @@ export function RestaurantProvider({ children }: RestaurantProviderProps) {
       
       if (!response.ok) {
         if (response.status === 404) {
-          throw new Error(`Ravintolaa "${slug}" ei löytynyt`);
+          throw new Error(`Restaurant "${slug}" not found`);
         }
-        throw new Error('Virhe ravintolan lataamisessa');
+        throw new Error('Error loading restaurant');
       }
       
       const data = await response.json();
@@ -77,7 +77,7 @@ export function RestaurantProvider({ children }: RestaurantProviderProps) {
       setRestaurant(null);
       
       // Redirect to default restaurant if slug not found
-      if (errorMessage.includes('ei löytynyt')) {
+      if (errorMessage.includes('not found')) {
         navigate('/r/demo-restaurant', { replace: true });
       }
     } finally {

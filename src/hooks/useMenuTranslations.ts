@@ -69,6 +69,36 @@ export function useMenuTranslations() {
       en: 'Show my safe dishes',
       fi: 'Näytä turvalliset ruokani',
       sv: 'Visa mina säkra rätter'
+    },
+    searchAllergens: {
+      en: 'Search allergens...',
+      fi: 'Etsi allergeeneja...',
+      sv: 'Sök allergener...'
+    },
+    avoidingAllergensCount: {
+      en: 'Avoiding allergens',
+      fi: 'Vältät allergeeneja',
+      sv: 'Undviker allergener'
+    },
+    selectRestaurant: {
+      en: 'Select restaurant',
+      fi: 'Valitse ravintola',
+      sv: 'Välj restaurang'
+    },
+    addNewRestaurant: {
+      en: 'Add new restaurant',
+      fi: 'Lisää uusi ravintola',
+      sv: 'Lägg till ny restaurang'
+    },
+    restaurantNotFound: {
+      en: 'Restaurant not found',
+      fi: 'Ravintolaa ei löytynyt',
+      sv: 'Restaurang hittades inte'
+    },
+    errorLoadingRestaurant: {
+      en: 'Error loading restaurant',
+      fi: 'Virhe ravintolan lataamisessa',
+      sv: 'Fel vid laddning av restaurang'
     }
   };
 

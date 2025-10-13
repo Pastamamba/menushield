@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useRestaurant } from '../contexts/RestaurantContext';
 import { useAuth } from '../auth/AuthContext';
+import { useMenuTranslations } from '../hooks/useMenuTranslations';
 import type { Restaurant } from '../types';
 
 interface RestaurantSwitcherProps {
@@ -9,7 +10,8 @@ interface RestaurantSwitcherProps {
 
 export default function RestaurantSwitcher({ className = '' }: RestaurantSwitcherProps) {
   const { restaurant, switchRestaurant, isLoading } = useRestaurant();
-  const { token } = useAuth();
+  const { user } = useAuth();
+  const { t } = useMenuTranslations();
   const [isOpen, setIsOpen] = useState(false);
   const [availableRestaurants, setAvailableRestaurants] = useState<Restaurant[]>([]);
   const [loadingRestaurants, setLoadingRestaurants] = useState(false);
@@ -76,10 +78,10 @@ export default function RestaurantSwitcher({ className = '' }: RestaurantSwitche
           </div>
           <div className="text-left">
             <div className="font-medium text-gray-900">
-              {restaurant?.name || 'Valitse ravintola'}
+              {restaurant?.name || t('selectRestaurant')}
             </div>
             <div className="text-sm text-gray-500">
-              {restaurant?.slug ? `/r/${restaurant.slug}` : 'Ei valittu'}
+              {restaurant?.slug ? `/r/${restaurant.slug}` : 'Not selected'}
             </div>
           </div>
         </div>
@@ -162,7 +164,7 @@ export default function RestaurantSwitcher({ className = '' }: RestaurantSwitche
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                Lisää uusi ravintola
+                {t('addNewRestaurant')}
               </button>
             </div>
           </div>

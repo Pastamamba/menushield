@@ -4,6 +4,7 @@ import {
   ALL_ALLERGENS,
   searchAllergens,
 } from "../utils/dishAnalyzer";
+import { useMenuTranslations } from '../hooks/useMenuTranslations';
 
 // Mobile haptic feedback helper
 const handleTouchFeedback = () => {
@@ -35,6 +36,7 @@ export default function AllergenFilter({
   searchPlaceholder = "Search allergens...",
   isMobile = false,
 }: AllergenFilterProps) {
+  const { t } = useMenuTranslations();
   const [searchQuery, setSearchQuery] = useState("");
 
   // Use new props if available, fallback to old props
@@ -77,7 +79,7 @@ export default function AllergenFilter({
         <div className="relative">
           <input
             type="text"
-            placeholder="Etsi allergeeneja..."
+            placeholder={t('searchAllergens')}
             value={currentSearchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="w-full px-4 py-4 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50 min-h-[48px]"
@@ -174,7 +176,7 @@ export default function AllergenFilter({
       <div className="relative">
         <input
           type="text"
-          placeholder="Etsi allergeeneja..."
+          placeholder={t('searchAllergens')}
           value={currentSearchTerm}
           onChange={(e) => handleSearchChange(e.target.value)}
           className="w-full px-4 py-4 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50 min-h-[48px]"
@@ -224,7 +226,7 @@ export default function AllergenFilter({
         <div className="bg-red-50 border border-red-200 rounded-xl p-4">
           <div className="flex items-center justify-between mb-3">
             <h4 className="text-sm font-medium text-red-800">
-              Vältät allergeeneja ({currentAllergens.length})
+              {t('avoidingAllergensCount')} ({currentAllergens.length})
             </h4>
             <button
               onClick={() => {
