@@ -42,37 +42,37 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-warm-gray-50">
       <div className="absolute top-4 right-4">
         <LanguageSelector variant="compact" />
       </div>
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
-        <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold text-gray-800">MenuShield</h2>
-          <p className="text-gray-600 mt-2">{t('adminLogin')}</p>
+      <div className="bg-white p-6 rounded-lg shadow-sm border border-warm-gray-200 w-full max-w-sm">
+        <div className="text-center mb-5">
+          <h2 className="text-2xl font-semibold text-warm-gray-800">MenuShield</h2>
+          <p className="text-warm-gray-600 mt-1 text-sm">{t('adminLogin')}</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2.5 rounded text-sm">
               {error}
             </div>
           )}
 
           {successMessage && (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+            <div className="bg-green-50 border border-green-200 text-green-700 px-3 py-2.5 rounded text-sm">
               {successMessage}
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-warm-gray-700 mb-1">
               {t('email')}
             </label>
             <input
               type="email"
               required
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-green-500"
+              className="w-full border border-warm-gray-300 rounded px-3 py-2 focus:outline-none focus:border-sage-500 focus:ring-1 focus:ring-sage-500"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@example.com"
@@ -80,13 +80,13 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-warm-gray-700 mb-1">
               {t('password')}
             </label>
             <input
               type="password"
               required
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-green-500"
+              className="w-full border border-warm-gray-300 rounded px-3 py-2 focus:outline-none focus:border-sage-500 focus:ring-1 focus:ring-sage-500"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Your password"
@@ -95,25 +95,25 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-colors"
+            className="w-full bg-sage-600 text-white py-2.5 px-4 rounded-lg hover:bg-sage-700 transition-all duration-200 active:scale-98 font-medium"
           >
             {t('login')}
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-gray-600">
+        <div className="mt-5 text-center">
+          <p className="text-warm-gray-600 text-sm">
             {t('noAccount')}{" "}
             <button
               onClick={() => navigate("/admin/signup")}
-              className="text-green-600 hover:text-green-800 font-medium"
+              className="text-sage-600 hover:text-sage-800 font-medium"
             >
               {t('signUpHere')}
             </button>
           </p>
         </div>
 
-        <div className="mt-4 p-4 bg-gray-50 rounded text-sm text-gray-600">
+        <div className="mt-4 p-3 bg-warm-gray-50 rounded text-sm text-warm-gray-600">
           <p className="font-medium mb-1">Demo Account:</p>
           <p>Email: admin@example.com</p>
           <p>Password: supersecret</p>

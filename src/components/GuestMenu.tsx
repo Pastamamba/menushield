@@ -15,10 +15,11 @@ const DishCard = lazy(() => import("./DishCard"));
 export default function GuestMenu() {
   const { data: dishes = [], isLoading, error } = useMenu();
   const { restaurant } = useRestaurant();
-  const { t } = useMenuTranslations();
+  const { t, currentLanguage } = useMenuTranslations();
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showMobileFilter, setShowMobileFilter] = useState(false);
+  const [showModifiableOnly, setShowModifiableOnly] = useState(false);
   const menuSectionRef = useRef<HTMLDivElement>(null);
 
   // Enhanced touch gestures for mobile filter
@@ -101,14 +102,19 @@ export default function GuestMenu() {
     );
   }
 
-  // Filter dishes based on search term
-  const filteredDishes = dishes.filter(dish =>
+  // Filter dishes based on search term and modifiable filter
+  let filteredDishes = dishes.filter(dish =>
     dish.is_active !== false &&
     (
       dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       dish.description?.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
+
+  // Apply modifiable filter if active
+  if (showModifiableOnly) {
+    filteredDishes = filteredDishes.filter(dish => dish.is_modifiable === true);
+  }
 
   // Categorize dishes by safety level
   const categorizedDishes = filteredDishes.reduce((acc, dish) => {
@@ -122,27 +128,27 @@ export default function GuestMenu() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Mobile Header - Always visible on mobile */}
-      <div className="mobile-header lg:hidden sticky top-0 z-40 bg-gradient-to-r from-green-500 to-blue-600 shadow-lg">
-        <div className="px-4 py-4">
+    <div className="min-h-screen bg-warm-gray-50">
+      {/* Mobile Header - Refined dining aesthetic */}
+      <div className="mobile-header lg:hidden sticky top-0 z-40 bg-gradient-to-r from-sage-600 to-sage-500 shadow-md">
+        <div className="px-3 py-3">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold text-white">MenuShield</h1>
-              <p className="text-green-100 text-sm">{t('safeDining')}</p>
+              <h1 className="text-lg font-semibold text-white">MenuShield</h1>
+              <p className="text-sage-100 text-sm">{t('safeDining')}</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <LanguageSelector variant="compact" className="z-50" />
               <button
               onClick={() => setShowMobileFilter(true)}
-              className="bg-white/20 backdrop-blur-sm text-white px-4 py-3 rounded-xl flex items-center gap-2 hover:bg-white/30 transition-all active:scale-95 shadow-md"
+              className="bg-white/20 backdrop-blur-sm text-white px-3 py-2.5 rounded-lg flex items-center gap-2 hover:bg-white/30 transition-all duration-200 active:scale-98 shadow-sm"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586a1 1 0 01-.293.707l-2 2A1 1 0 0110 21v-8.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
               </svg>
-              <span className="font-medium">{t('filter')}</span>
+              <span className="font-medium text-sm">{t('filter')}</span>
               {selectedAllergens.length > 0 && (
-                <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] font-semibold">
+                <span className="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[18px] font-semibold">
                   {selectedAllergens.length}
                 </span>
               )}
@@ -152,14 +158,14 @@ export default function GuestMenu() {
       </div>
       </div>
 
-      {/* Desktop Header - Always visible on desktop */}
-      <div className="hidden lg:block sticky top-0 z-40 bg-gradient-to-r from-green-500 to-blue-600 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+      {/* Desktop Header - More refined and minimal */}
+      <div className="hidden lg:block sticky top-0 z-40 bg-gradient-to-r from-sage-600 to-sage-500 shadow-md">
+        <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex-1"></div>
             <div className="text-center">
-              <h1 className="text-3xl font-bold text-white mb-2">MenuShield</h1>
-              <p className="text-green-100">{t('safeDining')}</p>
+              <h1 className="text-2xl font-semibold text-white mb-1">MenuShield</h1>
+              <p className="text-sage-100 text-sm">{t('safeDining')}</p>
             </div>
             <div className="flex-1 flex justify-end">
               <LanguageSelector variant="compact" className="z-50" />
@@ -215,6 +221,8 @@ export default function GuestMenu() {
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}
                     isMobile={true}
+                    showModifiableOnly={showModifiableOnly}
+                    onModifiableToggle={setShowModifiableOnly}
                   />
                 </Suspense>
               </div>
@@ -258,6 +266,8 @@ export default function GuestMenu() {
                       : [...prev, allergen]
                   );
                 }}
+                showModifiableOnly={showModifiableOnly}
+                onModifiableToggle={setShowModifiableOnly}
               />
             </Suspense>
           </div>
@@ -265,15 +275,38 @@ export default function GuestMenu() {
 
         {/* Dishes by Safety Level */}
         <div className="space-y-8">
+          {/* Modifiable Dishes Disclaimer */}
+          {showModifiableOnly && (
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+              <div className="flex items-start gap-3">
+                <div className="text-blue-600 text-2xl">ℹ️</div>
+                <div>
+                  <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                    Showing Modifiable Dishes Only
+                  </h3>
+                  <p className="text-blue-800 mb-3">
+                    These dishes may be modifiable. Please check with staff to confirm.
+                  </p>
+                  <div className="text-sm text-blue-700 bg-blue-100 px-3 py-2 rounded-lg">
+                    <strong>Important:</strong> Ingredient modifications depend on kitchen capabilities and preparation methods. Always verify with restaurant staff before ordering.
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {selectedAllergens.length === 0 ? (
             /* Show all dishes when no allergens selected */
             <section>
               <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
                 <span className="w-3 h-3 bg-gray-500 rounded-full mr-3"></span>
-                All dishes ({filteredDishes.length})
+                {showModifiableOnly ? `Modifiable dishes (${filteredDishes.length})` : `All dishes (${filteredDishes.length})`}
               </h2>
               <p className="text-gray-600 mb-4">
-                Select allergens to see safe options
+                {showModifiableOnly 
+                  ? "These dishes may be modifiable - please check with staff" 
+                  : "Select allergens to see safe options"
+                }
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredDishes.map((dish) => (
@@ -286,6 +319,7 @@ export default function GuestMenu() {
                       }}
                       showPrices={restaurant?.showPrices !== false}
                       currency={restaurant?.currency || 'EUR'}
+                      language={currentLanguage as any}
                       onCardSelect={handleCardSelect}
                       onCardLongPress={handleCardLongPress}
                     />
