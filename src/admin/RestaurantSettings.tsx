@@ -11,7 +11,7 @@ export default function RestaurantSettings() {
     description: '',
     contact: '',
     showPrices: true,
-    currency: 'EUR',
+    currency: 'SEK', // Default to SEK for Swedish market
   });
 
   // Update form when restaurant data loads
@@ -22,19 +22,33 @@ export default function RestaurantSettings() {
         description: restaurant.description || '',
         contact: restaurant.contact || '',
         showPrices: restaurant.showPrices !== undefined ? restaurant.showPrices : true,
-        currency: restaurant.currency || 'EUR',
+        currency: restaurant.currency || 'SEK', // Default to SEK for Swedish market
       });
     }
   }, [restaurant]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Add validation
+    if (!form.name.trim()) {
+      alert('Restaurant name is required');
+      return;
+    }
+    
     try {
+      console.log('Saving restaurant settings:', form);
       await updateRestaurantMutation.mutateAsync(form);
       alert('Restaurant settings updated successfully!');
     } catch (error) {
       console.error('Error updating restaurant:', error);
-      alert('Failed to update restaurant settings. Please try again.');
+      
+      // More detailed error message
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Failed to update restaurant settings. Please try again.';
+      
+      alert(`Save failed: ${errorMessage}`);
     }
   };
 
