@@ -2,6 +2,7 @@ import type { Dish, DishSafetyStatus } from "../types";
 import { getAllergenChips } from "../utils/allergenCalculator";
 import { formatPrice } from "../utils/currency";
 import { useCardGestures } from "../hooks/useEnhancedTouchGestures";
+import type { AllergenLanguage } from "../utils/allergenTranslations";
 
 interface DishCardProps {
   dish: Dish;
@@ -9,6 +10,7 @@ interface DishCardProps {
   isOffline?: boolean;
   showPrices?: boolean;
   currency?: string;
+  language?: AllergenLanguage;
   onCardSelect?: (dish: Dish) => void;
   onCardLongPress?: (dish: Dish) => void;
 }
@@ -19,6 +21,7 @@ export default function DishCard({
   isOffline,
   showPrices = true,
   currency = 'EUR',
+  language = 'en',
   onCardSelect,
   onCardLongPress,
 }: DishCardProps) {
@@ -42,7 +45,7 @@ export default function DishCard({
 
     // Extract allergen tags and get their info
     const allergenTags = safetyStatus.allergens.map(allergen => allergen.tag);
-    const allergenChips = getAllergenChips(allergenTags);
+    const allergenChips = getAllergenChips(allergenTags, language);
     
     return allergenChips.map(allergen => {
       // Find which component contains this allergen
@@ -78,29 +81,29 @@ export default function DishCard({
 
   return (
     <div 
-      className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200 active:scale-[0.98] transition-transform"
+      className="bg-white border border-warm-gray-200 rounded-lg p-3 transition-shadow duration-200 hover:shadow-sm"
       {...cardGestures}
     >
-      {/* Traditional Menu Header */}
+      {/* Traditional Menu Header - More compact */}
       <div className="flex items-start justify-between mb-2">
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold text-gray-900">{dish.name}</h3>
-            <span className="text-lg">{getStatusIcon()}</span>
+            <h3 className="text-base font-semibold text-warm-gray-900">{dish.name}</h3>
+            <span className="text-base">{getStatusIcon()}</span>
           </div>
           
-          {/* Price */}
+          {/* Price - More subtle */}
           {showPrices && dish.price && (
-            <div className="text-base font-medium text-gray-700 mt-1">
+            <div className="text-sm font-medium text-warm-gray-700 mt-0.5">
               {formatPrice(dish.price, currency)}
             </div>
           )}
         </div>
       </div>
 
-      {/* Description */}
+      {/* Description - More compact */}
       {dish.description && (
-        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+        <p className="text-sm text-warm-gray-600 mb-2.5 line-clamp-2">
           {dish.description}
         </p>
       )}
@@ -115,12 +118,12 @@ export default function DishCard({
             {userAvoidedAllergens.map((allergen) => (
               <div key={allergen.name} className="flex items-center gap-2 text-sm">
                 <span 
-                  className={`inline-flex items-center gap-1 px-3 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all active:scale-95 ${allergen.color}`}
+                  className={`inline-flex items-center gap-1 px-2.5 py-1.5 min-h-[36px] rounded-md text-sm font-medium transition-all duration-200 active:scale-98 ${allergen.color}`}
                   onTouchStart={handleTouchFeedback}
                 >
-                  <span className="capitalize">{allergen.name}</span>
+                  <span className="capitalize">{allergen.displayName}</span>
                 </span>
-                <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-3 py-2 min-h-[40px] rounded-lg flex items-center">
+                <span className="text-xs font-medium text-warm-gray-700 bg-warm-gray-100 px-2.5 py-1.5 min-h-[32px] rounded-md flex items-center">
                   in {allergen.component || 'Base'}
                   {allergen.canModify && (
                     <span className="text-green-600 ml-1 font-medium">(removable)</span>

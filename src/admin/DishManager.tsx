@@ -1,13 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAdminDishes, useCreateDish, useUpdateDish, useDeleteDish } from "../utils/dishApi";
 import { useAdminIngredients } from "../utils/ingredientApi";
 import { useRestaurant } from "../utils/restaurantApi";
 import { calculateAllergensFromIngredients, getAllergenChips } from "../utils/allergenCalculator";
 import { formatPrice, getCurrencySymbol } from "../utils/currency";
+import { useAdminTranslations } from "../hooks/useAdminTranslations";
 import logger from "../utils/logger";
 import type { Dish, CreateDishRequest } from "../types";
+import type { AllergenLanguage } from "../utils/allergenTranslations";
 
 export default function DishManager() {
+  const { currentLanguage } = useAdminTranslations();
+  
   // CSV import
   const handleCSVImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -49,6 +53,21 @@ export default function DishManager() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all"); // all, active, inactive
+
+  // Prevent body scroll when modals are open
+  useEffect(() => {
+    const isModalOpen = showCreateForm || editingDish;
+    if (isModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [showCreateForm, editingDish]);
 
   const createDishMutation = useCreateDish();
   const updateDishMutation = useUpdateDish();
@@ -145,40 +164,40 @@ export default function DishManager() {
 
   return (
     <div className="space-y-6">
-      {/* Header with search and actions */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <h2 className="text-2xl font-semibold text-gray-900">Dishes ({filteredDishes.length})</h2>
+      {/* Header with search and actions - More refined */}
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+        <h2 className="text-xl font-semibold text-warm-gray-900">Dishes ({filteredDishes.length})</h2>
         
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setShowCreateForm(true)}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+            className="bg-sage-600 text-white px-3 py-2 rounded-lg hover:bg-sage-700 transition-all duration-200 active:scale-98 font-medium"
           >
             + Add Dish
           </button>
-          <label className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 cursor-pointer transition-colors">
+          <label className="bg-warm-gray-600 text-white px-3 py-2 rounded-lg hover:bg-warm-gray-700 cursor-pointer transition-all duration-200 active:scale-98 font-medium">
             Import CSV
             <input type="file" accept=".csv" style={{ display: "none" }} onChange={handleCSVImport} />
           </label>
         </div>
       </div>
 
-      {/* Search and Filters */}
-      <div className="bg-white p-4 rounded-lg shadow flex flex-col sm:flex-row gap-4">
+      {/* Search and Filters - More compact */}
+      <div className="bg-white p-3 rounded-lg shadow-sm border border-warm-gray-200 flex flex-col sm:flex-row gap-3">
         <div className="flex-1">
           <input
             type="text"
             placeholder="Search dishes by name or description..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border border-warm-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-sage-500 focus:border-transparent"
           />
         </div>
         <div className="sm:w-48">
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border border-warm-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-sage-500 focus:border-transparent"
           >
             <option value="all">All Categories</option>
             {allCategories.slice(1).map(category => (
@@ -254,12 +273,12 @@ export default function DishManager() {
                 {Array.isArray(dish.allergen_tags) && dish.allergen_tags.length > 0 && (
                   <div className="mt-2">
                     <div className="flex flex-wrap gap-1">
-                      {getAllergenChips(dish.allergen_tags.slice(0, 3)).map((allergen) => (
+                      {getAllergenChips(dish.allergen_tags.slice(0, 3), currentLanguage as AllergenLanguage).map((allergen) => (
                         <span
                           key={allergen.name}
                           className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
                         >
-                          <span className="capitalize">{allergen.name}</span>
+                          <span className="capitalize">{allergen.displayName}</span>
                         </span>
                       ))}
                       {dish.allergen_tags.length > 3 && (
@@ -386,14 +405,14 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   
-  // Component group definitions
-  const componentGroups = [
+  // Component group definitions - now stateful for toggleable modifiability
+  const [componentGroups, setComponentGroups] = useState([
     { id: 'main', name: 'Main Component', canChange: false, icon: '🍽️' },
     { id: 'base', name: 'Base', canChange: true, icon: '🍞' },
     { id: 'side', name: 'Side Dish', canChange: true, icon: '🥗' },
     { id: 'sauce', name: 'Sauce/Dip', canChange: true, icon: '🫙' },
     { id: 'topping', name: 'Topping/Garnish', canChange: true, icon: '🌿' }
-  ];
+  ]);
 
   const [form, setForm] = useState<CreateDishRequest>({
     name: "",
@@ -469,6 +488,17 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
     }));
   };
 
+  // Toggle component group modifiability (except main component)
+  const handleToggleGroupModifiability = (groupId: string) => {
+    if (groupId === 'main') return; // Main component cannot be changed
+    
+    setComponentGroups(prev => prev.map(group => 
+      group.id === groupId 
+        ? { ...group, canChange: !group.canChange }
+        : group
+    ));
+  };
+
   const handleNextPage = () => {
     if (!form.name.trim()) {
       setError("Dish name is required");
@@ -508,10 +538,15 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
     }
   };
 
-  // Add escape key listener
+  // Add escape key listener and handle body scroll
   useState(() => {
     document.addEventListener('keydown', handleEscapeKey);
-    return () => document.removeEventListener('keydown', handleEscapeKey);
+    // Prevent background scroll when modal is open
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+      document.body.style.overflow = 'unset';
+    };
   });
 
   return (
@@ -671,6 +706,26 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
                             {group.canChange ? 'Modifiable' : 'Required'}
                           </span>
                         </div>
+                        
+                        {/* Toggle for modifiability (except main component) */}
+                        {group.id !== 'main' && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600">Can be changed:</span>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleGroupModifiability(group.id)}
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                                group.canChange ? 'bg-green-600' : 'bg-gray-300'
+                              }`}
+                            >
+                              <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                  group.canChange ? 'translate-x-6' : 'translate-x-1'
+                                }`}
+                              />
+                            </button>
+                          </div>
+                        )}
                       </div>
                       
                       <IngredientSelector 
@@ -727,12 +782,12 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
                     {form.allergen_tags.length > 0 ? (
                       <div className="space-y-3">
                         <div className="flex flex-wrap gap-2">
-                          {getAllergenChips(form.allergen_tags).map((allergen) => (
+                          {getAllergenChips(form.allergen_tags, currentLanguage as AllergenLanguage).map((allergen) => (
                             <span
                               key={allergen.name}
                               className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
                             >
-                              <span className="capitalize">{allergen.name}</span>
+                              <span className="capitalize">{allergen.displayName}</span>
                             </span>
                           ))}
                         </div>
@@ -850,27 +905,39 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
   };
 
   return (
-    <div className="p-6">
-      {/* Header with close button */}
-      <div className="flex items-center justify-between mb-6 pb-4 border-b">
-        <h3 className="text-xl font-semibold text-gray-900">Edit Dish: {dish.name}</h3>
-        <button
-          onClick={onCancel}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-        >
-          <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+    <div className="max-h-[90vh] overflow-hidden">
+      {/* Professional Header - Same style as CreateDishModal */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-white">Edit Dish</h2>
+            <p className="text-blue-100 text-sm">{dish.name}</p>
+          </div>
+          <button
+            onClick={onCancel}
+            className="text-white hover:text-blue-100 transition-colors p-1"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-          <p className="text-red-800 text-sm">{error}</p>
+        <div className="mx-6 mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
+          <p className="text-red-800 text-sm flex items-center">
+            <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            {error}
+          </p>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Modal Content */}
+      <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+        <form id="edit-dish-form" onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Name *</label>
@@ -885,13 +952,21 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-            <input 
-              name="category" 
-              value={form.category ?? ""} 
-              onChange={handleChange} 
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
-              placeholder="e.g., Main Course, Appetizer"
-            />
+            <select
+              name="category"
+              value={form.category ?? ""}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+            >
+              <option value="">Select a category</option>
+              <option value="Appetizer">Appetizer</option>
+              <option value="Main Course">Main Course</option>
+              <option value="Dessert">Dessert</option>
+              <option value="Beverage">Beverage</option>
+              <option value="Salad">Salad</option>
+              <option value="Soup">Soup</option>
+              <option value="Side Dish">Side Dish</option>
+            </select>
           </div>
         </div>
 
@@ -939,12 +1014,12 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
           <div className="min-h-[3rem] p-3 border border-gray-200 rounded-lg bg-gray-50">
             {Array.isArray(form.allergen_tags) && form.allergen_tags.length > 0 ? (
               <div className="flex flex-wrap gap-2">
-                {getAllergenChips(form.allergen_tags).map((allergen) => (
+                {getAllergenChips(form.allergen_tags, currentLanguage as AllergenLanguage).map((allergen) => (
                   <span
                     key={allergen.name}
                     className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
                   >
-                    <span className="capitalize">{allergen.name}</span>
+                    <span className="capitalize">{allergen.displayName}</span>
                   </span>
                 ))}
               </div>
@@ -957,23 +1032,26 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
             Update ingredients to modify allergens.
           </p>
         </div>
+        </form>
+      </div>
 
-        <div className="flex space-x-3 pt-4 border-t">
-          <button 
-            type="submit" 
-            className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
-          >
-            Update Dish
-          </button>
-          <button 
-            type="button" 
-            onClick={onCancel} 
-            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-6 rounded-lg transition-colors"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
+      {/* Professional Modal Footer - Same style as CreateDishModal */}
+      <div className="bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 border-t">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          form="edit-dish-form"
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+        >
+          Save Changes
+        </button>
+      </div>
     </div>
   );
 }

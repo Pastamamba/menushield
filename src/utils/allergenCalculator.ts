@@ -1,4 +1,5 @@
 import type { Ingredient } from '../types';
+import { normalizeAllergenId, getAllergenTranslation, type AllergenLanguage } from './allergenTranslations';
 
 /**
  * Calculate allergens automatically based on selected ingredients
@@ -22,8 +23,16 @@ export function calculateAllergensFromIngredients(
   
   selectedIngredients.forEach(ingredientName => {
     const ingredient = availableIngredients.find(ing => ing.name === ingredientName);
-    if (ingredient && Array.isArray(ingredient.allergenTags)) {
-      ingredient.allergenTags.forEach((allergen: string) => allergens.add(allergen));
+    if (ingredient && ingredient.allergenTags) {
+      // Handle both array and legacy formats
+      const tags = Array.isArray(ingredient.allergenTags) 
+        ? ingredient.allergenTags 
+        : [ingredient.allergenTags];
+      
+      tags.forEach((allergen: string) => {
+        const normalizedAllergen = normalizeAllergenId(allergen);
+        allergens.add(normalizedAllergen);
+      });
     }
   });
   
@@ -31,9 +40,12 @@ export function calculateAllergensFromIngredients(
 }
 
 /**
- * Get allergen chips for display
+ * Get allergen chips for display with multilingual support
  */
-export function getAllergenChips(allergens: string[]): { name: string; color: string }[] {
+export function getAllergenChips(
+  allergens: string[], 
+  language: AllergenLanguage = 'en'
+): { name: string; displayName: string; color: string }[] {
   // Safety check: ensure allergens is an array
   if (!Array.isArray(allergens)) {
     console.error('getAllergenChips received non-array:', allergens);
@@ -55,12 +67,22 @@ export function getAllergenChips(allergens: string[]): { name: string; color: st
     'celery': { color: 'bg-lime-100 text-lime-800 border-lime-200' },
     'lupin': { color: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
     'molluscs': { color: 'bg-teal-100 text-teal-800 border-teal-200' },
+    'corn': { color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
+    'coconut': { color: 'bg-amber-100 text-amber-800 border-amber-200' },
+    'nightshades': { color: 'bg-red-100 text-red-800 border-red-200' },
+    'citrus': { color: 'bg-orange-100 text-orange-800 border-orange-200' },
   };
 
-  return allergens.map(allergen => ({
-    name: allergen,
-    color: allergenMap[allergen.toLowerCase()]?.color || 'bg-gray-100 text-gray-800 border-gray-200',
-  }));
+  return allergens.map(allergen => {
+    const normalizedAllergen = normalizeAllergenId(allergen);
+    const displayName = getAllergenTranslation(normalizedAllergen, language);
+    
+    return {
+      name: normalizedAllergen,
+      displayName,
+      color: allergenMap[normalizedAllergen]?.color || 'bg-gray-100 text-gray-800 border-gray-200',
+    };
+  });
 }
 
 /**

@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { useAdminIngredients, useCreateIngredient, useUpdateIngredient, useDeleteIngredient } from "../utils/ingredientApi";
 import { COMMON_ALLERGENS, getSuggestedAllergens, getAllergenChips } from "../utils/allergenCalculator";
+import { useAdminTranslations } from "../hooks/useAdminTranslations";
 import type { Ingredient, CreateIngredientRequest } from "../types";
+import type { AllergenLanguage } from "../utils/allergenTranslations";
 
 interface IngredientManagerProps {
   token: string;
 }
 
 export default function IngredientManager(_props: IngredientManagerProps) {
+  const { currentLanguage } = useAdminTranslations();
   const { data: ingredients = [], isLoading, error } = useAdminIngredients();
   const [editingIngredient, setEditingIngredient] = useState<Ingredient | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -120,12 +123,12 @@ export default function IngredientManager(_props: IngredientManagerProps) {
                 <div className="mt-2">
                   {ingredient.allergenTags && ingredient.allergenTags.length > 0 ? (
                     <div className="flex flex-wrap gap-1">
-                      {getAllergenChips(ingredient.allergenTags).map((allergen) => (
+                      {getAllergenChips(ingredient.allergenTags, currentLanguage as AllergenLanguage).map((allergen) => (
                         <span
                           key={allergen.name}
                           className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
                         >
-                          <span className="capitalize">{allergen.name}</span>
+                          <span className="capitalize">{allergen.displayName}</span>
                         </span>
                       ))}
                     </div>
@@ -321,12 +324,12 @@ function CreateIngredientForm({ onSubmit, onCancel }: {
             <div className="mt-3 p-3 bg-gray-50 rounded-lg">
               <p className="text-sm font-medium text-gray-700 mb-2">Selected allergens:</p>
               <div className="flex flex-wrap gap-1">
-                {getAllergenChips(form.allergen_tags).map((allergen) => (
+                {getAllergenChips(form.allergen_tags, currentLanguage as AllergenLanguage).map((allergen) => (
                   <span
                     key={allergen.name}
                     className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
                   >
-                    <span className="capitalize">{allergen.name}</span>
+                    <span className="capitalize">{allergen.displayName}</span>
                   </span>
                 ))}
               </div>
@@ -465,12 +468,12 @@ function EditIngredientForm({ ingredient, onSubmit, onCancel }: {
             <div className="mt-3 p-3 bg-gray-50 rounded-lg">
               <p className="text-sm font-medium text-gray-700 mb-2">Selected allergens:</p>
               <div className="flex flex-wrap gap-1">
-                {getAllergenChips(form.allergen_tags || []).map((allergen) => (
+                {getAllergenChips(form.allergen_tags || [], currentLanguage as AllergenLanguage).map((allergen) => (
                   <span
                     key={allergen.name}
                     className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
                   >
-                    <span className="capitalize">{allergen.name}</span>
+                    <span className="capitalize">{allergen.displayName}</span>
                   </span>
                 ))}
               </div>
