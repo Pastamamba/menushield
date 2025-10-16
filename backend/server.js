@@ -416,7 +416,7 @@ app.get("/api/restaurant", async (req, res) => {
         name: "MenuShield Restaurant",
         description: "Welcome to our restaurant",
         showPrices: true,
-        currency: "EUR",
+        currency: "SEK", // Default to Swedish Krona for Swedish market
       }
     );
   } catch (error) {
@@ -430,6 +430,8 @@ app.put("/api/admin/restaurant", requireAuth, async (req, res) => {
   try {
     const { name, description, contact, showPrices, currency } = req.body;
     
+    console.log('Updating restaurant settings:', { name, description, contact, showPrices, currency });
+    
     // Update the user's restaurant
     const restaurant = await prisma.restaurant.update({
       where: { id: req.user.restaurantId },
@@ -442,6 +444,7 @@ app.put("/api/admin/restaurant", requireAuth, async (req, res) => {
       }
     });
     
+    console.log('Restaurant updated successfully:', restaurant);
     res.json(restaurant);
   } catch (error) {
     console.error("Error updating restaurant:", error);
@@ -555,6 +558,114 @@ app.post("/api/signup", authLimiter, [validateEmail, validatePassword, validateR
   } catch (error) {
     console.error("Signup error:", error);
     res.status(500).json({ error: "Signup failed" });
+  }
+});
+
+// Admin: Get user profile
+app.get("/api/admin/profile", requireAuth, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.userId },
+      select: {
+        email: true,
+        username: true,
+        restaurant: {
+          select: {
+            name: true
+          }
+        },
+        createdAt: true
+      }
+    });
+    
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    res.json({
+      email: user.email,
+      username: user.username,
+      restaurantName: user.restaurant?.name,
+      createdAt: user.createdAt
+    });
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    res.status(500).json({ error: "Failed to fetch user profile" });
+  }
+});
+
+// Admin: Update user profile
+app.put("/api/admin/profile", requireAuth, async (req, res) => {
+  try {
+    const { email, username, restaurantName } = req.body;
+    
+    console.log('Updating user profile:', { email, username, restaurantName });
+    
+    // Update user
+    const updatedUser = await prisma.user.update({
+      where: { id: req.user.userId },
+      data: {
+        ...(email && { email }),
+        ...(username && { username }),
+      }
+    });
+    
+    // Update restaurant name if provided
+    if (restaurantName && req.user.restaurantId) {
+      await prisma.restaurant.update({
+        where: { id: req.user.restaurantId },
+        data: { name: restaurantName }
+      });
+    }
+    
+    console.log('Profile updated successfully');
+    res.json({
+      email: updatedUser.email,
+      username: updatedUser.username,
+      restaurantName: restaurantName
+    });
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    res.status(500).json({ error: "Failed to update user profile" });
+  }
+});
+
+// Admin: Change password
+app.put("/api/admin/change-password", requireAuth, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    
+    console.log('Password change request for user:', req.user.userId);
+    
+    // Get current user with password
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.userId }
+    });
+    
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    // Verify current password
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isCurrentPasswordValid) {
+      return res.status(400).json({ error: "Current password is incorrect" });
+    }
+    
+    // Hash new password
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+    
+    // Update password
+    await prisma.user.update({
+      where: { id: req.user.userId },
+      data: { passwordHash: newPasswordHash }
+    });
+    
+    console.log('Password changed successfully');
+    res.json({ message: "Password changed successfully" });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    res.status(500).json({ error: "Failed to change password" });
   }
 });
 

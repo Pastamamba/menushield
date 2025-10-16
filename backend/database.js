@@ -223,6 +223,8 @@ function initializeDatabase() {
       description:
         "A family-friendly restaurant committed to safe dining for all",
       contact: "(555) 123-4567",
+      currency: "SEK", // Default to Swedish Krona for Swedish market
+      showPrices: true,
       updated_at: new Date().toISOString(),
     };
     writeJSONFile(files.restaurant, restaurantInfo);
@@ -503,6 +505,8 @@ export const restaurantOperations = {
       description:
         "A family-friendly restaurant committed to safe dining for all",
       contact: "(555) 123-4567",
+      currency: "SEK", // Default to Swedish Krona for Swedish market
+      showPrices: true,
     });
   },
 
