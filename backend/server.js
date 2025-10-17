@@ -1015,9 +1015,6 @@ app.get("/api/admin/ingredients", requireAuth, async (req, res) => {
     const language = req.query.lang || req.query.language || 'en'; // Get language parameter
     
     const ingredients = await prisma.ingredient.findMany({
-      where: {
-        restaurantId: req.user.restaurantId, // Only ingredients for this restaurant
-      },
       include: {
         category: true,
       },
