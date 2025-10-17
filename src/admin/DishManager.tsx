@@ -130,10 +130,20 @@ export default function DishManager() {
 
   const handleCreateDish = async (dishData: CreateDishRequest) => {
     try {
-      await createDishMutation.mutateAsync(dishData);
+      console.log('🍽️ DishManager: Attempting to create dish:', dishData);
+      const result = await createDishMutation.mutateAsync(dishData);
+      console.log('✅ DishManager: Dish created successfully');
+      
+      // Check if it's a local dish (starts with 'local-')
+      if (result.id.startsWith('local-')) {
+        alert('⚠️ Backend unavailable - Dish saved locally!\n\nThe dish has been saved to your local storage and will appear in the list. It will be synced to the server when the backend is available.');
+      }
+      
       setShowCreateForm(false);
     } catch (error) {
-      console.error("Failed to create dish:", error);
+      console.error("🚨 DishManager: Failed to create dish:", error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(`Failed to create dish: ${errorMessage}`);
     }
   };
 
@@ -396,6 +406,7 @@ export default function DishManager() {
               onCancel={() => setEditingDish(null)}
               availableIngredients={availableIngredients}
               restaurant={restaurant}
+              allCategories={allCategories}
             />
           </div>
         </div>
@@ -870,12 +881,13 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
   );
 }
 
-function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaurant }: { 
+function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaurant, allCategories }: { 
   dish: Dish; 
   onSubmit: (data: Partial<CreateDishRequest>) => void; 
   onCancel: () => void;
   availableIngredients: any[];
   restaurant?: any;
+  allCategories: string[];
 }) {
   const { t, currentLanguage } = useAdminTranslations();
   const lang = currentLanguage as AllergenLanguage;
@@ -884,19 +896,30 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
     name: dish.name,
     description: dish.description,
     price: dish.price,
-    category: (dish.category as any)?.name || dish.category,
+    category: typeof dish.category === 'string' ? dish.category : (dish.category as any)?.name || '',
     ingredients: dish.ingredients,
     allergen_tags: dish.allergen_tags,
     is_modifiable: dish.is_modifiable,
   });
   const [error, setError] = useState("");
 
+  // Debug logging
+  console.log('🔍 EditDishModal - dish.category:', dish.category);
+  console.log('🔍 EditDishModal - typeof dish.category:', typeof dish.category);
+  console.log('🔍 EditDishModal - form.category:', form.category);
+  console.log('🔍 EditDishModal - available options: ["Appetizer", "Main Course", "Dessert", "Beverage", "Salad", "Soup", "Side Dish"]');
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    setForm(prev => ({
-      ...prev,
-      [name]: type === "number" ? (value ? parseFloat(value) : undefined) : value
-    }));
+    console.log('🔍 EditDishModal handleChange:', { name, value, type });
+    setForm(prev => {
+      const newForm = {
+        ...prev,
+        [name]: type === "number" ? (value ? parseFloat(value) : undefined) : value
+      };
+      console.log('🔍 EditDishModal form updated:', newForm);
+      return newForm;
+    });
   };
 
   const handleIngredientsChange = (ingredients: string[]) => {

@@ -1200,17 +1200,25 @@ app.put("/api/admin/ingredients/:id", requireAuth, async (req, res) => {
     const { id } = req.params;
     const { name, category, parentId, allergen_tags } = req.body;
 
-    // Find category by name
+    if (isDev) console.log('Updating ingredient:', { id, name, category, allergen_tags, restaurantId: req.user.restaurantId });
+
+    // Find category by name within this restaurant
     let categoryId = null;
     if (category) {
       const categoryRecord = await prisma.category.findFirst({
-        where: { name: { contains: category, mode: "insensitive" } },
+        where: { 
+          name: { contains: category, mode: "insensitive" },
+          restaurantId: req.user.restaurantId
+        },
       });
       categoryId = categoryRecord?.id;
     }
 
     const ingredient = await prisma.ingredient.update({
-      where: { id },
+      where: { 
+        id,
+        restaurantId: req.user.restaurantId // Ensure we only update ingredients owned by this restaurant
+      },
       data: {
         name,
         categoryId,
@@ -1235,8 +1243,15 @@ app.put("/api/admin/ingredients/:id", requireAuth, async (req, res) => {
 
     res.json(transformedIngredient);
   } catch (error) {
-    console.error("Error updating ingredient:", error);
-    res.status(500).json({ error: "Failed to update ingredient" });
+    console.error("Error updating ingredient:", {
+      error: error.message,
+      code: error.code,
+      meta: error.meta,
+      ingredientId: req.params.id,
+      restaurantId: req.user.restaurantId,
+      requestBody: req.body
+    });
+    res.status(500).json({ error: "Failed to update ingredient", details: isDev ? error.message : undefined });
   }
 });
 

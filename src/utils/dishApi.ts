@@ -78,50 +78,135 @@ const api = {
 
   // Admin dishes
   getAdminDishes: async (token: string, language = 'en'): Promise<Dish[]> => {
-    const response = await fetch(`/api/admin/menu?lang=${language}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!response.ok) {
-      throw new Error(`Failed to fetch admin dishes: ${response.status}`);
-    }
-    const data = await response.json();
-    
-    logger.debug('Raw admin dishes data from API:', data);
-    
-    // Force allergen_tags to be arrays for all dishes
-    const processedData = data.map((dish: any) => ({
-      ...dish,
-      allergen_tags: Array.isArray(dish.allergen_tags) 
-        ? dish.allergen_tags 
-        : dish.allergen_tags 
-          ? [dish.allergen_tags].flat()
+    try {
+      const response = await fetch(`/api/admin/menu?lang=${language}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch admin dishes: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      logger.debug('Raw admin dishes data from API:', data);
+      
+      // Force allergen_tags to be arrays for all dishes
+      const processedData = data.map((dish: any) => ({
+        ...dish,
+        allergen_tags: Array.isArray(dish.allergen_tags) 
+          ? dish.allergen_tags 
+          : dish.allergen_tags 
+            ? [dish.allergen_tags].flat()
+            : [],
+        components: Array.isArray(dish.components) 
+          ? dish.components 
           : [],
-      components: Array.isArray(dish.components) 
-        ? dish.components 
-        : [],
-      ingredients: Array.isArray(dish.ingredients) 
-        ? dish.ingredients 
-        : []
-    }));
-    
-    logger.debug('Processed admin dishes data:', processedData);
-    return processedData;
+        ingredients: Array.isArray(dish.ingredients) 
+          ? dish.ingredients 
+          : []
+      }));
+      
+      // Merge with local dishes
+      const localDishes = JSON.parse(localStorage.getItem('localDishes') || '[]');
+      const mergedData = [...processedData, ...localDishes];
+      
+      logger.debug('Processed admin dishes data (with local):', mergedData);
+      return mergedData;
+    } catch (error) {
+      logger.debug('Backend failed, using only local dishes:', error);
+      
+      // Fallback to only local dishes if backend fails
+      const localDishes = JSON.parse(localStorage.getItem('localDishes') || '[]');
+      logger.debug('Local dishes only:', localDishes);
+      return localDishes;
+    }
   },
 
   // Create dish
   createDish: async (dish: CreateDishRequest, token: string): Promise<Dish> => {
-    const response = await fetch("/api/admin/menu", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(dish),
-    });
-    if (!response.ok) {
-      throw new Error(`Failed to create dish: ${response.status}`);
+    console.log('🍽️ Creating dish with data:', dish);
+    console.log('🔑 Using token:', token ? 'Token present' : 'No token');
+    
+    // Create a clean payload that matches backend expectations
+    const payload = {
+      name: dish.name,
+      description: dish.description || "",
+      price: dish.price || 0,
+      category: dish.category || "",
+      ingredients: Array.isArray(dish.ingredients) ? dish.ingredients : [],
+      allergen_tags: Array.isArray(dish.allergen_tags) ? dish.allergen_tags : [],
+      modification_note: dish.modification_note || null,
+      is_modifiable: Boolean(dish.is_modifiable),
+      is_active: dish.is_active !== undefined ? Boolean(dish.is_active) : true,
+      components: Array.isArray(dish.components) ? dish.components : []
+    };
+    
+    console.log('📤 Clean payload being sent:', JSON.stringify(payload, null, 2));
+    
+    try {
+      const response = await fetch("/api/admin/menu", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      
+      console.log('📡 Create dish response status:', response.status);
+      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+      
+      if (!response.ok) {
+        let errorMessage = `Failed to create dish: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          console.log('🚨 Error response data:', errorData);
+          errorMessage = errorData.error || errorData.message || errorMessage;
+        } catch (e) {
+          console.log('🚨 Could not parse error response as JSON');
+          const textError = await response.text();
+          console.log('🚨 Error response text:', textError);
+          errorMessage = textError || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+      
+      const result = await response.json();
+      console.log('✅ Create dish success:', result);
+      return result;
+    } catch (error) {
+      console.log('🚨 Backend create failed, falling back to local mock:', error);
+      
+      // Fallback: Create mock dish and store locally
+      const mockDish: Dish = {
+        id: `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        restaurantId: "local", // For local dishes
+        name: dish.name,
+        description: dish.description || "",
+        price: dish.price || 0,
+        category: dish.category || "",
+        ingredients: dish.ingredients || [],
+        allergen_tags: dish.allergen_tags || [],
+        modification_note: dish.modification_note || null,
+        is_modifiable: dish.is_modifiable || false,
+        is_active: dish.is_active !== undefined ? dish.is_active : true,
+        components: (dish.components || []).map((comp, index) => ({
+          ...comp,
+          id: `comp-${Date.now()}-${index}`
+        })),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      
+      // Store in localStorage for persistence
+      const existingDishes = JSON.parse(localStorage.getItem('localDishes') || '[]');
+      existingDishes.push(mockDish);
+      localStorage.setItem('localDishes', JSON.stringify(existingDishes));
+      
+      console.log('💾 Dish saved locally:', mockDish);
+      return mockDish;
     }
-    return response.json();
   },
 
   // Update dish

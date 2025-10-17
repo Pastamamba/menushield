@@ -8,11 +8,12 @@ import { useAdminTranslations } from "../hooks/useAdminTranslations";
 
 // Lazy load heavy admin components for better performance
 const DishManager = lazy(() => import("./DishManager"));
+const IngredientAllergenManager = lazy(() => import("./IngredientAllergenManager"));
 const QRCodeManager = lazy(() => import("./QRCodeManager"));
 const RestaurantSettings = lazy(() => import("./RestaurantSettings"));
 const AccountSettings = lazy(() => import("./AccountSettings"));
 
-type TabType = "dashboard" | "qr-code" | "restaurant" | "settings";
+type TabType = "dashboard" | "ingredients" | "qr-code" | "restaurant" | "settings";
 
 export default function AdminMenu() {
   const { logout } = useAuth();
@@ -22,7 +23,7 @@ export default function AdminMenu() {
   const [activeTab, setActiveTab] = useState<TabType>(() => {
     try {
       const saved = localStorage.getItem('admin-active-tab');
-      const validTabs: TabType[] = ["dashboard", "qr-code", "restaurant", "settings"];
+      const validTabs: TabType[] = ["dashboard", "ingredients", "qr-code", "restaurant", "settings"];
       if (saved && validTabs.includes(saved as TabType)) {
         return saved as TabType;
       }
@@ -41,6 +42,9 @@ export default function AdminMenu() {
 
   const menuItems = [
     { id: "dashboard" as const, label: t('dishes'), icon: "🍽️" },
+    ...(import.meta.env.VITE_SHOW_INGREDIENT_MANAGER === 'true' || import.meta.env.DEV 
+      ? [{ id: "ingredients" as const, label: "Ingredients", icon: "🧄" }] 
+      : []),
     { id: "qr-code" as const, label: t('qrCode'), icon: "📱" },
     { id: "restaurant" as const, label: t('restaurantName'), icon: "🏪" },
     { id: "settings" as const, label: t('settings'), icon: "⚙️" },
@@ -157,6 +161,11 @@ export default function AdminMenu() {
           {activeTab === "dashboard" && (
             <Suspense fallback={<LoadingShimmer />}>
               <DishManager />
+            </Suspense>
+          )}
+          {activeTab === "ingredients" && (
+            <Suspense fallback={<LoadingShimmer />}>
+              <IngredientAllergenManager />
             </Suspense>
           )}
           {activeTab === "qr-code" && (
