@@ -1,0 +1,1448 @@
+﻿[{
+  "_id": {
+    "$oid": "68c018a1699aa89005b47e24"
+  },
+  "name": "Salmon",
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1c"
+  },
+  "allergen_tags": "[\"fish\"]",
+  "translations": {
+    "name": {
+      "en": "Salmon",
+      "fi": "Lohi",
+      "sv": "Lax"
+    }
+  },
+  "created_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  },
+  "updated_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68c018a1699aa89005b47e27"
+  },
+  "name": "Greek Yogurt",
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1e"
+  },
+  "allergen_tags": "[\"dairy\"]",
+  "translations": {
+    "name": {
+      "en": "Greek Yogurt",
+      "fi": "Kreikkalainen jogurtti",
+      "sv": "Grekisk yoghurt"
+    }
+  },
+  "created_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  },
+  "updated_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68c018a1699aa89005b47e25"
+  },
+  "name": "Mozzarella",
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1e"
+  },
+  "allergen_tags": "[\"dairy\"]",
+  "translations": {
+    "name": {
+      "en": "Mozzarella",
+      "fi": "Mozzarella",
+      "sv": "Mozzarella"
+    }
+  },
+  "created_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  },
+  "updated_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68c018a1699aa89005b47e2c"
+  },
+  "name": "Spinach",
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e20"
+  },
+  "allergen_tags": "[]",
+  "translations": {
+    "name": {
+      "en": "Spinach",
+      "fi": "Pinaatti",
+      "sv": "Spenat"
+    }
+  },
+  "created_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  },
+  "updated_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68c018a1699aa89005b47e2b"
+  },
+  "name": "Almonds",
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1d"
+  },
+  "allergen_tags": "[\"nuts\"]",
+  "translations": {
+    "name": {
+      "en": "Almonds",
+      "fi": "Mantelit",
+      "sv": "Mandlar"
+    }
+  },
+  "created_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  },
+  "updated_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68c018a1699aa89005b47e23"
+  },
+  "name": "Chicken Breast",
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1c"
+  },
+  "allergen_tags": "[]",
+  "translations": {
+    "name": {
+      "en": "Chicken Breast",
+      "fi": "Kananrinta",
+      "sv": "KycklingbrÃ¶st"
+    }
+  },
+  "created_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  },
+  "updated_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68c018a1699aa89005b47e2a"
+  },
+  "name": "Blueberries",
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e21"
+  },
+  "allergen_tags": "[]",
+  "translations": {
+    "name": {
+      "en": "Blueberries",
+      "fi": "Mustikat",
+      "sv": "BlÃ¥bÃ¤r"
+    }
+  },
+  "created_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  },
+  "updated_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68c018a1699aa89005b47e28"
+  },
+  "name": "Cherry Tomatoes",
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e20"
+  },
+  "allergen_tags": "[]",
+  "translations": {
+    "name": {
+      "en": "Cherry Tomatoes",
+      "fi": "Kirsikkatomaatit",
+      "sv": "KÃ¶rsbÃ¤rstomater"
+    }
+  },
+  "created_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  },
+  "updated_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68c018a1699aa89005b47e29"
+  },
+  "name": "Avocado",
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e21"
+  },
+  "allergen_tags": "[]",
+  "translations": {
+    "name": {
+      "en": "Avocado",
+      "fi": "Avokado",
+      "sv": "Avokado"
+    }
+  },
+  "created_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  },
+  "updated_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68c018a2699aa89005b47e2d"
+  },
+  "name": "Walnuts",
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1d"
+  },
+  "allergen_tags": "[\"nuts\"]",
+  "translations": {
+    "name": {
+      "en": "Walnuts",
+      "fi": "SaksanpÃ¤hkinÃ¤t",
+      "sv": "ValnÃ¶tter"
+    }
+  },
+  "created_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  },
+  "updated_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68c018a2699aa89005b47e2e"
+  },
+  "name": "Basil",
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1f"
+  },
+  "allergen_tags": "[]",
+  "translations": {
+    "name": {
+      "en": "Basil",
+      "fi": "Basilika",
+      "sv": "Basilika"
+    }
+  },
+  "created_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  },
+  "updated_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68c018a2699aa89005b47e2f"
+  },
+  "name": "Quinoa",
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e22"
+  },
+  "allergen_tags": "[]",
+  "translations": {
+    "name": {
+      "en": "Quinoa",
+      "fi": "Kvinoa",
+      "sv": "Quinoa"
+    }
+  },
+  "created_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  },
+  "updated_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68c018a2699aa89005b47e31"
+  },
+  "name": "Red Bell Pepper",
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e20"
+  },
+  "allergen_tags": "[]",
+  "translations": {
+    "name": {
+      "en": "Red Bell Pepper",
+      "fi": "Punainen paprika",
+      "sv": "RÃ¶d paprika"
+    }
+  },
+  "created_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  },
+  "updated_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68c018a2699aa89005b47e32"
+  },
+  "name": "Whole Wheat Pasta",
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e22"
+  },
+  "allergen_tags": "[\"gluten\"]",
+  "translations": {
+    "name": {
+      "en": "Whole Wheat Pasta",
+      "fi": "TÃ¤ysjyvÃ¤pasta",
+      "sv": "Fullkornspasta"
+    }
+  },
+  "created_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  },
+  "updated_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68c018a1699aa89005b47e26"
+  },
+  "name": "Ground Beef",
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1c"
+  },
+  "allergen_tags": "[]",
+  "translations": {
+    "name": {
+      "en": "Ground Beef",
+      "fi": "Jauheliha",
+      "sv": "KÃ¶ttfÃ¤rs"
+    }
+  },
+  "created_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  },
+  "updated_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68c018a2699aa89005b47e30"
+  },
+  "name": "Black Pepper",
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1f"
+  },
+  "allergen_tags": "[]",
+  "translations": {
+    "name": {
+      "en": "Black Pepper",
+      "fi": "Mustapippuri",
+      "sv": "Svartpeppar"
+    }
+  },
+  "created_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  },
+  "updated_at": {
+    "$date": "2025-09-09T12:08:01.955Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f7"
+  },
+  "name": "Tomato Sauce",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68e79f43b7afb57d706ea5f4"
+  },
+  "translations": {
+    "name": {
+      "en": "Tomato Sauce",
+      "fi": "Tomaattikastike",
+      "sv": "TomatsÃ¥s"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f5"
+  },
+  "name": "Mozzarella Cheese",
+  "allergen_tags": "[\"dairy\"]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68e79f43b7afb57d706ea5f4"
+  },
+  "translations": {
+    "name": {
+      "en": "Mozzarella Cheese",
+      "fi": "Mozzarellajuusto",
+      "sv": "Mozzarella ost"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f6"
+  },
+  "name": "Flour",
+  "allergen_tags": "[\"gluten\"]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e22"
+  },
+  "translations": {
+    "name": {
+      "en": "Flour",
+      "fi": "Jauho",
+      "sv": "MjÃ¶l"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea6f6a"
+  },
+  "name": "Yeast",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1f"
+  },
+  "translations": {
+    "name": {
+      "en": "Yeast",
+      "fi": "Hiiva",
+      "sv": "JÃ¤st"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f6b"
+  },
+  "name": "Sunflower Oil",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1f"
+  },
+  "translations": {
+    "name": {
+      "en": "Sunflower Oil",
+      "fi": "AuringonkukkaÃ¶ljy",
+      "sv": "Solrosolja"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f6c"
+  },
+  "name": "Salt",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1f"
+  },
+  "translations": {
+    "name": {
+      "en": "Salt",
+      "fi": "Suola",
+      "sv": "Salt"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f44b7afb57d706ea5f8"
+  },
+  "name": "Fresh Basil",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68e79f43b7afb57d706ea5f4"
+  },
+  "translations": {
+    "name": {
+      "en": "Fresh Basil",
+      "fi": "Tuore basilika",
+      "sv": "FÃ¤rsk basilika"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f6d"
+  },
+  "name": "Eggs",
+  "allergen_tags": "[\"eggs\"]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1c"
+  },
+  "translations": {
+    "name": {
+      "en": "Eggs",
+      "fi": "Kananmunat",
+      "sv": "Ã„gg"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f6e"
+  },
+  "name": "Butter",
+  "allergen_tags": "[\"dairy\"]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1e"
+  },
+  "translations": {
+    "name": {
+      "en": "Butter",
+      "fi": "Voi",
+      "sv": "SmÃ¶r"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f6f"
+  },
+  "name": "Milk",
+  "allergen_tags": "[\"dairy\"]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1e"
+  },
+  "translations": {
+    "name": {
+      "en": "Milk",
+      "fi": "Maito",
+      "sv": "MjÃ¶lk"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f70"
+  },
+  "name": "Heavy Cream",
+  "allergen_tags": "[\"dairy\"]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1e"
+  },
+  "translations": {
+    "name": {
+      "en": "Heavy Cream",
+      "fi": "Kuohukerma",
+      "sv": "VispgrÃ¤dde"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f71"
+  },
+  "name": "Parmesan Cheese",
+  "allergen_tags": "[\"dairy\"]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1e"
+  },
+  "translations": {
+    "name": {
+      "en": "Parmesan Cheese",
+      "fi": "Parmesaanijuusto",
+      "sv": "Parmesanost"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f72"
+  },
+  "name": "Shrimp",
+  "allergen_tags": "[\"shellfish\"]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1c"
+  },
+  "translations": {
+    "name": {
+      "en": "Shrimp",
+      "fi": "Katkarapu",
+      "sv": "RÃ¤kor"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f73"
+  },
+  "name": "Tuna",
+  "allergen_tags": "[\"fish\"]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1c"
+  },
+  "translations": {
+    "name": {
+      "en": "Tuna",
+      "fi": "Tonnikala",
+      "sv": "Tonfisk"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f74"
+  },
+  "name": "Cod",
+  "allergen_tags": "[\"fish\"]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1c"
+  },
+  "translations": {
+    "name": {
+      "en": "Cod",
+      "fi": "Turska",
+      "sv": "Torsk"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f75"
+  },
+  "name": "Pork",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1c"
+  },
+  "translations": {
+    "name": {
+      "en": "Pork",
+      "fi": "Sianliha",
+      "sv": "FlÃ¤sk"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f76"
+  },
+  "name": "Bacon",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1c"
+  },
+  "translations": {
+    "name": {
+      "en": "Bacon",
+      "fi": "Pekoni",
+      "sv": "Bacon"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f77"
+  },
+  "name": "Cashews",
+  "allergen_tags": "[\"nuts\"]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1d"
+  },
+  "translations": {
+    "name": {
+      "en": "Cashews",
+      "fi": "CashewpÃ¤hkinÃ¤t",
+      "sv": "CashewnÃ¶tter"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f78"
+  },
+  "name": "Peanuts",
+  "allergen_tags": "[\"nuts\"]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1d"
+  },
+  "translations": {
+    "name": {
+      "en": "Peanuts",
+      "fi": "MaapÃ¤hkinÃ¤t",
+      "sv": "JordnÃ¶tter"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f79"
+  },
+  "name": "Pine Nuts",
+  "allergen_tags": "[\"nuts\"]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1d"
+  },
+  "translations": {
+    "name": {
+      "en": "Pine Nuts",
+      "fi": "MÃ¤nnynsiemenet",
+      "sv": "PinjenÃ¶tter"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f7a"
+  },
+  "name": "Sesame Seeds",
+  "allergen_tags": "[\"sesame\"]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1d"
+  },
+  "translations": {
+    "name": {
+      "en": "Sesame Seeds",
+      "fi": "Seesaminsiemenet",
+      "sv": "SesamfrÃ¶n"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f7b"
+  },
+  "name": "Onion",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e20"
+  },
+  "translations": {
+    "name": {
+      "en": "Onion",
+      "fi": "Sipuli",
+      "sv": "LÃ¶k"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f7c"
+  },
+  "name": "Garlic",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e20"
+  },
+  "translations": {
+    "name": {
+      "en": "Garlic",
+      "fi": "Valkosipuli",
+      "sv": "VitlÃ¶k"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f7d"
+  },
+  "name": "Carrots",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e20"
+  },
+  "translations": {
+    "name": {
+      "en": "Carrots",
+      "fi": "Porkkanat",
+      "sv": "MorÃ¶tter"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f7e"
+  },
+  "name": "Broccoli",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e20"
+  },
+  "translations": {
+    "name": {
+      "en": "Broccoli",
+      "fi": "Parsakaali",
+      "sv": "Broccoli"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f7f"
+  },
+  "name": "Mushrooms",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e20"
+  },
+  "translations": {
+    "name": {
+      "en": "Mushrooms",
+      "fi": "Sienet",
+      "sv": "Svamp"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f80"
+  },
+  "name": "Lettuce",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e20"
+  },
+  "translations": {
+    "name": {
+      "en": "Lettuce",
+      "fi": "Lehtisalaatti",
+      "sv": "Sallad"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f81"
+  },
+  "name": "Cucumber",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e20"
+  },
+  "translations": {
+    "name": {
+      "en": "Cucumber",
+      "fi": "Kurkku",
+      "sv": "Gurka"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f82"
+  },
+  "name": "Lemon",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e21"
+  },
+  "translations": {
+    "name": {
+      "en": "Lemon",
+      "fi": "Sitruuna",
+      "sv": "Citron"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f83"
+  },
+  "name": "Apple",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e21"
+  },
+  "translations": {
+    "name": {
+      "en": "Apple",
+      "fi": "Omena",
+      "sv": "Ã„pple"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f84"
+  },
+  "name": "Rice",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e22"
+  },
+  "translations": {
+    "name": {
+      "en": "Rice",
+      "fi": "Riisi",
+      "sv": "Ris"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f85"
+  },
+  "name": "Bread",
+  "allergen_tags": "[\"gluten\"]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e22"
+  },
+  "translations": {
+    "name": {
+      "en": "Bread",
+      "fi": "LeipÃ¤",
+      "sv": "BrÃ¶d"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f86"
+  },
+  "name": "Oats",
+  "allergen_tags": "[\"gluten\"]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e22"
+  },
+  "translations": {
+    "name": {
+      "en": "Oats",
+      "fi": "Kaura",
+      "sv": "Havre"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f87"
+  },
+  "name": "Olive Oil",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1f"
+  },
+  "translations": {
+    "name": {
+      "en": "Olive Oil",
+      "fi": "OliiviÃ¶ljy",
+      "sv": "Olivolja"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f88"
+  },
+  "name": "Oregano",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1f"
+  },
+  "translations": {
+    "name": {
+      "en": "Oregano",
+      "fi": "Oregano",
+      "sv": "Oregano"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f43b7afb57d706ea5f89"
+  },
+  "name": "Thyme",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1f"
+  },
+  "translations": {
+    "name": {
+      "en": "Thyme",
+      "fi": "Timjami",
+      "sv": "Timjan"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f44b7afb57d706ea5f8a"
+  },
+  "name": "Rosemary",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1f"
+  },
+  "translations": {
+    "name": {
+      "en": "Rosemary",
+      "fi": "Rosmariini",
+      "sv": "Rosmarin"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f45b7afb57d706ea5f8b"
+  },
+  "name": "Paprika",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1f"
+  },
+  "translations": {
+    "name": {
+      "en": "Paprika",
+      "fi": "Paprika",
+      "sv": "Paprika"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f46b7afb57d706ea5f8c"
+  },
+  "name": "Soy Sauce",
+  "allergen_tags": "[\"soy\", \"gluten\"]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1f"
+  },
+  "translations": {
+    "name": {
+      "en": "Soy Sauce",
+      "fi": "Soijakastike",
+      "sv": "SojasÃ¥s"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68e79f47b7afb57d706ea5f8d"
+  },
+  "name": "Sugar",
+  "allergen_tags": "[]",
+  "is_active": true,
+  "restaurant_id": {
+    "$oid": "68e79f43b7afb57d706ea5f0"
+  },
+  "category_id": {
+    "$oid": "68c018a1699aa89005b47e1f"
+  },
+  "translations": {
+    "name": {
+      "en": "Sugar",
+      "fi": "Sokeri",
+      "sv": "Socker"
+    }
+  },
+  "created_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  },
+  "updated_at": {
+    "$date": "2025-10-09T11:40:51.995Z"
+  }
+}]

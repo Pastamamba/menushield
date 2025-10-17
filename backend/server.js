@@ -55,9 +55,25 @@ function getTranslatedContent(entity, language, field = 'name', fallbackLanguage
   }
   
   try {
-    const translations = JSON.parse(entity.translations);
+    // Handle both object and string formats
+    let translations = entity.translations;
+    if (typeof translations === 'string') {
+      translations = JSON.parse(translations);
+    }
+    
+    // Check for nested field structure: translations[field][language]
+    if (translations[field] && translations[field][language]) {
+      return translations[field][language];
+    }
+    
+    // Check for direct language structure: translations[language][field]
     if (translations[language] && translations[language][field]) {
       return translations[language][field];
+    }
+    
+    // Fallback to English
+    if (translations[field] && translations[field][fallbackLanguage]) {
+      return translations[field][fallbackLanguage];
     }
     if (translations[fallbackLanguage] && translations[fallbackLanguage][field]) {
       return translations[fallbackLanguage][field];
@@ -76,7 +92,7 @@ function translateDish(dish, language) {
     ...dish,
     name: getTranslatedContent(dish, language, 'name'),
     description: getTranslatedContent(dish, language, 'description'),
-    modificationNote: getTranslatedContent(dish, language, 'modificationNote')
+    modificationNote: getTranslatedContent(dish, language, 'modification_note') || dish.modification_note || dish.modificationNote
   };
   
   // Translate components if they exist
