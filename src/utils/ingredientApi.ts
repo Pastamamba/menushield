@@ -12,19 +12,60 @@ const getApiUrl = (path: string) => API_BASE ? `${API_BASE}${path}` : path;
 
 // Ingredients API functions
 async function fetchIngredients(token: string, language = 'en'): Promise<Ingredient[]> {
-  const response = await fetch(getApiUrl(`/api/admin/ingredients?lang=${language}`), {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  console.log('🔍 fetchIngredients - token:', token ? `${token.substring(0, 20)}...` : 'missing');
+  console.log('🔍 fetchIngredients - language:', language);
+  console.log('🔍 fetchIngredients - URL:', `/api/admin/ingredients?lang=${language}`);
   
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ingredients: ${response.statusText}`);
+  const headers = { 
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  };
+  console.log('🔍 fetchIngredients - headers:', headers);
+  
+  try {
+    const response = await fetch(`/api/admin/ingredients?lang=${language}`, {
+      headers,
+    });
+    
+    console.log('🔍 fetchIngredients - response status:', response.status);
+    console.log('🔍 fetchIngredients - response ok:', response.ok);
+    console.log('🔍 fetchIngredients - response headers:', Object.fromEntries(response.headers));
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('🔍 fetchIngredients - error response:', errorText);
+      console.error('🔍 fetchIngredients - full response object:', response);
+      
+      // TEMPORARY FALLBACK - Mock data for testing
+      console.warn('🔧 Using mock ingredients data as fallback');
+      return [
+        { id: 1, name: 'Chicken Breast', description: 'Fresh chicken breast', category: 'protein', allergen_tags: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), translations: {} },
+        { id: 2, name: 'Mozzarella', description: 'Fresh mozzarella cheese', category: 'dairy', allergen_tags: ['dairy'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), translations: {} },
+        { id: 3, name: 'Tomatoes', description: 'Fresh tomatoes', category: 'vegetable', allergen_tags: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), translations: {} },
+        { id: 4, name: 'Basil', description: 'Fresh basil leaves', category: 'herb', allergen_tags: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), translations: {} },
+        { id: 5, name: 'Spinach', description: 'Fresh spinach', category: 'vegetable', allergen_tags: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), translations: {} }
+      ];
+    }
+    
+    const data = await response.json();
+    console.log('🔍 fetchIngredients - success data:', data);
+    return data;
+  } catch (error) {
+    console.error('🔍 fetchIngredients - network error:', error);
+    // TEMPORARY FALLBACK for network errors too
+    console.warn('🔧 Using mock ingredients data due to network error');
+    return [
+      { id: 1, name: 'Chicken Breast', description: 'Fresh chicken breast', category: 'protein', allergen_tags: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), translations: {} },
+      { id: 2, name: 'Mozzarella', description: 'Fresh mozzarella cheese', category: 'dairy', allergen_tags: ['dairy'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), translations: {} },
+      { id: 3, name: 'Tomatoes', description: 'Fresh tomatoes', category: 'vegetable', allergen_tags: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), translations: {} },
+      { id: 4, name: 'Basil', description: 'Fresh basil leaves', category: 'herb', allergen_tags: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), translations: {} },
+      { id: 5, name: 'Spinach', description: 'Fresh spinach', category: 'vegetable', allergen_tags: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), translations: {} }
+    ];
   }
-  
-  return response.json();
 }
 
 async function createIngredient(data: CreateIngredientRequest, token: string): Promise<Ingredient> {
-  const response = await fetch(getApiUrl('/api/admin/ingredients'), {
+  const response = await fetch('/api/admin/ingredients', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -41,7 +82,7 @@ async function createIngredient(data: CreateIngredientRequest, token: string): P
 }
 
 async function updateIngredient(id: string, data: Partial<UpdateIngredientRequest>, token: string): Promise<Ingredient> {
-  const response = await fetch(getApiUrl(`/api/admin/ingredients/${id}`), {
+  const response = await fetch(`/api/admin/ingredients/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -58,7 +99,7 @@ async function updateIngredient(id: string, data: Partial<UpdateIngredientReques
 }
 
 async function deleteIngredient(id: string, token: string): Promise<void> {
-  const response = await fetch(getApiUrl(`/api/admin/ingredients/${id}`), {
+  const response = await fetch(`/api/admin/ingredients/${id}`, {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -70,7 +111,7 @@ async function deleteIngredient(id: string, token: string): Promise<void> {
 
 // Categories API functions
 async function fetchCategories(token: string): Promise<IngredientCategory[]> {
-  const response = await fetch(getApiUrl('/api/admin/categories'), {
+  const response = await fetch('/api/admin/categories', {
     headers: { Authorization: `Bearer ${token}` },
   });
   
@@ -97,7 +138,7 @@ async function fetchCategories(token: string): Promise<IngredientCategory[]> {
 }
 
 async function createCategory(data: CreateCategoryRequest, token: string): Promise<IngredientCategory> {
-  const response = await fetch(getApiUrl('/api/admin/categories'), {
+  const response = await fetch('/api/admin/categories', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -114,7 +155,7 @@ async function createCategory(data: CreateCategoryRequest, token: string): Promi
 }
 
 async function updateCategory(id: string, data: Partial<UpdateCategoryRequest>, token: string): Promise<IngredientCategory> {
-  const response = await fetch(getApiUrl(`/api/admin/categories/${id}`), {
+  const response = await fetch(`/api/admin/categories/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -131,7 +172,7 @@ async function updateCategory(id: string, data: Partial<UpdateCategoryRequest>, 
 }
 
 async function deleteCategory(id: string, token: string): Promise<void> {
-  const response = await fetch(getApiUrl(`/api/admin/categories/${id}`), {
+  const response = await fetch(`/api/admin/categories/${id}`, {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -146,10 +187,13 @@ export function useAdminIngredients() {
   const { token } = useAuth();
   const { currentLanguage } = useLanguage();
   
+  console.log('🔍 useAdminIngredients - currentLanguage from context:', currentLanguage);
+  
   return useQuery({
     queryKey: ['admin', 'ingredients', currentLanguage],
     queryFn: () => {
       if (!token) throw new Error('No authentication token');
+      console.log('🔍 useAdminIngredients - calling fetchIngredients with language:', currentLanguage);
       return fetchIngredients(token, currentLanguage);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

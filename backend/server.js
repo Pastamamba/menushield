@@ -1019,10 +1019,12 @@ app.delete("/api/admin/menu/:id", requireAuth, async (req, res) => {
 // GET /api/admin/ingredients - Get all ingredients
 app.get("/api/admin/ingredients", requireAuth, async (req, res) => {
   try {
-    console.log("Fetching ingredients from database...");
+    console.log("🔍 Fetching ingredients from database...");
     const language = req.query.lang || req.query.language || 'en'; // Get language parameter
+    console.log("🔍 Requested language:", language);
     
     let ingredients;
+    let usingFallback = false;
     try {
       ingredients = await prisma.ingredient.findMany({
         include: {
@@ -1030,16 +1032,23 @@ app.get("/api/admin/ingredients", requireAuth, async (req, res) => {
         },
         orderBy: [{ name: "asc" }],
       });
-      console.log(`Found ${ingredients.length} ingredients in database`);
+      console.log(`🔍 Found ${ingredients.length} ingredients in database`);
+      
+      if (ingredients.length === 0) {
+        console.log("🔍 Database is empty, using fallback JSON data");
+        throw new Error("No ingredients in database");
+      }
+      
     } catch (dbError) {
-      console.error("Database error, falling back to JSON data:", dbError);
+      console.error("🔍 Database error, falling back to JSON data:", dbError.message);
+      usingFallback = true;
       // Fallback to JSON data if database fails
       const ingredientsPath = path.join(__dirname, 'data', 'ingredients.json');
       
       if (fs.existsSync(ingredientsPath)) {
         const rawData = fs.readFileSync(ingredientsPath, 'utf8');
         const jsonIngredients = JSON.parse(rawData);
-        console.log(`Using fallback JSON data with ${jsonIngredients.length} ingredients`);
+        console.log(`🔍 Using fallback JSON data with ${jsonIngredients.length} ingredients`);
         
         // Transform JSON data to match expected format
         ingredients = jsonIngredients.map(ing => ({
@@ -1061,6 +1070,8 @@ app.get("/api/admin/ingredients", requireAuth, async (req, res) => {
     const transformedIngredients = ingredients.map((ingredient) => {
       const translatedIngredient = translateIngredient(ingredient, language);
       
+      console.log(`🔍 Ingredient ${ingredient.name} -> ${translatedIngredient.name} (lang: ${language}, hasTranslations: ${!!ingredient.translations})`);
+      
       return {
         id: ingredient.id,
         name: translatedIngredient.name,
@@ -1074,7 +1085,7 @@ app.get("/api/admin/ingredients", requireAuth, async (req, res) => {
       };
     });
 
-    console.log(`Returning ${transformedIngredients.length} transformed ingredients`);
+    console.log(`🔍 Returning ${transformedIngredients.length} transformed ingredients (fallback: ${usingFallback})`);
     res.json(transformedIngredients);
   } catch (error) {
     console.error("Error fetching ingredients:", error);
