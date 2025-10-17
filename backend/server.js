@@ -169,7 +169,7 @@ app.use(
   cors({
     origin: process.env.NODE_ENV === 'production' 
       ? ['https://menushield.netlify.app', 'https://menushield-production.up.railway.app']
-      : ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5176'],
+      : ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5176', 'http://127.0.0.1:5177'],
     credentials: true,
   })
 );
@@ -1012,14 +1012,45 @@ app.delete("/api/admin/menu/:id", requireAuth, async (req, res) => {
 // GET /api/admin/ingredients - Get all ingredients
 app.get("/api/admin/ingredients", requireAuth, async (req, res) => {
   try {
+    console.log("Fetching ingredients from database...");
     const language = req.query.lang || req.query.language || 'en'; // Get language parameter
     
-    const ingredients = await prisma.ingredient.findMany({
-      include: {
-        category: true,
-      },
-      orderBy: [{ name: "asc" }],
-    });
+    let ingredients;
+    try {
+      ingredients = await prisma.ingredient.findMany({
+        include: {
+          category: true,
+        },
+        orderBy: [{ name: "asc" }],
+      });
+      console.log(`Found ${ingredients.length} ingredients in database`);
+    } catch (dbError) {
+      console.error("Database error, falling back to JSON data:", dbError);
+      // Fallback to JSON data if database fails
+      const fs = require('fs');
+      const path = require('path');
+      const ingredientsPath = path.join(__dirname, 'data', 'ingredients.json');
+      
+      if (fs.existsSync(ingredientsPath)) {
+        const rawData = fs.readFileSync(ingredientsPath, 'utf8');
+        const jsonIngredients = JSON.parse(rawData);
+        console.log(`Using fallback JSON data with ${jsonIngredients.length} ingredients`);
+        
+        // Transform JSON data to match expected format
+        ingredients = jsonIngredients.map(ing => ({
+          id: ing.id,
+          name: ing.name,
+          description: ing.description || '',
+          allergenTags: JSON.stringify(ing.allergen_tags || []),
+          category: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          translations: ing.translations || {}
+        }));
+      } else {
+        throw new Error("No database connection and no fallback data available");
+      }
+    }
 
     // Transform to match frontend expectations with translation support
     const transformedIngredients = ingredients.map((ingredient) => {
@@ -1038,10 +1069,11 @@ app.get("/api/admin/ingredients", requireAuth, async (req, res) => {
       };
     });
 
+    console.log(`Returning ${transformedIngredients.length} transformed ingredients`);
     res.json(transformedIngredients);
   } catch (error) {
     console.error("Error fetching ingredients:", error);
-    res.status(500).json({ error: "Failed to fetch ingredients" });
+    res.status(500).json({ error: "Failed to fetch ingredients", details: error.message });
   }
 });
 
