@@ -6,6 +6,18 @@ import { queryClient } from '../utils/queryClient';
 import logger from '../utils/logger';
 import type { Restaurant } from '../types';
 
+// API base URL (same as other API utils)
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
+// Helper function for API URLs
+const getApiUrl = (path: string) => API_BASE ? `${API_BASE}${path}` : path;
+
+// API base URL
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
+// Helper function for API URLs
+const getApiUrl = (path: string) => API_BASE ? `${API_BASE}${path}` : path;
+
 interface RestaurantContextType {
   restaurant: Restaurant | null;
   restaurantSlug: string | null;
@@ -34,7 +46,7 @@ export function RestaurantProvider({ children }: RestaurantProviderProps) {
 
   const fetchRestaurantBySlug = async (slug: string): Promise<Restaurant | null> => {
     try {
-      const response = await fetch(`/api/restaurants/slug/${slug}`);
+      const response = await fetch(getApiUrl(`/api/restaurants/slug/${slug}`));
       
       if (!response.ok) {
         if (response.status === 404) {

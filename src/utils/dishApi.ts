@@ -6,6 +6,12 @@ import { queryKeys } from "./queryClient";
 import logger from "./logger";
 import type { Dish, CreateDishRequest } from "../types";
 
+// API base URL (same as ingredientApi)
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
+// Helper function for API URLs
+const getApiUrl = (path: string) => API_BASE ? `${API_BASE}${path}` : path;
+
 // Background prefetch helper for menu data
 export const prefetchMenuData = (queryClient: any, restaurantSlug: string, language = 'en') => {
   return queryClient.prefetchQuery({
@@ -19,7 +25,7 @@ export const prefetchMenuData = (queryClient: any, restaurantSlug: string, langu
 const api = {
   // Guest menu by restaurant slug
   getMenuBySlug: async (slug: string, language = 'en'): Promise<Dish[]> => {
-    const response = await fetch(`/api/menu/by-slug/${slug}?lang=${language}`);
+    const response = await fetch(getApiUrl(`/api/menu/by-slug/${slug}?lang=${language}`));
     if (!response.ok) {
       throw new Error(`Failed to fetch menu: ${response.status}`);
     }
@@ -44,7 +50,7 @@ const api = {
 
   // Legacy guest menu (fallback)
   getMenu: async (language = 'en'): Promise<Dish[]> => {
-    const response = await fetch(`/api/menu?lang=${language}`);
+    const response = await fetch(getApiUrl(`/api/menu?lang=${language}`));
     if (!response.ok) {
       throw new Error(`Failed to fetch menu: ${response.status}`);
     }
@@ -69,7 +75,7 @@ const api = {
 
   // Admin dishes
   getAdminDishes: async (token: string, language = 'en'): Promise<Dish[]> => {
-    const response = await fetch(`/api/admin/menu?lang=${language}`, {
+    const response = await fetch(getApiUrl(`/api/admin/menu?lang=${language}`), {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!response.ok) {
@@ -101,7 +107,7 @@ const api = {
 
   // Create dish
   createDish: async (dish: CreateDishRequest, token: string): Promise<Dish> => {
-    const response = await fetch("/api/admin/menu", {
+    const response = await fetch(getApiUrl("/api/admin/menu"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -121,7 +127,7 @@ const api = {
     dish: Partial<CreateDishRequest>,
     token: string
   ): Promise<Dish> => {
-    const response = await fetch(`/api/admin/menu/${id}`, {
+    const response = await fetch(getApiUrl(`/api/admin/menu/${id}`), {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -137,7 +143,7 @@ const api = {
 
   // Delete dish
   deleteDish: async (id: string, token: string): Promise<void> => {
-    const response = await fetch(`/api/admin/menu/${id}`, {
+    const response = await fetch(getApiUrl(`/api/admin/menu/${id}`), {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });

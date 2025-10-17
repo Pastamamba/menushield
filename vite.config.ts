@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig(() => ({
   plugins: [react()],
   server: {
     port: 5176,
@@ -9,16 +9,17 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       port: 5176,
     },
-    proxy: {
-      "/api": {
-        target:
-          mode === "production"
-            ? "http://backend:4000"
-            : "http://localhost:4000",
-        changeOrigin: true,
-        secure: false,
-      },
-    },
+    // Proxy disabled - using VITE_API_URL from .env instead
+    // proxy: {
+    //   "/api": {
+    //     target:
+    //       mode === "production"
+    //         ? "http://backend:4000"
+    //         : "http://localhost:4000",
+    //     changeOrigin: true,
+    //     secure: false,
+    //   },
+    // },
   },
   build: {
     outDir: "dist",
