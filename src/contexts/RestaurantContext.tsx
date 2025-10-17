@@ -12,12 +12,6 @@ const API_BASE = import.meta.env.VITE_API_URL || '';
 // Helper function for API URLs
 const getApiUrl = (path: string) => API_BASE ? `${API_BASE}${path}` : path;
 
-// API base URL
-const API_BASE = import.meta.env.VITE_API_URL || '';
-
-// Helper function for API URLs
-const getApiUrl = (path: string) => API_BASE ? `${API_BASE}${path}` : path;
-
 interface RestaurantContextType {
   restaurant: Restaurant | null;
   restaurantSlug: string | null;
