@@ -1,15 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../auth/AuthContext";
 import { useRestaurant } from "../contexts/RestaurantContext";
+import { useLanguage } from "../contexts/LanguageContext";
 import { queryKeys } from "./queryClient";
 import logger from "./logger";
 import type { Dish, CreateDishRequest } from "../types";
 
 // Background prefetch helper for menu data
-export const prefetchMenuData = (queryClient: any, restaurantSlug: string) => {
+export const prefetchMenuData = (queryClient: any, restaurantSlug: string, language = 'en') => {
   return queryClient.prefetchQuery({
-    queryKey: [...queryKeys.dishes, restaurantSlug],
-    queryFn: () => api.getMenuBySlug(restaurantSlug),
+    queryKey: [...queryKeys.dishes, restaurantSlug, language],
+    queryFn: () => api.getMenuBySlug(restaurantSlug, language),
     staleTime: 1000 * 60 * 5, // 5 minutes for background refresh
   });
 };
@@ -17,8 +18,8 @@ export const prefetchMenuData = (queryClient: any, restaurantSlug: string) => {
 // API functions
 const api = {
   // Guest menu by restaurant slug
-  getMenuBySlug: async (slug: string): Promise<Dish[]> => {
-    const response = await fetch(`/api/menu/by-slug/${slug}`);
+  getMenuBySlug: async (slug: string, language = 'en'): Promise<Dish[]> => {
+    const response = await fetch(`/api/menu/by-slug/${slug}?lang=${language}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch menu: ${response.status}`);
     }
@@ -42,8 +43,8 @@ const api = {
   },
 
   // Legacy guest menu (fallback)
-  getMenu: async (): Promise<Dish[]> => {
-    const response = await fetch("/api/menu");
+  getMenu: async (language = 'en'): Promise<Dish[]> => {
+    const response = await fetch(`/api/menu?lang=${language}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch menu: ${response.status}`);
     }
@@ -67,8 +68,8 @@ const api = {
   },
 
   // Admin dishes
-  getAdminDishes: async (token: string): Promise<Dish[]> => {
-    const response = await fetch("/api/admin/menu", {
+  getAdminDishes: async (token: string, language = 'en'): Promise<Dish[]> => {
+    const response = await fetch(`/api/admin/menu?lang=${language}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!response.ok) {
@@ -149,19 +150,20 @@ const api = {
 // Hooks
 export const useMenu = () => {
   const { restaurantSlug } = useRestaurant();
+  const { currentLanguage } = useLanguage();
 
-  logger.debug('useMenu hook - restaurantSlug:', restaurantSlug);
+  logger.debug('useMenu hook - restaurantSlug:', restaurantSlug, 'language:', currentLanguage);
 
   return useQuery({
-    queryKey: [...queryKeys.dishes, restaurantSlug],
+    queryKey: [...queryKeys.dishes, restaurantSlug, currentLanguage],
     queryFn: () => {
-      logger.debug('useMenu queryFn - fetching for slug:', restaurantSlug);
+      logger.debug('useMenu queryFn - fetching for slug:', restaurantSlug, 'language:', currentLanguage);
       if (restaurantSlug) {
-        return api.getMenuBySlug(restaurantSlug);
+        return api.getMenuBySlug(restaurantSlug, currentLanguage);
       }
       // Fallback to legacy API
       logger.debug('useMenu queryFn - using legacy API');
-      return api.getMenu();
+      return api.getMenu(currentLanguage);
     },
     enabled: true, // Always run the query - let the queryFn handle the logic
     staleTime: 1000 * 60 * 10, // 10 minutes (was 5) - reduce API calls
@@ -175,12 +177,13 @@ export const useMenu = () => {
 
 export const useAdminDishes = () => {
   const { token } = useAuth();
+  const { currentLanguage } = useLanguage();
 
   return useQuery({
-    queryKey: queryKeys.adminDishes,
+    queryKey: [...queryKeys.adminDishes, currentLanguage],
     queryFn: () => {
       if (!token) throw new Error("No authentication token");
-      return api.getAdminDishes(token);
+      return api.getAdminDishes(token, currentLanguage);
     },
     enabled: !!token, // Only run query if token exists
     staleTime: 1000 * 60 * 5, // 5 minutes (admin data changes more frequently)
@@ -194,6 +197,7 @@ export const useCreateDish = () => {
   const { token } = useAuth();
   const queryClient = useQueryClient();
   const { restaurantSlug } = useRestaurant();
+  const { currentLanguage } = useLanguage();
 
   return useMutation({
     mutationFn: (dish: CreateDishRequest) => {
@@ -202,12 +206,12 @@ export const useCreateDish = () => {
     },
     onSuccess: () => {
       // Invalidate and refetch dishes
-      queryClient.invalidateQueries({ queryKey: queryKeys.adminDishes });
-      queryClient.invalidateQueries({ queryKey: [...queryKeys.dishes, restaurantSlug] });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.adminDishes, currentLanguage] });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.dishes, restaurantSlug, currentLanguage] });
       
       // Background prefetch updated menu data
       if (restaurantSlug) {
-        prefetchMenuData(queryClient, restaurantSlug);
+        prefetchMenuData(queryClient, restaurantSlug, currentLanguage);
       }
     },
   });
@@ -217,6 +221,7 @@ export const useUpdateDish = () => {
   const { token } = useAuth();
   const queryClient = useQueryClient();
   const { restaurantSlug } = useRestaurant();
+  const { currentLanguage } = useLanguage();
 
   return useMutation({
     mutationFn: ({
@@ -231,12 +236,12 @@ export const useUpdateDish = () => {
     },
     onSuccess: () => {
       // Invalidate and refetch dishes
-      queryClient.invalidateQueries({ queryKey: queryKeys.adminDishes });
-      queryClient.invalidateQueries({ queryKey: [...queryKeys.dishes, restaurantSlug] });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.adminDishes, currentLanguage] });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.dishes, restaurantSlug, currentLanguage] });
       
       // Background prefetch updated menu data
       if (restaurantSlug) {
-        prefetchMenuData(queryClient, restaurantSlug);
+        prefetchMenuData(queryClient, restaurantSlug, currentLanguage);
       }
     },
   });
@@ -246,6 +251,7 @@ export const useDeleteDish = () => {
   const { token } = useAuth();
   const queryClient = useQueryClient();
   const { restaurantSlug } = useRestaurant();
+  const { currentLanguage } = useLanguage();
 
   return useMutation({
     mutationFn: (id: string) => {
@@ -254,12 +260,12 @@ export const useDeleteDish = () => {
     },
     onSuccess: () => {
       // Invalidate and refetch dishes
-      queryClient.invalidateQueries({ queryKey: queryKeys.adminDishes });
-      queryClient.invalidateQueries({ queryKey: [...queryKeys.dishes, restaurantSlug] });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.adminDishes, currentLanguage] });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.dishes, restaurantSlug, currentLanguage] });
       
       // Background prefetch updated menu data
       if (restaurantSlug) {
-        prefetchMenuData(queryClient, restaurantSlug);
+        prefetchMenuData(queryClient, restaurantSlug, currentLanguage);
       }
     },
   });

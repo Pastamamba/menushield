@@ -45,6 +45,61 @@ function safeParseArray(val) {
   return [];
 }
 
+// Helper to get translated content from translations JSON field
+function getTranslatedContent(entity, language, field = 'name', fallbackLanguage = 'en') {
+  if (!entity) return '';
+  
+  // If no translations field, return the original field
+  if (!entity.translations) {
+    return entity[field] || '';
+  }
+  
+  try {
+    const translations = JSON.parse(entity.translations);
+    if (translations[language] && translations[language][field]) {
+      return translations[language][field];
+    }
+    if (translations[fallbackLanguage] && translations[fallbackLanguage][field]) {
+      return translations[fallbackLanguage][field];
+    }
+  } catch (e) {
+    if (isDev) console.warn('Translation parsing error:', e);
+  }
+  
+  // Fallback to original field
+  return entity[field] || '';
+}
+
+// Helper to translate dish with all fields
+function translateDish(dish, language) {
+  const translated = {
+    ...dish,
+    name: getTranslatedContent(dish, language, 'name'),
+    description: getTranslatedContent(dish, language, 'description'),
+    modificationNote: getTranslatedContent(dish, language, 'modificationNote')
+  };
+  
+  // Translate components if they exist
+  if (dish.components && Array.isArray(dish.components)) {
+    translated.components = dish.components.map(component => ({
+      ...component,
+      name: component.translations ? getTranslatedContent(component, language, 'name') : component.name,
+      description: component.translations ? getTranslatedContent(component, language, 'description') : (component.description || '')
+    }));
+  }
+  
+  return translated;
+}
+
+// Helper to translate ingredient
+function translateIngredient(ingredient, language) {
+  return {
+    ...ingredient,
+    name: getTranslatedContent(ingredient, language, 'name'),
+    description: getTranslatedContent(ingredient, language, 'description')
+  };
+}
+
 // Validate JWT_SECRET in production
 if (!isDev && (!process.env.JWT_SECRET || process.env.JWT_SECRET === "replace_with_strong_secret")) {
   console.error('⚠️ CRITICAL: Set a strong JWT_SECRET in production!');
@@ -301,6 +356,7 @@ app.get("/api/menu", async (req, res) => {
   try {
     // Legacy endpoint - default to demo-restaurant if no restaurant specified
     const restaurantSlug = req.query.r || req.query.restaurant || 'demo-restaurant';
+    const language = req.query.lang || req.query.language || 'en'; // Get language parameter
 
     // Find restaurant by slug
     const restaurant = await prisma.restaurant.findUnique({
@@ -321,8 +377,11 @@ app.get("/api/menu", async (req, res) => {
       orderBy: { displayOrder: 'asc' },
     });
 
-    // Transform for guest view with EXTRA safety
+    // Transform for guest view with translation support
     const guestMenu = dishes.map((dish) => {
+      // Translate the dish based on language parameter
+      const translatedDish = translateDish(dish, language);
+
       let allergenTags;
       try {
         allergenTags = safeParseArray(dish.allergenTags);
@@ -341,6 +400,12 @@ app.get("/api/menu", async (req, res) => {
         if (!Array.isArray(components)) {
           components = [];
         }
+        // Translate component names
+        components = components.map(comp => ({
+          ...comp,
+          name: comp.translations ? getTranslatedContent(comp, language, 'name') : comp.name,
+          description: comp.translations ? getTranslatedContent(comp, language, 'description') : (comp.description || '')
+        }));
       } catch (e) {
         console.error('Components parsing error for dish', dish.name, ':', e);
         components = [];
@@ -359,13 +424,13 @@ app.get("/api/menu", async (req, res) => {
 
       return {
         id: dish.id,
-        name: dish.name,
-        description: dish.description,
+        name: translatedDish.name,
+        description: translatedDish.description,
         price: dish.price,
         category: dish.category,
         ingredients: ingredients,
         allergen_tags: allergenTags,
-        modification_note: dish.modificationNote,
+        modification_note: translatedDish.modificationNote,
         is_modifiable: dish.isModifiable,
         components: components,
       };
@@ -394,13 +459,21 @@ app.get("/api/categories", async (req, res) => {
 // Public: fetch ingredients
 app.get("/api/ingredients", async (req, res) => {
   try {
+    const language = req.query.lang || req.query.language || 'en'; // Get language parameter
+    
     const ingredients = await prisma.ingredient.findMany({
       include: {
         category: true
       },
       orderBy: { name: 'asc' }
     });
-    res.json(ingredients);
+    
+    // Translate ingredients based on language parameter
+    const translatedIngredients = ingredients.map(ingredient => 
+      translateIngredient(ingredient, language)
+    );
+    
+    res.json(translatedIngredients);
   } catch (error) {
     console.error("Error fetching ingredients:", error);
     res.status(500).json({ error: "Failed to fetch ingredients" });
@@ -690,6 +763,8 @@ function requireAuth(req, res, next) {
 // Admin: list all dishes
 app.get("/api/admin/menu", requireAuth, async (req, res) => {
   try {
+    const language = req.query.lang || req.query.language || 'en'; // Get language parameter
+    
     const dishes = await prisma.dish.findMany({
       where: {
         restaurantId: req.user.restaurantId, // Only dishes for this restaurant
@@ -702,24 +777,29 @@ app.get("/api/admin/menu", requireAuth, async (req, res) => {
 
     const formattedDishes = dishes.map((dish) => {
       try {
+        // Translate the dish based on language parameter
+        const translatedDish = translateDish(dish, language);
+        
         const allergenTags = safeParseArray(dish.allergenTags);
         const components = safeParseArray(dish.components);
         const ingredients = dish.ingredients ? safeParseArray(dish.ingredients) : [];
         
         return {
           id: dish.id,
-          name: dish.name,
-          description: dish.description,
+          name: translatedDish.name,
+          description: translatedDish.description,
           price: dish.price,
           category: dish.category,
           ingredients: Array.isArray(ingredients) ? ingredients : [],
           allergen_tags: Array.isArray(allergenTags) ? allergenTags : [],
-          modification_note: dish.modificationNote,
+          modification_note: translatedDish.modificationNote,
           is_modifiable: dish.isModifiable,
           is_active: dish.isActive !== undefined ? dish.isActive : true,
           components: Array.isArray(components) ? components : [],
           created_at: dish.createdAt,
           updated_at: dish.updatedAt,
+          // Include original translations for admin editing
+          translations: dish.translations,
         };
       } catch (error) {
         console.error(`Error formatting admin dish ${dish.name}:`, error);
@@ -916,6 +996,8 @@ app.delete("/api/admin/menu/:id", requireAuth, async (req, res) => {
 // GET /api/admin/ingredients - Get all ingredients
 app.get("/api/admin/ingredients", requireAuth, async (req, res) => {
   try {
+    const language = req.query.lang || req.query.language || 'en'; // Get language parameter
+    
     const ingredients = await prisma.ingredient.findMany({
       where: {
         restaurantId: req.user.restaurantId, // Only ingredients for this restaurant
@@ -926,15 +1008,22 @@ app.get("/api/admin/ingredients", requireAuth, async (req, res) => {
       orderBy: [{ name: "asc" }],
     });
 
-    // Transform to match frontend expectations
-    const transformedIngredients = ingredients.map((ingredient) => ({
-      id: ingredient.id,
-      name: ingredient.name,
-      category: ingredient.category?.name?.toLowerCase() || "other",
-      allergen_tags: JSON.parse(ingredient.allergenTags || "[]"),
-      createdAt: ingredient.createdAt,
-      updatedAt: ingredient.updatedAt,
-    }));
+    // Transform to match frontend expectations with translation support
+    const transformedIngredients = ingredients.map((ingredient) => {
+      const translatedIngredient = translateIngredient(ingredient, language);
+      
+      return {
+        id: ingredient.id,
+        name: translatedIngredient.name,
+        description: translatedIngredient.description,
+        category: ingredient.category?.name?.toLowerCase() || "other",
+        allergen_tags: JSON.parse(ingredient.allergenTags || "[]"),
+        createdAt: ingredient.createdAt,
+        updatedAt: ingredient.updatedAt,
+        // Include original translations for admin editing
+        translations: ingredient.translations,
+      };
+    });
 
     res.json(transformedIngredients);
   } catch (error) {
@@ -1275,6 +1364,7 @@ app.get("/api/my-restaurants", requireAuth, async (req, res) => {
 app.get("/api/menu/by-slug/:slug", async (req, res) => {
   try {
     const { slug } = req.params;
+    const language = req.query.lang || req.query.language || 'en'; // Get language parameter
 
     // First find the restaurant by slug
     const restaurant = await prisma.restaurant.findUnique({
@@ -1295,21 +1385,29 @@ app.get("/api/menu/by-slug/:slug", async (req, res) => {
       orderBy: { displayOrder: 'asc' },
     });
 
-    // Transform dishes for frontend compatibility
-    const transformedDishes = dishes.map(dish => ({
-      ...dish,
-      allergen_tags: JSON.parse(dish.allergenTags || "[]"),
-      modification_note: dish.modificationNote,
-      is_modifiable: dish.isModifiable,
-      is_active: dish.isActive,
-      is_featured: dish.isFeatured,
-      display_order: dish.displayOrder,
-      image_url: dish.imageUrl,
-      restaurant_id: dish.restaurantId,
-      category_id: dish.categoryId,
-      created_at: dish.createdAt,
-      updated_at: dish.updatedAt,
-    }));
+    // Transform dishes for frontend compatibility with translation support
+    const transformedDishes = dishes.map(dish => {
+      // Translate the dish based on language parameter
+      const translatedDish = translateDish(dish, language);
+      
+      return {
+        ...dish,
+        name: translatedDish.name,
+        description: translatedDish.description,
+        modificationNote: translatedDish.modificationNote,
+        allergen_tags: JSON.parse(dish.allergenTags || "[]"),
+        modification_note: translatedDish.modificationNote,
+        is_modifiable: dish.isModifiable,
+        is_active: dish.isActive,
+        is_featured: dish.isFeatured,
+        display_order: dish.displayOrder,
+        image_url: dish.imageUrl,
+        restaurant_id: dish.restaurantId,
+        category_id: dish.categoryId,
+        created_at: dish.createdAt,
+        updated_at: dish.updatedAt,
+      };
+    });
 
     res.json(transformedDishes);
   } catch (error) {

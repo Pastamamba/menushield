@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import logger from './logger';
 import type { Ingredient, CreateIngredientRequest, UpdateIngredientRequest, IngredientCategory, CreateCategoryRequest, UpdateCategoryRequest } from '../types';
 
@@ -10,8 +11,8 @@ const API_BASE = import.meta.env.VITE_API_URL || '';
 const getApiUrl = (path: string) => API_BASE ? `${API_BASE}${path}` : path;
 
 // Ingredients API functions
-async function fetchIngredients(token: string): Promise<Ingredient[]> {
-  const response = await fetch(getApiUrl('/api/admin/ingredients'), {
+async function fetchIngredients(token: string, language = 'en'): Promise<Ingredient[]> {
+  const response = await fetch(getApiUrl(`/api/admin/ingredients?lang=${language}`), {
     headers: { Authorization: `Bearer ${token}` },
   });
   
@@ -143,12 +144,13 @@ async function deleteCategory(id: string, token: string): Promise<void> {
 // React Query hooks for ingredients
 export function useAdminIngredients() {
   const { token } = useAuth();
+  const { currentLanguage } = useLanguage();
   
   return useQuery({
-    queryKey: ['admin', 'ingredients'],
+    queryKey: ['admin', 'ingredients', currentLanguage],
     queryFn: () => {
       if (!token) throw new Error('No authentication token');
-      return fetchIngredients(token);
+      return fetchIngredients(token, currentLanguage);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     enabled: !!token,
@@ -158,6 +160,7 @@ export function useAdminIngredients() {
 export function useCreateIngredient() {
   const queryClient = useQueryClient();
   const { token } = useAuth();
+  const { currentLanguage } = useLanguage();
   
   return useMutation({
     mutationFn: (data: CreateIngredientRequest) => {
@@ -165,7 +168,7 @@ export function useCreateIngredient() {
       return createIngredient(data, token);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'ingredients'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ingredients', currentLanguage] });
     },
   });
 }
@@ -173,6 +176,7 @@ export function useCreateIngredient() {
 export function useUpdateIngredient() {
   const queryClient = useQueryClient();
   const { token } = useAuth();
+  const { currentLanguage } = useLanguage();
   
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<UpdateIngredientRequest> }) => {
@@ -180,7 +184,7 @@ export function useUpdateIngredient() {
       return updateIngredient(id, data, token);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'ingredients'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ingredients', currentLanguage] });
     },
   });
 }
@@ -188,6 +192,7 @@ export function useUpdateIngredient() {
 export function useDeleteIngredient() {
   const queryClient = useQueryClient();
   const { token } = useAuth();
+  const { currentLanguage } = useLanguage();
   
   return useMutation({
     mutationFn: (id: string) => {
@@ -195,7 +200,7 @@ export function useDeleteIngredient() {
       return deleteIngredient(id, token);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'ingredients'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ingredients', currentLanguage] });
     },
   });
 }
