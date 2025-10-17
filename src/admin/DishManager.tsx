@@ -10,7 +10,15 @@ import type { Dish, CreateDishRequest } from "../types";
 import type { AllergenLanguage } from "../utils/allergenTranslations";
 
 export default function DishManager() {
-  const { currentLanguage } = useAdminTranslations();
+  const { t, currentLanguage } = useAdminTranslations();
+  
+  // Ensure currentLanguage is available before using it
+  if (!currentLanguage) {
+    return <div className="p-6">Loading...</div>;
+  }
+
+  // Store current language for use in nested functions
+  const lang = currentLanguage as AllergenLanguage;
   
   // CSV import
   const handleCSVImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -273,7 +281,7 @@ export default function DishManager() {
                 {Array.isArray(dish.allergen_tags) && dish.allergen_tags.length > 0 && (
                   <div className="mt-2">
                     <div className="flex flex-wrap gap-1">
-                      {getAllergenChips(dish.allergen_tags.slice(0, 3), currentLanguage as AllergenLanguage).map((allergen) => (
+                      {getAllergenChips(dish.allergen_tags.slice(0, 3), lang).map((allergen) => (
                         <span
                           key={allergen.name}
                           className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
@@ -308,7 +316,7 @@ export default function DishManager() {
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
                       dish.is_active !== false ? 'bg-green-600' : 'bg-gray-300'
                     }`}
-                    title={dish.is_active !== false ? "Deactivate dish" : "Activate dish"}
+                    title={dish.is_active !== false ? t('deactivateDish') : t('activateDish')}
                   >
                     <span
                       className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -326,14 +334,14 @@ export default function DishManager() {
                 <button
                   onClick={() => setEditingDish(dish)}
                   className="text-blue-600 hover:text-blue-800 p-2 hover:bg-blue-50 rounded transition-colors"
-                  title="Edit dish"
+                  title={t('editDish')}
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => handleDeleteDish(dish.id)}
                   className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded transition-colors"
-                  title="Delete dish"
+                  title={t('deleteDish')}
                 >
                   Delete
                 </button>
@@ -403,6 +411,9 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
   availableIngredients: any[];
   restaurant?: any;
 }) {
+  const { t, currentLanguage } = useAdminTranslations();
+  const lang = currentLanguage as AllergenLanguage;
+  
   const [currentPage, setCurrentPage] = useState(1);
   
   // Component group definitions - now stateful for toggleable modifiability
@@ -641,12 +652,12 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
                     >
                       <option value="">Select a category</option>
                       <option value="Appetizer">Appetizer</option>
-                      <option value="Main Course">Main Course</option>
+                      <option value="Main Course">{t('mainCourse')}</option>
                       <option value="Dessert">Dessert</option>
                       <option value="Beverage">Beverage</option>
                       <option value="Salad">Salad</option>
                       <option value="Soup">Soup</option>
-                      <option value="Side Dish">Side Dish</option>
+                      <option value="Side Dish">{t('sideDish')}</option>
                     </select>
                   </div>
                   <div>
@@ -782,7 +793,7 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
                     {form.allergen_tags.length > 0 ? (
                       <div className="space-y-3">
                         <div className="flex flex-wrap gap-2">
-                          {getAllergenChips(form.allergen_tags, currentLanguage as AllergenLanguage).map((allergen) => (
+                          {getAllergenChips(form.allergen_tags, lang).map((allergen) => (
                             <span
                               key={allergen.name}
                               className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
@@ -866,6 +877,9 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
   availableIngredients: any[];
   restaurant?: any;
 }) {
+  const { t, currentLanguage } = useAdminTranslations();
+  const lang = currentLanguage as AllergenLanguage;
+  
   const [form, setForm] = useState<Partial<CreateDishRequest>>({
     name: dish.name,
     description: dish.description,
@@ -877,7 +891,7 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
   });
   const [error, setError] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     setForm(prev => ({
       ...prev,
@@ -960,12 +974,12 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
             >
               <option value="">Select a category</option>
               <option value="Appetizer">Appetizer</option>
-              <option value="Main Course">Main Course</option>
+              <option value="Main Course">{t('mainCourse')}</option>
               <option value="Dessert">Dessert</option>
               <option value="Beverage">Beverage</option>
               <option value="Salad">Salad</option>
               <option value="Soup">Soup</option>
-              <option value="Side Dish">Side Dish</option>
+              <option value="Side Dish">{t('sideDish')}</option>
             </select>
           </div>
         </div>
@@ -1014,7 +1028,7 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
           <div className="min-h-[3rem] p-3 border border-gray-200 rounded-lg bg-gray-50">
             {Array.isArray(form.allergen_tags) && form.allergen_tags.length > 0 ? (
               <div className="flex flex-wrap gap-2">
-                {getAllergenChips(form.allergen_tags, currentLanguage as AllergenLanguage).map((allergen) => (
+                {getAllergenChips(form.allergen_tags, lang).map((allergen) => (
                   <span
                     key={allergen.name}
                     className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}

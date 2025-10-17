@@ -22,6 +22,38 @@ export function useAdminTranslations() {
       sv: 'Skapa ditt restaurang-adminskonto'
     },
     
+    // Dish Management
+    editDish: {
+      en: 'Edit dish',
+      fi: 'Muokkaa ruokaa',
+      sv: 'Redigera rätt'
+    },
+    deleteDish: {
+      en: 'Delete dish',
+      fi: 'Poista ruoka',
+      sv: 'Ta bort rätt'
+    },
+    deactivateDish: {
+      en: 'Deactivate dish',
+      fi: 'Poista ruoka käytöstä',
+      sv: 'Inaktivera rätt'
+    },
+    activateDish: {
+      en: 'Activate dish',
+      fi: 'Ota ruoka käyttöön',
+      sv: 'Aktivera rätt'
+    },
+    mainCourse: {
+      en: 'Main Course',
+      fi: 'Pääruoka',
+      sv: 'Huvudrätt'
+    },
+    sideDish: {
+      en: 'Side Dish',
+      fi: 'Lisuke',
+      sv: 'Tillbehör'
+    },
+    
     // Forms
     email: {
       en: 'Email',
