@@ -1051,16 +1051,68 @@ app.get("/api/admin/ingredients", requireAuth, async (req, res) => {
         console.log(`🔍 Using fallback JSON data with ${jsonIngredients.length} ingredients`);
         
         // Transform JSON data to match expected format
-        ingredients = jsonIngredients.map(ing => ({
-          id: ing.id,
-          name: ing.name,
-          description: ing.description || '',
-          allergenTags: JSON.stringify(ing.allergen_tags || []),
-          category: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          translations: ing.translations || {}
-        }));
+        ingredients = jsonIngredients.map(ing => {
+          // Add default translations if not present
+          let translations = ing.translations || {};
+          if (!translations.name) {
+            // Create basic translations based on the Finnish name
+            const englishNames = {
+              'Lohi': 'Salmon',
+              'Taimen': 'Trout', 
+              'Kala': 'Fish',
+              'Parmesan': 'Parmesan',
+              'Juusto': 'Cheese',
+              'Vehnäjauho': 'Wheat Flour',
+              'Maapähkinä': 'Peanut',
+              'Kananmuna': 'Egg',
+              'Maito': 'Milk',
+              'Voi': 'Butter',
+              'Soija': 'Soy',
+              'Seesami': 'Sesame',
+              'Sulfiitti': 'Sulphite'
+            };
+            
+            const swedishNames = {
+              'Lohi': 'Lax',
+              'Taimen': 'Öring',
+              'Kala': 'Fisk', 
+              'Parmesan': 'Parmesan',
+              'Juusto': 'Ost',
+              'Vehnäjauho': 'Vetemjöl',
+              'Maapähkinä': 'Jordnöt',
+              'Kananmuna': 'Ägg',
+              'Maito': 'Mjölk',
+              'Voi': 'Smör',
+              'Soija': 'Soja',
+              'Seesami': 'Sesam',
+              'Sulfiitti': 'Sulfit'
+            };
+            
+            translations = {
+              name: {
+                en: englishNames[ing.name] || ing.name,
+                fi: ing.name,
+                sv: swedishNames[ing.name] || ing.name
+              },
+              description: {
+                en: ing.description || '',
+                fi: ing.description || '',
+                sv: ing.description || ''
+              }
+            };
+          }
+          
+          return {
+            id: ing.id,
+            name: ing.name,
+            description: ing.description || '',
+            allergenTags: JSON.stringify(ing.allergen_tags || []),
+            category: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            translations: translations
+          };
+        });
       } else {
         throw new Error("No database connection and no fallback data available");
       }

@@ -7,7 +7,7 @@ import logger from "./logger";
 import type { Dish, CreateDishRequest } from "../types";
 
 // API base URL (same as ingredientApi)
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://menushield-production.up.railway.app';
 
 // Helper function for API URLs
 const getApiUrl = (path: string) => API_BASE ? `${API_BASE}${path}` : path;
@@ -25,7 +25,10 @@ export const prefetchMenuData = (queryClient: any, restaurantSlug: string, langu
 const api = {
   // Guest menu by restaurant slug
   getMenuBySlug: async (slug: string, language = 'en'): Promise<Dish[]> => {
-    const response = await fetch(getApiUrl(`/api/menu/by-slug/${slug}?lang=${language}`));
+    // Using Vite proxy now
+    const url = `/api/menu/by-slug/${slug}?lang=${language}`;
+    console.log('🔍 PROXY MENU URL:', url);
+    const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`Failed to fetch menu: ${response.status}`);
     }
@@ -75,7 +78,7 @@ const api = {
 
   // Admin dishes
   getAdminDishes: async (token: string, language = 'en'): Promise<Dish[]> => {
-    const response = await fetch(getApiUrl(`/api/admin/menu?lang=${language}`), {
+    const response = await fetch(`/api/admin/menu?lang=${language}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!response.ok) {
@@ -107,7 +110,7 @@ const api = {
 
   // Create dish
   createDish: async (dish: CreateDishRequest, token: string): Promise<Dish> => {
-    const response = await fetch(getApiUrl("/api/admin/menu"), {
+    const response = await fetch("/api/admin/menu", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -127,7 +130,7 @@ const api = {
     dish: Partial<CreateDishRequest>,
     token: string
   ): Promise<Dish> => {
-    const response = await fetch(getApiUrl(`/api/admin/menu/${id}`), {
+    const response = await fetch(`/api/admin/menu/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -143,7 +146,7 @@ const api = {
 
   // Delete dish
   deleteDish: async (id: string, token: string): Promise<void> => {
-    const response = await fetch(getApiUrl(`/api/admin/menu/${id}`), {
+    const response = await fetch(`/api/admin/menu/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -171,13 +174,13 @@ export const useMenu = () => {
       logger.debug('useMenu queryFn - using legacy API');
       return api.getMenu(currentLanguage);
     },
-    enabled: true, // Always run the query - let the queryFn handle the logic
+    enabled: !!restaurantSlug, // Only run when we have a restaurant slug
     staleTime: 1000 * 60 * 10, // 10 minutes (was 5) - reduce API calls
     gcTime: 1000 * 60 * 30, // 30 minutes garbage collection
     refetchOnWindowFocus: false, // Prevent unnecessary refetches
     refetchOnMount: false, // Use cached data on component mount
-    retry: 3, // Retry failed requests 3 times
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+    retry: 1, // Only retry once to prevent infinite loops
+    retryDelay: 2000, // Fixed 2 second delay instead of exponential backoff
   });
 };
 

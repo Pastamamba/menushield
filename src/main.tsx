@@ -13,8 +13,20 @@ import "./index.css";
 performanceMonitor.startTimer('App Bootstrap');
 initWebVitals();
 
-// Initialize offline manager (this will register the service worker)
-offlineManager;
+// DEVELOPMENT: Unregister service worker to prevent API interception
+if (import.meta.env.DEV && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function(registrations) {
+    for(let registration of registrations) {
+      registration.unregister();
+      console.log('🚫 Unregistered Service Worker for development');
+    }
+  });
+}
+
+// Initialize offline manager only in production
+if (!import.meta.env.DEV) {
+  offlineManager;
+}
 
 performanceMonitor.endTimer('App Bootstrap');
 

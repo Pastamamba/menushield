@@ -11,14 +11,12 @@ interface UpdateRestaurantRequest {
   supportedLanguages?: string;
 }
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
-
 // Fetch restaurant info (public)
 export const useRestaurant = () => {
   return useQuery({
     queryKey: ['restaurant'],
     queryFn: async (): Promise<Restaurant> => {
-      const response = await fetch(`${API_BASE}/api/restaurant`);
+      const response = await fetch(`/api/restaurant`);
       if (!response.ok) {
         throw new Error('Failed to fetch restaurant info');
       }
@@ -34,7 +32,7 @@ export const useUpdateRestaurant = () => {
   return useMutation({
     mutationFn: async (data: UpdateRestaurantRequest): Promise<Restaurant> => {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE}/api/admin/restaurant`, {
+      const response = await fetch(`/api/admin/restaurant`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

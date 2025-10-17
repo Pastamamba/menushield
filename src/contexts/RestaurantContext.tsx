@@ -7,10 +7,16 @@ import logger from '../utils/logger';
 import type { Restaurant } from '../types';
 
 // API base URL (same as other API utils)
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://menushield-production.up.railway.app';
 
 // Helper function for API URLs
 const getApiUrl = (path: string) => API_BASE ? `${API_BASE}${path}` : path;
+
+// Debug log for development
+if (import.meta.env.DEV) {
+  console.log('RestaurantContext - API_BASE:', API_BASE);
+  console.log('RestaurantContext - VITE_API_URL:', import.meta.env.VITE_API_URL);
+}
 
 interface RestaurantContextType {
   restaurant: Restaurant | null;
@@ -40,7 +46,10 @@ export function RestaurantProvider({ children }: RestaurantProviderProps) {
 
   const fetchRestaurantBySlug = async (slug: string): Promise<Restaurant | null> => {
     try {
-      const response = await fetch(getApiUrl(`/api/restaurants/slug/${slug}`));
+      // Using Vite proxy now
+      const url = `/api/restaurants/slug/${slug}`;
+      console.log('🔍 PROXY URL:', url);
+      const response = await fetch(url);
       
       if (!response.ok) {
         if (response.status === 404) {
@@ -70,20 +79,20 @@ export function RestaurantProvider({ children }: RestaurantProviderProps) {
       const restaurantData = await fetchRestaurantBySlug(slug);
       setRestaurant(restaurantData);
       
-      // Background prefetch menu data for better performance
-      setTimeout(() => {
-        prefetchMenuData(queryClient, slug).catch((err: any) => 
-          console.warn('Background menu prefetch failed:', err)
-        );
-      }, 100); // Small delay to not block restaurant loading
+      // Background prefetch disabled in development to prevent loops
+      // setTimeout(() => {
+      //   prefetchMenuData(queryClient, slug).catch((err: any) => 
+      //     console.warn('Background menu prefetch failed:', err)
+      //   );
+      // }, 100);
       
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Tuntematon virhe';
       setError(errorMessage);
       setRestaurant(null);
       
-      // Redirect to default restaurant if slug not found
-      if (errorMessage.includes('not found')) {
+      // Don't redirect if we're already on demo-restaurant - prevents infinite loop
+      if (errorMessage.includes('not found') && slug !== 'demo-restaurant') {
         navigate('/r/demo-restaurant', { replace: true });
       }
     } finally {
@@ -102,6 +111,7 @@ export function RestaurantProvider({ children }: RestaurantProviderProps) {
   };
 
   useEffect(() => {
+    logger.debug('RestaurantContext useEffect triggered - restaurantSlug:', restaurantSlug);
     if (restaurantSlug) {
       loadRestaurant(restaurantSlug);
     } else {
