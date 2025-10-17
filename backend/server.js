@@ -871,18 +871,21 @@ app.post("/api/admin/menu", requireAuth, validateDishInput, handleValidationErro
       return res.status(400).json({ error: "allergen_tags must be an array" });
     }
 
+    console.log('🔍 Creating dish with user:', req.user);
+    console.log('🔍 Request body:', req.body);
+
     const newDish = await prisma.dish.create({
       data: {
         name,
         description: description || "",
         price: typeof price === 'string' ? parseFloat(price) || 0 : (price || 0),
-        category: category || "",
-        ingredients: JSON.stringify(ingredients || []),
         allergenTags: JSON.stringify(allergen_tags),
         modificationNote: modification_note || null,
         isModifiable: is_modifiable || false,
         isActive: is_active !== undefined ? is_active : true,
-        components: JSON.stringify(components || []),
+        
+        // Set restaurant from authenticated user
+        restaurantId: req.user.restaurantId,
       },
     });
 
@@ -894,16 +897,17 @@ app.post("/api/admin/menu", requireAuth, validateDishInput, handleValidationErro
 
     res.status(201).json({
       id: newDish.id,
+      restaurantId: newDish.restaurantId,
       name: newDish.name,
       description: newDish.description,
       price: newDish.price,
-      category: newDish.category,
-      ingredients: JSON.parse(newDish.ingredients || "[]"),
-      allergen_tags: JSON.parse(newDish.allergenTags),
+      category: category || "", // Use original request data
+      ingredients: ingredients || [], // Use original request data
+      allergen_tags: allergen_tags,
       modification_note: newDish.modificationNote,
       is_modifiable: newDish.isModifiable,
       is_active: newDish.isActive,
-      components: JSON.parse(newDish.components || "[]"),
+      components: components || [], // Use original request data
       created_at: newDish.createdAt,
       updated_at: newDish.updatedAt,
     });
@@ -912,7 +916,8 @@ app.post("/api/admin/menu", requireAuth, validateDishInput, handleValidationErro
     console.error("Request body:", req.body);
     res.status(500).json({ 
       error: "Failed to create dish",
-      details: isDev ? error.message : undefined
+      details: error.message, // Always show details for debugging
+      stack: isDev ? error.stack : undefined
     });
   }
 });
