@@ -112,7 +112,7 @@ export default function AllergenFilter({
               </button>
               <div className="flex-1">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Show only modifiable dishes
+                  {t('showOnlyModifiable')}
                 </label>
                 <p className="text-xs text-gray-600 mb-2">
                   These dishes may be modifiable. Please check with staff to confirm.
@@ -238,7 +238,7 @@ export default function AllergenFilter({
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Show only modifiable dishes
+                {t('showOnlyModifiable')}
               </label>
               <p className="text-xs text-gray-600 mb-1">
                 These dishes may be modifiable. Please check with staff to confirm.

@@ -104,6 +104,61 @@ export function useMenuTranslations() {
       en: 'Error loading restaurant',
       fi: 'Virhe ravintolan lataamisessa',
       sv: 'Fel vid laddning av restaurang'
+    },
+    showingModifiableOnly: {
+      en: 'Showing Modifiable Dishes Only',
+      fi: 'Näytetään vain muokattavissa olevat ruoat',
+      sv: 'Visar endast modificerbara rätter'
+    },
+    modifiableDishesInfo: {
+      en: 'These dishes may be modifiable. Please check with staff to confirm.',
+      fi: 'Nämä ruoat saattavat olla muokattavissa. Tarkista henkilökunnalta.',
+      sv: 'Dessa rätter kan vara modificerbara. Kontrollera med personalen.'
+    },
+    modifiableImportant: {
+      en: 'Important: Ingredient modifications depend on kitchen capabilities and preparation methods. Always verify with restaurant staff before ordering.',
+      fi: 'Tärkeää: Ainesten muokkaukset riippuvat keittiön mahdollisuuksista ja valmistustavoista. Varmista aina ravintolan henkilökunnalta ennen tilaamista.',
+      sv: 'Viktigt: Ingrediensmodifieringar beror på kökets möjligheter och tillredningsmetoder. Kontrollera alltid med restaurangpersonalen innan beställning.'
+    },
+    allDishes: {
+      en: 'All dishes',
+      fi: 'Kaikki ruoat',
+      sv: 'Alla rätter'
+    },
+    modifiableDishes: {
+      en: 'Modifiable dishes',
+      fi: 'Muokattavat ruoat',
+      sv: 'Modificerbara rätter'
+    },
+    modifiableDishesHelp: {
+      en: 'These dishes may be modifiable - please check with staff',
+      fi: 'Nämä ruoat saattavat olla muokattavissa - kysy henkilökunnalta',
+      sv: 'Dessa rätter kan vara modificerbara - fråga personalen'
+    },
+    selectAllergensHelp: {
+      en: 'Select allergens to see safe options',
+      fi: 'Valitse allergeenit nähdäksesi turvallisia vaihtoehtoja',
+      sv: 'Välj allergener för att se säkra alternativ'
+    },
+    safeDishesTitle: {
+      en: 'Safe dishes',
+      fi: 'Turvalliset ruoat',
+      sv: 'Säkra rätter'
+    },
+    warningDishesTitle: {
+      en: 'Contains your allergens',
+      fi: 'Sisältää allergeeneja',
+      sv: 'Innehåller dina allergener'
+    },
+    warningDishesInfo: {
+      en: '⚠️ These dishes contain your selected allergens. Ask the server if allergens can be modified or removed.',
+      fi: '⚠️ Nämä ruoat sisältävät valitsemiasi allergeeneja. Kysy tarjoilijalta, voiko allergeeneja muokata tai poistaa.',
+      sv: '⚠️ Dessa rätter innehåller dina valda allergener. Fråga servitören om allergener kan modifieras eller tas bort.'
+    },
+    showOnlyModifiable: {
+      en: 'Show only modifiable dishes',
+      fi: 'Näytä vain muokattavat ruoat',
+      sv: 'Visa endast modificerbara rätter'
     }
   };
 

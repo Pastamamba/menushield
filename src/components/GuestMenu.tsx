@@ -275,13 +275,13 @@ export default function GuestMenu() {
                 <div className="text-blue-600 text-2xl">ℹ️</div>
                 <div>
                   <h3 className="text-lg font-semibold text-blue-900 mb-2">
-                    Showing Modifiable Dishes Only
+                    {t('showingModifiableOnly')}
                   </h3>
                   <p className="text-blue-800 mb-3">
-                    These dishes may be modifiable. Please check with staff to confirm.
+                    {t('modifiableDishesInfo')}
                   </p>
                   <div className="text-sm text-blue-700 bg-blue-100 px-3 py-2 rounded-lg">
-                    <strong>Important:</strong> Ingredient modifications depend on kitchen capabilities and preparation methods. Always verify with restaurant staff before ordering.
+                    <strong>Important:</strong> {t('modifiableImportant')}
                   </div>
                 </div>
               </div>
@@ -293,12 +293,12 @@ export default function GuestMenu() {
             <section>
               <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
                 <span className="w-3 h-3 bg-gray-500 rounded-full mr-3"></span>
-                {showModifiableOnly ? `Modifiable dishes (${filteredDishes.length})` : `All dishes (${filteredDishes.length})`}
+                {showModifiableOnly ? `${t('modifiableDishes')} (${filteredDishes.length})` : `${t('allDishes')} (${filteredDishes.length})`}
               </h2>
               <p className="text-gray-600 mb-4">
                 {showModifiableOnly 
-                  ? "These dishes may be modifiable - please check with staff" 
-                  : "Select allergens to see safe options"
+                  ? t('modifiableDishesHelp')
+                  : t('selectAllergensHelp')
                 }
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -326,7 +326,7 @@ export default function GuestMenu() {
                 <section>
                   <h2 className="text-2xl font-bold text-green-700 mb-4 flex items-center">
                     <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
-                    Safe dishes ({categorizedDishes.safe.length})
+                    {t('safeDishesTitle')} ({categorizedDishes.safe.length})
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {categorizedDishes.safe.map(({ dish, safety }) => (
@@ -349,10 +349,10 @@ export default function GuestMenu() {
                 <section>
                   <h2 className="text-2xl font-bold text-orange-700 mb-4 flex items-center">
                     <span className="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
-                    Contains allergens ({categorizedDishes.modifiable.length + categorizedDishes.unsafe.length})
+                    {t('warningDishesTitle')} ({categorizedDishes.modifiable.length + categorizedDishes.unsafe.length})
                   </h2>
                   <p className="text-orange-600 mb-4 p-3 bg-orange-50 rounded-lg border border-orange-200">
-                    ⚠️ These dishes contain your selected allergens. Ask the server if allergens can be modified or removed.
+                    {t('warningDishesInfo')}
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {/* Show modifiable dishes first */}
