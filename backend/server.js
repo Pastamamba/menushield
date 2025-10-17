@@ -8,6 +8,13 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Get __dirname equivalent for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables
 dotenv.config();
@@ -1027,8 +1034,6 @@ app.get("/api/admin/ingredients", requireAuth, async (req, res) => {
     } catch (dbError) {
       console.error("Database error, falling back to JSON data:", dbError);
       // Fallback to JSON data if database fails
-      const fs = require('fs');
-      const path = require('path');
       const ingredientsPath = path.join(__dirname, 'data', 'ingredients.json');
       
       if (fs.existsSync(ingredientsPath)) {
