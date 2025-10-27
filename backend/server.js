@@ -759,7 +759,6 @@ app.get("/api/admin/profile", requireAuth, async (req, res) => {
       where: { id: req.user.userId },
       select: {
         email: true,
-        username: true,
         restaurant: {
           select: {
             name: true,
@@ -775,7 +774,6 @@ app.get("/api/admin/profile", requireAuth, async (req, res) => {
 
     res.json({
       email: user.email,
-      username: user.username,
       restaurantName: user.restaurant?.name,
       createdAt: user.createdAt,
     });
@@ -788,16 +786,15 @@ app.get("/api/admin/profile", requireAuth, async (req, res) => {
 // Admin: Update user profile
 app.put("/api/admin/profile", requireAuth, async (req, res) => {
   try {
-    const { email, username, restaurantName } = req.body;
+    const { email, restaurantName } = req.body;
 
-    console.log("Updating user profile:", { email, username, restaurantName });
+    console.log("Updating user profile:", { email, restaurantName });
 
     // Update user
     const updatedUser = await prisma.user.update({
       where: { id: req.user.userId },
       data: {
         ...(email && { email }),
-        ...(username && { username }),
       },
     });
 
@@ -812,7 +809,6 @@ app.put("/api/admin/profile", requireAuth, async (req, res) => {
     console.log("Profile updated successfully");
     res.json({
       email: updatedUser.email,
-      username: updatedUser.username,
       restaurantName: restaurantName,
     });
   } catch (error) {
@@ -1160,9 +1156,6 @@ app.get("/api/admin/ingredients", requireAuth, async (req, res) => {
     let usingFallback = false;
     try {
       ingredients = await prisma.ingredient.findMany({
-        where: {
-          restaurantId: req.user.restaurantId // Only get ingredients for this restaurant
-        },
         include: {
           category: true,
         },
@@ -1300,15 +1293,14 @@ app.post("/api/admin/ingredients", requireAuth, async (req, res) => {
   try {
     const { name, category, parentId, allergen_tags } = req.body;
 
-    if (isDev) console.log('Creating ingredient:', { name, category, allergen_tags, restaurantId: req.user.restaurantId });
+    if (isDev) console.log('Creating ingredient:', { name, category, allergen_tags });
 
-    // Find category by name within this restaurant
+    // Find category by name (global search, not restaurant-specific)
     let categoryId = null;
     if (category) {
       const categoryRecord = await prisma.category.findFirst({
         where: { 
-          name: { contains: category, mode: "insensitive" },
-          restaurantId: req.user.restaurantId
+          name: { contains: category, mode: "insensitive" }
         },
       });
       categoryId = categoryRecord?.id;
@@ -1320,7 +1312,7 @@ app.post("/api/admin/ingredients", requireAuth, async (req, res) => {
         categoryId,
         parentId: parentId || null,
         allergenTags: JSON.stringify(allergen_tags || []),
-        restaurantId: req.user.restaurantId, // Add restaurantId to new ingredients
+        // No restaurantId - ingredients are global
       },
       include: {
         category: true,
@@ -1363,16 +1355,14 @@ app.put("/api/admin/ingredients/:id", requireAuth, async (req, res) => {
         name,
         category,
         allergen_tags,
-        restaurantId: req.user.restaurantId,
       });
 
-    // Find category by name within this restaurant
+    // Find category by name (global search, not restaurant-specific)
     let categoryId = null;
     if (category) {
       const categoryRecord = await prisma.category.findFirst({
         where: {
           name: { contains: category, mode: "insensitive" },
-          restaurantId: req.user.restaurantId,
         },
       });
       categoryId = categoryRecord?.id;
@@ -1380,8 +1370,7 @@ app.put("/api/admin/ingredients/:id", requireAuth, async (req, res) => {
 
     const ingredient = await prisma.ingredient.update({
       where: {
-        id,
-        restaurantId: req.user.restaurantId, // Ensure we only update ingredients owned by this restaurant
+        id, // No restaurantId constraint - ingredients are global
       },
       data: {
         name,
@@ -1429,8 +1418,7 @@ app.delete("/api/admin/ingredients/:id", requireAuth, async (req, res) => {
 
     await prisma.ingredient.delete({
       where: { 
-        id,
-        restaurantId: req.user.restaurantId // Only delete ingredients owned by this restaurant
+        id, // No restaurantId constraint - ingredients are global
       },
     });
 
@@ -1440,7 +1428,6 @@ app.delete("/api/admin/ingredients/:id", requireAuth, async (req, res) => {
       error: error.message,
       code: error.code,
       ingredientId: id,
-      restaurantId: req.user.restaurantId
     });
     res.status(500).json({ error: "Failed to delete ingredient", details: isDev ? error.message : undefined });
   }
