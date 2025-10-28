@@ -1145,7 +1145,7 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id; // Handle both userId and id fields
 
     console.log("PUT /api/admin/menu/:id - Update dish request:", {
       dishId: id,
@@ -1255,6 +1255,8 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
       // Add new ingredient relationships
       if (ingredientNames.length > 0) {
         // Find ingredients by name (global ingredients)
+        console.log("PUT /api/admin/menu/:id - Searching for ingredients with names:", ingredientNames);
+        
         const ingredients = await prisma.ingredient.findMany({
           where: {
             name: { in: ingredientNames },
@@ -1262,7 +1264,16 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
           }
         });
 
-        console.log("PUT /api/admin/menu/:id - Found ingredients:", ingredients.map(i => i.name));
+        console.log("PUT /api/admin/menu/:id - Found ingredients:", ingredients.map(i => ({ name: i.name, id: i.id, isActive: i.isActive })));
+        
+        // Also search without isActive filter to see if that's the issue
+        const allIngredientsWithSameName = await prisma.ingredient.findMany({
+          where: {
+            name: { in: ingredientNames }
+          }
+        });
+        
+        console.log("PUT /api/admin/menu/:id - All ingredients with matching names (ignoring isActive):", allIngredientsWithSameName.map(i => ({ name: i.name, id: i.id, isActive: i.isActive })));
 
         // Create new relationships
         const dishIngredientData = ingredients.map(ingredient => ({
@@ -1277,6 +1288,8 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
             data: dishIngredientData
           });
           console.log("PUT /api/admin/menu/:id - Created ingredient relationships:", dishIngredientData.length);
+        } else {
+          console.log("PUT /api/admin/menu/:id - No valid ingredients found, no relationships created");
         }
       }
     }
