@@ -35,16 +35,7 @@ async function fetchIngredients(token: string, language = 'en'): Promise<Ingredi
       const errorText = await response.text();
       console.error('🔍 fetchIngredients - error response:', errorText);
       console.error('🔍 fetchIngredients - full response object:', response);
-      
-      // TEMPORARY FALLBACK - Mock data for testing
-      console.warn('🔧 Using mock ingredients data as fallback');
-      return [
-        { id: 1, name: 'Chicken Breast', description: 'Fresh chicken breast', category: 'protein', allergen_tags: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), translations: {} },
-        { id: 2, name: 'Mozzarella', description: 'Fresh mozzarella cheese', category: 'dairy', allergen_tags: ['dairy'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), translations: {} },
-        { id: 3, name: 'Tomatoes', description: 'Fresh tomatoes', category: 'vegetable', allergen_tags: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), translations: {} },
-        { id: 4, name: 'Basil', description: 'Fresh basil leaves', category: 'herb', allergen_tags: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), translations: {} },
-        { id: 5, name: 'Spinach', description: 'Fresh spinach', category: 'vegetable', allergen_tags: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), translations: {} }
-      ];
+      throw new Error(`Failed to fetch ingredients: ${response.statusText}`);
     }
     
     const data = await response.json();
@@ -52,15 +43,7 @@ async function fetchIngredients(token: string, language = 'en'): Promise<Ingredi
     return data;
   } catch (error) {
     console.error('🔍 fetchIngredients - network error:', error);
-    // TEMPORARY FALLBACK for network errors too
-    console.warn('🔧 Using mock ingredients data due to network error');
-    return [
-      { id: 1, name: 'Chicken Breast', description: 'Fresh chicken breast', category: 'protein', allergen_tags: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), translations: {} },
-      { id: 2, name: 'Mozzarella', description: 'Fresh mozzarella cheese', category: 'dairy', allergen_tags: ['dairy'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), translations: {} },
-      { id: 3, name: 'Tomatoes', description: 'Fresh tomatoes', category: 'vegetable', allergen_tags: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), translations: {} },
-      { id: 4, name: 'Basil', description: 'Fresh basil leaves', category: 'herb', allergen_tags: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), translations: {} },
-      { id: 5, name: 'Spinach', description: 'Fresh spinach', category: 'vegetable', allergen_tags: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), translations: {} }
-    ];
+    throw error;
   }
 }
 
