@@ -463,11 +463,6 @@ app.get("/api/menu", async (req, res) => {
         dishIngredients: {
           include: {
             ingredient: true
-          },
-          where: {
-            ingredient: {
-              isNot: null // Only include relationships where ingredient exists
-            }
           }
         }
       },
@@ -907,11 +902,6 @@ app.get("/api/admin/menu", requireAuth, async (req, res) => {
         dishIngredients: {
           include: {
             ingredient: true
-          },
-          where: {
-            ingredient: {
-              isNot: null // Only include relationships where ingredient exists
-            }
           }
         }
       },
@@ -1209,11 +1199,6 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
         dishIngredients: {
           include: {
             ingredient: true
-          },
-          where: {
-            ingredient: {
-              isNot: null // Only include relationships where ingredient exists
-            }
           }
         }
       }
