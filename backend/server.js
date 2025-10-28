@@ -1153,6 +1153,9 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
       updateData: JSON.stringify(updateData, null, 2),
     });
 
+    console.log("PUT /api/admin/menu/:id - req.user:", req.user);
+    console.log("PUT /api/admin/menu/:id - userId extracted:", userId);
+
     console.log("PUT /api/admin/menu/:id - Detailed field analysis:");
     console.log("- ingredients field:", updateData.ingredients);
     console.log("- ingredients type:", typeof updateData.ingredients);
@@ -1181,6 +1184,8 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
       });
       return res.status(404).json({ error: "Dish not found or unauthorized" });
     }
+
+    console.log("PUT /api/admin/menu/:id - Existing dish found, proceeding with update");
 
     // Transform data for Prisma - only include fields that exist in schema
     const prismaData = {};
