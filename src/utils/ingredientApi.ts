@@ -227,8 +227,28 @@ export function useUpdateIngredient() {
       if (!token) throw new Error('No authentication token');
       return updateIngredient(id, data, token);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'ingredients', currentLanguage] });
+    onSuccess: (_, { id, data }) => {
+      // For fallback ingredients (ID starts with "ing_"), update cache manually
+      if (id.startsWith('ing_')) {
+        queryClient.setQueryData(['admin', 'ingredients', currentLanguage], (oldData: Ingredient[] | undefined) => {
+          if (!oldData) return oldData;
+          
+          return oldData.map(ingredient => 
+            ingredient.id === id 
+              ? { 
+                  ...ingredient, 
+                  name: data.name || ingredient.name,
+                  category: data.category || ingredient.category,
+                  allergenTags: data.allergen_tags || ingredient.allergenTags,
+                  updatedAt: new Date().toISOString() 
+                }
+              : ingredient
+          );
+        });
+      } else {
+        // For real database ingredients, invalidate to fetch fresh data
+        queryClient.invalidateQueries({ queryKey: ['admin', 'ingredients', currentLanguage] });
+      }
     },
   });
 }
