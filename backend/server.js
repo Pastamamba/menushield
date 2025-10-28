@@ -1153,6 +1153,13 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
       updateData: JSON.stringify(updateData, null, 2),
     });
 
+    console.log("PUT /api/admin/menu/:id - Detailed field analysis:");
+    console.log("- ingredients field:", updateData.ingredients);
+    console.log("- ingredients type:", typeof updateData.ingredients);
+    console.log("- ingredients isArray:", Array.isArray(updateData.ingredients));
+    console.log("- allergen_tags field:", updateData.allergen_tags);
+    console.log("- allergen_tags type:", typeof updateData.allergen_tags);
+
     // Check if user owns this dish through restaurant association
     const existingDish = await prisma.dish.findFirst({
       where: {
