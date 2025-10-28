@@ -454,20 +454,47 @@ app.get("/api/menu", async (req, res) => {
     }
 
     // Get dishes only for this restaurant
-    const dishes = await prisma.dish.findMany({
-      where: {
-        restaurantId: restaurant.id,
-        isActive: true,
-      },
-      include: {
-        dishIngredients: {
-          include: {
-            ingredient: true
+    let dishes;
+    try {
+      dishes = await prisma.dish.findMany({
+        where: {
+          restaurantId: restaurant.id,
+          isActive: true,
+        },
+        include: {
+          dishIngredients: {
+            include: {
+              ingredient: true
+            }
           }
-        }
-      },
-      orderBy: { displayOrder: "asc" },
-    });
+        },
+        orderBy: { displayOrder: "asc" },
+      });
+
+      // Filter out any dishIngredients with null ingredients after fetch
+      dishes = dishes.map(dish => ({
+        ...dish,
+        dishIngredients: dish.dishIngredients?.filter(di => di.ingredient) || []
+      }));
+
+    } catch (includeError) {
+      console.error("Error fetching public dishes with ingredients, falling back to basic fetch:", includeError);
+      
+      // Fallback to basic fetch without ingredients
+      dishes = await prisma.dish.findMany({
+        where: {
+          restaurantId: restaurant.id,
+          isActive: true,
+        },
+        orderBy: { displayOrder: "asc" },
+      });
+
+      // Add empty dishIngredients array
+      dishes = dishes.map(dish => ({
+        ...dish,
+        dishIngredients: []
+      }));
+    }
 
     // Transform for guest view with translation support
     const guestMenu = dishes.map((dish) => {
@@ -893,20 +920,61 @@ app.get("/api/admin/menu", requireAuth, async (req, res) => {
   try {
     const language = req.query.lang || req.query.language || "en"; // Get language parameter
 
-    const dishes = await prisma.dish.findMany({
-      where: {
-        restaurantId: req.user.restaurantId, // Only dishes for this restaurant
-      },
-      include: {
-        category: true,
-        dishIngredients: {
-          include: {
-            ingredient: true
+    let dishes;
+    try {
+      // Try to fetch with ingredients
+      dishes = await prisma.dish.findMany({
+        where: {
+          restaurantId: req.user.restaurantId, // Only dishes for this restaurant
+        },
+        include: {
+          category: true,
+          dishIngredients: {
+            include: {
+              ingredient: true
+            }
           }
-        }
-      },
-      orderBy: { displayOrder: "asc" },
-    });
+        },
+        orderBy: { displayOrder: "asc" },
+      });
+
+      // Filter out any dishIngredients with null ingredients after fetch
+      dishes = dishes.map(dish => ({
+        ...dish,
+        dishIngredients: dish.dishIngredients?.filter(di => di.ingredient) || []
+      }));
+
+    } catch (includeError) {
+      console.error("Error fetching dishes with ingredients, falling back to basic fetch:", includeError);
+      
+      // Clean up orphaned dish_ingredients relationships first
+      try {
+        await prisma.$executeRaw`
+          DELETE FROM dish_ingredients 
+          WHERE ingredient_id NOT IN (SELECT _id FROM ingredients)
+        `;
+        console.log("Cleaned up orphaned dish_ingredients relationships");
+      } catch (cleanupError) {
+        console.error("Error cleaning up orphaned relationships:", cleanupError);
+      }
+
+      // Fallback to basic fetch without ingredients
+      dishes = await prisma.dish.findMany({
+        where: {
+          restaurantId: req.user.restaurantId,
+        },
+        include: {
+          category: true,
+        },
+        orderBy: { displayOrder: "asc" },
+      });
+
+      // Add empty dishIngredients array
+      dishes = dishes.map(dish => ({
+        ...dish,
+        dishIngredients: []
+      }));
+    }
 
     const formattedDishes = dishes.map((dish) => {
       try {
