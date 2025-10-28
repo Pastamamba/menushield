@@ -463,6 +463,11 @@ app.get("/api/menu", async (req, res) => {
         dishIngredients: {
           include: {
             ingredient: true
+          },
+          where: {
+            ingredient: {
+              isNot: null // Only include relationships where ingredient exists
+            }
           }
         }
       },
@@ -510,7 +515,9 @@ app.get("/api/menu", async (req, res) => {
       let ingredients;
       try {
         ingredients = dish.dishIngredients 
-          ? dish.dishIngredients.map(di => di.ingredient.name)
+          ? dish.dishIngredients
+              .filter(di => di.ingredient && di.ingredient.name) // Filter out null ingredients
+              .map(di => di.ingredient.name)
           : [];
         if (!Array.isArray(ingredients)) {
           ingredients = [];
@@ -900,6 +907,11 @@ app.get("/api/admin/menu", requireAuth, async (req, res) => {
         dishIngredients: {
           include: {
             ingredient: true
+          },
+          where: {
+            ingredient: {
+              isNot: null // Only include relationships where ingredient exists
+            }
           }
         }
       },
@@ -914,7 +926,9 @@ app.get("/api/admin/menu", requireAuth, async (req, res) => {
         const allergenTags = safeParseArray(dish.allergenTags);
         const components = safeParseArray(dish.components);
         const ingredients = dish.dishIngredients 
-          ? dish.dishIngredients.map(di => di.ingredient.name)
+          ? dish.dishIngredients
+              .filter(di => di.ingredient && di.ingredient.name) // Filter out null ingredients
+              .map(di => di.ingredient.name)
           : [];
 
         return {
@@ -1195,12 +1209,19 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
         dishIngredients: {
           include: {
             ingredient: true
+          },
+          where: {
+            ingredient: {
+              isNot: null // Only include relationships where ingredient exists
+            }
           }
         }
       }
     });
 
-    const ingredientsList = dishWithIngredients?.dishIngredients?.map(di => di.ingredient.name) || [];
+    const ingredientsList = dishWithIngredients?.dishIngredients
+      ?.filter(di => di.ingredient && di.ingredient.name) // Filter out null ingredients  
+      ?.map(di => di.ingredient.name) || [];
 
     res.json({
       id: updatedDish.id,
