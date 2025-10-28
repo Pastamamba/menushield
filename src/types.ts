@@ -78,19 +78,11 @@ export interface Ingredient {
   id: string;
   name: string;
   description?: string;
-  allergenTags: string[]; // Matches database: allergen_tags (will be parsed from JSON)
-  isActive: boolean; // Matches database: is_active
-  // Multi-tenant relationship
-  restaurantId: string; // Matches database: restaurant_id
-  restaurant?: Restaurant;
-  categoryId?: string; // Matches database: category_id
-  category?: IngredientCategory;
-  // Hierarchy support
-  parentId?: string; // Matches database: parent_id
-  parent?: Ingredient;
-  children?: Ingredient[];
+  allergen_tags: string[]; // Matches backend API: allergen_tags (snake_case)
+  isActive?: boolean; // Matches database: is_active
+  category?: string | IngredientCategory; // Can be string name or object
   // Multilingual support
-  translations?: string; // JSON string containing translations
+  translations?: any; // JSON object containing translations
   createdAt: string; // Matches database: created_at
   updatedAt: string; // Matches database: updated_at
 }

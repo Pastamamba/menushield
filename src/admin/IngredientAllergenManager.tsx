@@ -65,15 +65,15 @@ export default function IngredientAllergenManager() {
                          ingredient.description?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesAllergen = selectedAllergenFilter === "all" || 
-                           (Array.isArray(ingredient.allergenTags) && 
-                            ingredient.allergenTags.includes(selectedAllergenFilter));
+                           (Array.isArray(ingredient.allergen_tags) &&
+                            ingredient.allergen_tags.includes(selectedAllergenFilter));
     
     return matchesSearch && matchesAllergen;
   });
 
   // Get unique allergens for filter dropdown
   const allAllergens = ["all", ...Array.from(new Set(
-    ingredients.flatMap(i => Array.isArray(i.allergenTags) ? i.allergenTags : [])
+    ingredients.flatMap(i => Array.isArray(i.allergen_tags) ? i.allergen_tags : [])
   ))];
 
   const handleCreateIngredient = async (ingredientData: CreateIngredientRequest) => {
@@ -207,8 +207,8 @@ export default function IngredientAllergenManager() {
                   {/* Allergen Tags */}
                   <div className="mt-3">
                     <div className="flex flex-wrap gap-2">
-                      {Array.isArray(ingredient.allergenTags) && ingredient.allergenTags.length > 0 ? (
-                        ingredient.allergenTags.map((allergen: string) => (
+                      {Array.isArray(ingredient.allergen_tags) && ingredient.allergen_tags.length > 0 ? (
+                        ingredient.allergen_tags.map((allergen: string) => (
                           <span
                             key={allergen}
                             className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full border ${getAllergenColor(allergen)}`}
@@ -291,7 +291,7 @@ function IngredientModal({ ingredient, onSubmit, onCancel, allergenOptions, curr
   const [form, setForm] = useState<CreateIngredientRequest>({
     name: ingredient?.name || "",
     category: ingredient?.category ? (typeof ingredient.category === 'string' ? ingredient.category : ingredient.category.name) : "",
-    allergen_tags: ingredient?.allergenTags || [],
+    allergen_tags: ingredient?.allergen_tags || [],
   });
   const [error, setError] = useState("");
 
