@@ -149,6 +149,8 @@ export default function DishManager() {
 
   const handleUpdateDish = async (id: string, dishData: Partial<CreateDishRequest>) => {
     try {
+      console.log('🔍 DishManager handleUpdateDish called with:', { id, dishData });
+      console.log('🔍 DishManager ingredients being sent:', dishData.ingredients);
       await updateDishMutation.mutateAsync({ id, dish: dishData });
       setEditingDish(null);
     } catch (error) {
@@ -943,6 +945,9 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
       return;
     }
     setError("");
+    console.log('🔍 EditDishForm submitting form data:', JSON.stringify(form, null, 2));
+    console.log('🔍 EditDishForm ingredients specifically:', form.ingredients);
+    console.log('🔍 EditDishForm allergen_tags specifically:', form.allergen_tags);
     onSubmit(form);
   };
 
