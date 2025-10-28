@@ -489,11 +489,24 @@ app.get("/api/menu", async (req, res) => {
         orderBy: { displayOrder: "asc" },
       });
 
-      // Add empty dishIngredients array
-      dishes = dishes.map(dish => ({
-        ...dish,
-        dishIngredients: []
-      }));
+      console.log("Public menu fallback: Found", dishes.length, "dishes, now fetching ingredients manually");
+
+      // Manually fetch ingredients for each dish
+      for (let dish of dishes) {
+        try {
+          const dishIngredients = await prisma.dishIngredient.findMany({
+            where: { dishId: dish.id },
+            include: { ingredient: true }
+          });
+          
+          // Filter out null ingredients and attach to dish
+          dish.dishIngredients = dishIngredients.filter(di => di.ingredient);
+          console.log(`Public menu fallback: Dish ${dish.name} has ${dish.dishIngredients.length} ingredients`);
+        } catch (ingredientError) {
+          console.error(`Public menu fallback: Error fetching ingredients for dish ${dish.name}:`, ingredientError);
+          dish.dishIngredients = [];
+        }
+      }
     }
 
     // Transform for guest view with translation support
@@ -969,11 +982,24 @@ app.get("/api/admin/menu", requireAuth, async (req, res) => {
         orderBy: { displayOrder: "asc" },
       });
 
-      // Add empty dishIngredients array
-      dishes = dishes.map(dish => ({
-        ...dish,
-        dishIngredients: []
-      }));
+      console.log("Admin menu fallback: Found", dishes.length, "dishes, now fetching ingredients manually");
+
+      // Manually fetch ingredients for each dish
+      for (let dish of dishes) {
+        try {
+          const dishIngredients = await prisma.dishIngredient.findMany({
+            where: { dishId: dish.id },
+            include: { ingredient: true }
+          });
+          
+          // Filter out null ingredients and attach to dish
+          dish.dishIngredients = dishIngredients.filter(di => di.ingredient);
+          console.log(`Admin menu fallback: Dish ${dish.name} has ${dish.dishIngredients.length} ingredients`);
+        } catch (ingredientError) {
+          console.error(`Admin menu fallback: Error fetching ingredients for dish ${dish.name}:`, ingredientError);
+          dish.dishIngredients = [];
+        }
+      }
     }
 
     const formattedDishes = dishes.map((dish) => {
@@ -1291,10 +1317,11 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
         }));
 
         if (dishIngredientData.length > 0) {
+          console.log("PUT /api/admin/menu/:id - About to create dish-ingredient relationships:", dishIngredientData);
           await prisma.dishIngredient.createMany({
             data: dishIngredientData
           });
-          console.log("PUT /api/admin/menu/:id - Created ingredient relationships:", dishIngredientData.length);
+          console.log("PUT /api/admin/menu/:id - Successfully created ingredient relationships:", dishIngredientData.length);
         } else {
           console.log("PUT /api/admin/menu/:id - No valid ingredients found, no relationships created");
         }
