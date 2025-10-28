@@ -18,25 +18,37 @@ export function calculateAllergensFromIngredients(
     console.error('calculateAllergensFromIngredients received non-array availableIngredients:', availableIngredients);
     return [];
   }
+
+  console.log('🧮 Calculating allergens for ingredients:', selectedIngredients);
+  console.log('🧮 Available ingredients:', availableIngredients.length, availableIngredients.map(i => ({ name: i.name, allergen_tags: i.allergen_tags })));
   
   const allergens = new Set<string>();
   
   selectedIngredients.forEach(ingredientName => {
     const ingredient = availableIngredients.find(ing => ing.name === ingredientName);
-    if (ingredient && ingredient.allergenTags) {
+    console.log(`🧮 Looking for ingredient "${ingredientName}":`, ingredient);
+    
+    if (ingredient && ingredient.allergen_tags) {
       // Handle both array and legacy formats
-      const tags = Array.isArray(ingredient.allergenTags) 
-        ? ingredient.allergenTags 
-        : [ingredient.allergenTags];
+      const tags = Array.isArray(ingredient.allergen_tags) 
+        ? ingredient.allergen_tags 
+        : [ingredient.allergen_tags];
+      
+      console.log(`🧮 Found allergen tags for "${ingredientName}":`, tags);
       
       tags.forEach((allergen: string) => {
         const normalizedAllergen = normalizeAllergenId(allergen);
         allergens.add(normalizedAllergen);
+        console.log(`🧮 Added allergen: ${allergen} -> ${normalizedAllergen}`);
       });
+    } else {
+      console.log(`🧮 No allergens found for ingredient "${ingredientName}"`);
     }
   });
   
-  return Array.from(allergens).sort();
+  const result = Array.from(allergens).sort();
+  console.log('🧮 Final calculated allergens:', result);
+  return result;
 }
 
 /**
