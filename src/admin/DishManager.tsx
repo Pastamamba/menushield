@@ -487,7 +487,12 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
     
     const allergens = calculateAllergensFromIngredients(allIngredients, availableIngredients);
     
-    // Create components for the dish
+    // Create components for the dish using updated ingredients
+    const updatedComponentIngredients = {
+      ...componentIngredients,
+      [groupId]: ingredients
+    };
+    
     const components = componentGroups.map(group => ({
       name: group.name,
       type: group.id === 'main' ? 'base' as const : 
@@ -496,8 +501,8 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
             group.id === 'sauce' ? 'sauce' as const :
             group.id === 'topping' ? 'garnish' as const :
             'other' as const,
-      ingredients: componentIngredients[group.id] || [],
-      allergen_tags: calculateAllergensFromIngredients(componentIngredients[group.id] || [], availableIngredients),
+      ingredients: updatedComponentIngredients[group.id] || [],
+      allergen_tags: calculateAllergensFromIngredients(updatedComponentIngredients[group.id] || [], availableIngredients),
       is_required: !group.canChange,
       is_locked: !group.canChange
     })).filter(comp => comp.ingredients.length > 0);
