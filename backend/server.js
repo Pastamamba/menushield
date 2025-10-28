@@ -1259,8 +1259,8 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
         
         const ingredients = await prisma.ingredient.findMany({
           where: {
-            name: { in: ingredientNames },
-            isActive: true
+            name: { in: ingredientNames }
+            // isActive: true  // Temporarily disabled to test
           }
         });
 
@@ -1273,7 +1273,14 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
           }
         });
         
-        console.log("PUT /api/admin/menu/:id - All ingredients with matching names (ignoring isActive):", allIngredientsWithSameName.map(i => ({ name: i.name, id: i.id, isActive: i.isActive })));
+        console.log("PUT /api/admin/menu/:id - All ingredients with matching names (ignoring isActive):", allIngredientsWithSameName.map(i => ({ 
+          name: i.name, 
+          id: i.id, 
+          isActive: i.isActive,
+          isActiveType: typeof i.isActive,
+          isActiveValue: i.isActive === true,
+          isActiveString: String(i.isActive)
+        })));
 
         // Create new relationships
         const dishIngredientData = ingredients.map(ingredient => ({
