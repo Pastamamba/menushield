@@ -1291,16 +1291,17 @@ app.post("/api/admin/ingredients", requireAuth, async (req, res) => {
 
     if (isDev) console.log('Creating ingredient:', { name, category, allergen_tags });
 
-    // Find category by name (global search, not restaurant-specific)
+    // For now, skip category lookup due to schema constraints
+    // Categories require restaurantId but we want global ingredients
     let categoryId = null;
-    if (category) {
-      const categoryRecord = await prisma.category.findFirst({
-        where: { 
-          name: { contains: category, mode: "insensitive" }
-        },
-      });
-      categoryId = categoryRecord?.id;
-    }
+    // if (category) {
+    //   const categoryRecord = await prisma.category.findFirst({
+    //     where: { 
+    //       name: { contains: category, mode: "insensitive" }
+    //     },
+    //   });
+    //   categoryId = categoryRecord?.id;
+    // }
 
     const ingredient = await prisma.ingredient.create({
       data: {
@@ -1368,16 +1369,17 @@ app.put("/api/admin/ingredients/:id", requireAuth, async (req, res) => {
       return res.json(transformedIngredient);
     }
 
-    // Find category by name (global search, not restaurant-specific)
+    // For now, skip category lookup due to schema constraints
+    // Categories require restaurantId but we want global ingredients
     let categoryId = null;
-    if (category) {
-      const categoryRecord = await prisma.category.findFirst({
-        where: {
-          name: { contains: category, mode: "insensitive" },
-        },
-      });
-      categoryId = categoryRecord?.id;
-    }
+    // if (category) {
+    //   const categoryRecord = await prisma.category.findFirst({
+    //     where: {
+    //       name: { contains: category, mode: "insensitive" },
+    //     },
+    //   });
+    //   categoryId = categoryRecord?.id;
+    // }
 
     const ingredient = await prisma.ingredient.update({
       where: {
