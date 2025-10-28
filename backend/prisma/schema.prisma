@@ -92,8 +92,9 @@ model Ingredient {
   allergenTags String    @map("allergen_tags")
   isActive     Boolean   @default(true) @map("is_active")
   
-  restaurantId String    @map("restaurant_id") @db.ObjectId
-  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  // Make restaurantId optional - ingredients can be global
+  restaurantId String?   @map("restaurant_id") @db.ObjectId
+  restaurant   Restaurant? @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   
   categoryId   String?   @map("category_id") @db.ObjectId
   category     Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)

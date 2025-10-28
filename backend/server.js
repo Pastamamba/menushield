@@ -1155,8 +1155,12 @@ app.get("/api/admin/ingredients", requireAuth, async (req, res) => {
     let ingredients;
     let usingFallback = false;
     try {
-      // For now, always use fallback since database ingredients may have schema issues
-      throw new Error("Using fallback for ingredient management");
+      ingredients = await prisma.ingredient.findMany({
+        include: {
+          category: true,
+        },
+        orderBy: [{ name: "asc" }],
+      });
       console.log(`🔍 Found ${ingredients.length} ingredients in database`);
 
       if (ingredients.length === 0) {
@@ -1308,7 +1312,7 @@ app.post("/api/admin/ingredients", requireAuth, async (req, res) => {
         name,
         categoryId,
         allergenTags: JSON.stringify(allergen_tags || []),
-        restaurantId: req.user.restaurantId, // Temporary - required by schema
+        // No restaurantId - ingredients are global
       },
       include: {
         category: true,
@@ -1351,23 +1355,6 @@ app.put("/api/admin/ingredients/:id", requireAuth, async (req, res) => {
         category,
         allergen_tags,
       });
-
-    // Check if this is a fallback JSON ingredient (starts with "ing_")
-    if (id.startsWith("ing_")) {
-      // For fallback ingredients, we can't update the database
-      // Return a success response with the updated data
-      const transformedIngredient = {
-        id: id,
-        name: name,
-        category: category || "other",
-        allergen_tags: allergen_tags || [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      
-      if (isDev) console.log("Updated fallback ingredient:", transformedIngredient);
-      return res.json(transformedIngredient);
-    }
 
     // For now, skip category lookup due to schema constraints
     // Categories require restaurantId but we want global ingredients
