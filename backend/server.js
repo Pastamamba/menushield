@@ -459,6 +459,13 @@ app.get("/api/menu", async (req, res) => {
         restaurantId: restaurant.id,
         isActive: true,
       },
+      include: {
+        dishIngredients: {
+          include: {
+            ingredient: true
+          }
+        }
+      },
       orderBy: { displayOrder: "asc" },
     });
 
@@ -502,7 +509,9 @@ app.get("/api/menu", async (req, res) => {
 
       let ingredients;
       try {
-        ingredients = dish.ingredients ? safeParseArray(dish.ingredients) : [];
+        ingredients = dish.dishIngredients 
+          ? dish.dishIngredients.map(di => di.ingredient.name)
+          : [];
         if (!Array.isArray(ingredients)) {
           ingredients = [];
         }
@@ -888,6 +897,11 @@ app.get("/api/admin/menu", requireAuth, async (req, res) => {
       },
       include: {
         category: true,
+        dishIngredients: {
+          include: {
+            ingredient: true
+          }
+        }
       },
       orderBy: { displayOrder: "asc" },
     });
@@ -899,8 +913,8 @@ app.get("/api/admin/menu", requireAuth, async (req, res) => {
 
         const allergenTags = safeParseArray(dish.allergenTags);
         const components = safeParseArray(dish.components);
-        const ingredients = dish.ingredients
-          ? safeParseArray(dish.ingredients)
+        const ingredients = dish.dishIngredients 
+          ? dish.dishIngredients.map(di => di.ingredient.name)
           : [];
 
         return {
@@ -993,10 +1007,37 @@ app.post(
         },
       });
 
-      // Handle ingredients if provided (for future use)
+      // Handle ingredients if provided
+      let ingredientsList = [];
       if (Array.isArray(ingredients) && ingredients.length > 0) {
-        // For now, we'll just include ingredients in response without storing relationships
-        // This maintains backward compatibility
+        console.log("POST /api/admin/menu - Processing ingredients:", ingredients);
+        
+        // Find ingredients by name (global ingredients)
+        const foundIngredients = await prisma.ingredient.findMany({
+          where: {
+            name: { in: ingredients },
+            isActive: true
+          }
+        });
+
+        console.log("POST /api/admin/menu - Found ingredients:", foundIngredients.map(i => i.name));
+
+        // Create ingredient relationships
+        if (foundIngredients.length > 0) {
+          const dishIngredientData = foundIngredients.map(ingredient => ({
+            dishId: newDish.id,
+            ingredientId: ingredient.id,
+            isOptional: false,
+            isCore: true
+          }));
+
+          await prisma.dishIngredient.createMany({
+            data: dishIngredientData
+          });
+          
+          ingredientsList = foundIngredients.map(ing => ing.name);
+          console.log("POST /api/admin/menu - Created ingredient relationships:", dishIngredientData.length);
+        }
       }
 
       res.status(201).json({
@@ -1006,7 +1047,7 @@ app.post(
         description: newDish.description,
         price: newDish.price,
         category: category || "", // Use original request data
-        ingredients: ingredients || [], // Use original request data
+        ingredients: ingredientsList, // Use actual stored ingredients
         allergen_tags: allergen_tags,
         modification_note: newDish.modificationNote,
         is_modifiable: newDish.isModifiable,
@@ -1089,15 +1130,77 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
       JSON.stringify(prismaData, null, 2)
     );
 
+    // Handle ingredients relationship if provided
+    let shouldUpdateIngredients = false;
+    let ingredientNames = [];
+    
+    if (updateData.ingredients !== undefined) {
+      shouldUpdateIngredients = true;
+      ingredientNames = Array.isArray(updateData.ingredients) ? updateData.ingredients : [];
+      console.log("PUT /api/admin/menu/:id - Processing ingredients:", ingredientNames);
+    }
+
     const updatedDish = await prisma.dish.update({
       where: { id },
       data: prismaData,
     });
 
+    // Update ingredient relationships if provided
+    if (shouldUpdateIngredients) {
+      console.log("PUT /api/admin/menu/:id - Updating ingredient relationships");
+      
+      // Remove existing ingredient relationships
+      await prisma.dishIngredient.deleteMany({
+        where: { dishId: id }
+      });
+
+      // Add new ingredient relationships
+      if (ingredientNames.length > 0) {
+        // Find ingredients by name (global ingredients)
+        const ingredients = await prisma.ingredient.findMany({
+          where: {
+            name: { in: ingredientNames },
+            isActive: true
+          }
+        });
+
+        console.log("PUT /api/admin/menu/:id - Found ingredients:", ingredients.map(i => i.name));
+
+        // Create new relationships
+        const dishIngredientData = ingredients.map(ingredient => ({
+          dishId: id,
+          ingredientId: ingredient.id,
+          isOptional: false,
+          isCore: true
+        }));
+
+        if (dishIngredientData.length > 0) {
+          await prisma.dishIngredient.createMany({
+            data: dishIngredientData
+          });
+          console.log("PUT /api/admin/menu/:id - Created ingredient relationships:", dishIngredientData.length);
+        }
+      }
+    }
+
     console.log(
       "PUT /api/admin/menu/:id - Dish updated successfully:",
       updatedDish.id
     );
+
+    // Fetch updated dish with ingredients for response
+    const dishWithIngredients = await prisma.dish.findUnique({
+      where: { id },
+      include: {
+        dishIngredients: {
+          include: {
+            ingredient: true
+          }
+        }
+      }
+    });
+
+    const ingredientsList = dishWithIngredients?.dishIngredients?.map(di => di.ingredient.name) || [];
 
     res.json({
       id: updatedDish.id,
@@ -1105,7 +1208,7 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
       description: updatedDish.description,
       price: updatedDish.price,
       category: updatedDish.category,
-      ingredients: [], // Legacy compatibility - ingredients are handled separately
+      ingredients: ingredientsList,
       allergen_tags: JSON.parse(updatedDish.allergenTags || "[]"),
       modification_note: updatedDish.modificationNote,
       is_modifiable: updatedDish.isModifiable,
