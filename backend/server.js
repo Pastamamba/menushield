@@ -2001,6 +2001,81 @@ app.delete("/api/admin/categories/:id", requireAuth, async (req, res) => {
   }
 });
 
+// Emergency admin creation endpoint (for dev purposes)
+app.post("/api/emergency/create-admin", async (req, res) => {
+  try {
+    console.log("Emergency admin creation requested");
+    
+    // Only allow in development or if specific env var is set
+    if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_EMERGENCY_ADMIN) {
+      return res.status(403).json({ error: "Emergency admin creation not allowed in production" });
+    }
+
+    // Check if demo restaurant exists
+    let demoRestaurant = await prisma.restaurant.findUnique({
+      where: { slug: 'demo-restaurant' }
+    });
+
+    if (!demoRestaurant) {
+      // Create demo restaurant
+      demoRestaurant = await prisma.restaurant.create({
+        data: {
+          name: 'Demo Restaurant',
+          slug: 'demo-restaurant',
+          address: 'Demo Address',
+          showPrices: true,
+          currency: 'EUR',
+          timezone: 'Europe/Helsinki',
+          defaultLanguage: 'en',
+          supportedLanguages: JSON.stringify(['en', 'fi']),
+          isActive: true,
+          subscriptionTier: 'premium'
+        }
+      });
+      console.log('✅ Demo restaurant created');
+    }
+
+    // Hash password
+    const passwordHash = await bcrypt.hash('admin123', 10);
+    
+    // Delete existing admin if exists
+    const existingAdmin = await prisma.user.findUnique({
+      where: { email: 'admin@menushield.com' }
+    });
+    
+    if (existingAdmin) {
+      await prisma.user.delete({
+        where: { email: 'admin@menushield.com' }
+      });
+      console.log('🗑️ Deleted existing admin');
+    }
+    
+    // Create new admin user
+    const newAdmin = await prisma.user.create({
+      data: {
+        email: 'admin@menushield.com',
+        passwordHash,
+        role: 'OWNER',
+        restaurantId: demoRestaurant.id
+      }
+    });
+    
+    console.log('✅ Emergency admin created successfully');
+    
+    res.json({
+      message: 'Emergency admin created successfully',
+      credentials: {
+        email: 'admin@menushield.com',
+        password: 'admin123'
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Error creating emergency admin:', error);
+    res.status(500).json({ error: 'Failed to create emergency admin' });
+  }
+});
+
 // Start server with proper error handling
 async function startServer() {
   try {
