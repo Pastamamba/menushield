@@ -1428,6 +1428,21 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
           />
         </div>
 
+        {/* Allow Customer Modifications */}
+        <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+          <input
+            type="checkbox"
+            name="is_modifiable"
+            checked={form.is_modifiable ?? false}
+            onChange={handleChange}
+            className="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+          />
+          <div>
+            <label className="text-sm font-medium text-gray-900">Allow Modifications</label>
+            <p className="text-xs text-gray-600">Customers can request ingredient changes</p>
+          </div>
+        </div>
+
         {/* Auto-calculated Allergens Display */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">

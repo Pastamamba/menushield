@@ -328,10 +328,9 @@ export default function GuestMenu() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div>
-                    <h3 className="font-medium text-blue-900 mb-1">Turvallisempi menu</h3>
+                    <h3 className="font-medium text-blue-900 mb-1">{t('saferMenuTitle')}</h3>
                     <p className="text-blue-700 text-sm">
-                      Piilotamme ruoat jotka sisältävät valitsemiasi allergeeneja pakollisissa aineksissa, sillä niitä ei voida tehdä turvallisiksi. 
-                      Näet vain ruoat jotka ovat turvallisia tai joista allergeenit voidaan poistaa.
+                      {t('hiddenDishesExplanation')}
                     </p>
                   </div>
                 </div>

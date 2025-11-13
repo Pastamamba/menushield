@@ -155,6 +155,16 @@ export function useMenuTranslations() {
       fi: '⚠️ Nämä ruoat sisältävät valitsemiasi allergeeneja. Kysy tarjoilijalta, voiko allergeeneja muokata tai poistaa.',
       sv: '⚠️ Dessa rätter innehåller dina valda allergener. Fråga servitören om allergener kan modifieras eller tas bort.'
     },
+    saferMenuTitle: {
+      en: 'Safer menu',
+      fi: 'Turvallisempi menu',
+      sv: 'Säkrare meny'
+    },
+    hiddenDishesExplanation: {
+      en: 'We hide dishes that contain your selected allergens in required ingredients, as they cannot be made safe. You only see dishes that are safe or from which allergens can be removed.',
+      fi: 'Piilotamme ruoat jotka sisältävät valitsemiasi allergeeneja pakollisissa aineksissa, sillä niitä ei voida tehdä turvallisiksi. Näet vain ruoat jotka ovat turvallisia tai joista allergeenit voidaan poistaa.',
+      sv: 'Vi döljer rätter som innehåller dina valda allergener i obligatoriska ingredienser, eftersom de inte kan göras säkra. Du ser bara rätter som är säkra eller där allergener kan tas bort.'
+    },
     showOnlyModifiable: {
       en: 'Show only modifiable dishes',
       fi: 'Näytä vain muokattavat ruoat',
