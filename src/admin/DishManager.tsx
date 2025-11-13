@@ -687,8 +687,9 @@ export default function DishManager() {
             </div>
           ))}
         </div>
+      )}
 
-        {/* Grid Pagination */}
+      {/* Grid Pagination */}
         {totalPages > 1 && (
           <div className="mt-6 bg-white rounded-xl p-4 flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-gray-600">
