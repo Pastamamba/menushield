@@ -112,7 +112,7 @@ export default function DishCard({
       {userAvoidedAllergens.length > 0 && (
         <div className="border-t border-gray-100 pt-3">
           <div className="text-xs font-medium text-gray-500 mb-2">
-            {safetyStatus.status === "unsafe" ? "❌ Contains Required Allergens:" :
+            {safetyStatus.status === "unsafe" ? "Contains Required Allergens:" :
              safetyStatus.status === "modifiable" ? "⚠️ Contains Removable Allergens:" :
              "⚠️ Contains Your Allergens:"}
           </div>
@@ -124,17 +124,6 @@ export default function DishCard({
                   onTouchStart={handleTouchFeedback}
                 >
                   <span className="capitalize">{allergen.displayName}</span>
-                </span>
-                <span className={`text-xs font-medium px-2.5 py-1.5 min-h-[32px] rounded-md flex items-center ${
-                  allergen.canModify ? 'bg-orange-50 text-orange-700 border border-orange-200' : 'bg-red-50 text-red-700 border border-red-200'
-                }`}>
-                  in {allergen.component || 'Base'}
-                  {allergen.canModify && (
-                    <span className="text-green-600 ml-1 font-medium">(removable)</span>
-                  )}
-                  {!allergen.canModify && allergen.component && (
-                    <span className="text-red-600 ml-1 font-medium">(required)</span>
-                  )}
                 </span>
               </div>
             ))}

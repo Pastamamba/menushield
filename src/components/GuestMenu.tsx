@@ -317,7 +317,7 @@ export default function GuestMenu() {
                   <h2 className="text-2xl font-bold text-orange-700 mb-4 flex items-center">
                     <span className="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
                     {categorizedDishes.unsafe.length > 0 
-                      ? `❌ Contains Required Allergens (${categorizedDishes.unsafe.length})`
+                      ? `Contains Required Allergens (${categorizedDishes.unsafe.length})`
                       : `⚠️ May Be Modifiable (${categorizedDishes.modifiable.length})`
                     }
                   </h2>
