@@ -7,6 +7,7 @@ import { useMenuTranslations } from "../hooks/useMenuTranslations";
 import LanguageSelector from "./LanguageSelector";
 import AllergenFilter from "./AllergenFilter";
 import DishCard from "./DishCard";
+import SkeletonLoader from "./SkeletonLoader";
 import type { Dish } from "../types";
 
 export default function GuestMenu() {
@@ -73,10 +74,34 @@ export default function GuestMenu() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">{t('loadingMenu')}</p>
+      <div className="min-h-screen bg-warm-gray-50">
+        {/* Mobile Header */}
+        <div className="mobile-header lg:hidden sticky top-0 z-40 bg-gradient-to-r from-sage-600 to-sage-500 shadow-md">
+          <div className="px-3 py-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-lg font-semibold text-white">MenuShield</h1>
+                <p className="text-sage-100 text-sm">Ladataan menua...</p>
+              </div>
+              <div className="w-20 h-8 bg-white/20 rounded-lg animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Header */}
+        <div className="hidden lg:block bg-white border-b border-gray-200">
+          <div className="container mx-auto px-4 py-6">
+            <SkeletonLoader type="header" />
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="container mx-auto px-4 py-6">
+          {/* Filter Skeleton */}
+          <SkeletonLoader type="filter" />
+          
+          {/* Dish Grid Skeleton */}
+          <SkeletonLoader type="dish-grid" count={9} />
         </div>
       </div>
     );
