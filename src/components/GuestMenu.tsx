@@ -132,9 +132,16 @@ export default function GuestMenu() {
     )
   );
 
-  // Categorize dishes by safety level
+  // Categorize dishes by safety level - HIDE unsafe dishes completely when allergens are selected
   const categorizedDishes = filteredDishes.reduce((acc, dish) => {
     const safety = analyzeDishSafety(dish, selectedAllergens);
+    
+    // If allergens are selected and dish is unsafe (allergens in required components), 
+    // don't show it at all - hide completely from the list
+    if (selectedAllergens.length > 0 && safety.status === 'unsafe') {
+      return acc; // Skip this dish completely - don't add to any category
+    }
+    
     acc[safety.status].push({ dish, safety });
     return acc;
   }, {
@@ -312,7 +319,24 @@ export default function GuestMenu() {
               </div>
             </section>
           ) : (
+            /* Show filtered dishes by safety when allergens are selected */
             <>
+              {/* Info message about hidden dishes */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <h3 className="font-medium text-blue-900 mb-1">Turvallisempi menu</h3>
+                    <p className="text-blue-700 text-sm">
+                      Piilotamme ruoat jotka sisältävät valitsemiasi allergeeneja pakollisissa aineksissa, sillä niitä ei voida tehdä turvallisiksi. 
+                      Näet vain ruoat jotka ovat turvallisia tai joista allergeenit voidaan poistaa.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               {/* Safe Dishes */}
               {categorizedDishes.safe.length > 0 && (
                 <section>
@@ -336,31 +360,15 @@ export default function GuestMenu() {
                 </section>
               )}
 
-              {/* Modifiable and Unsafe Dishes Combined */}
-              {(categorizedDishes.modifiable.length > 0 || categorizedDishes.unsafe.length > 0) && (
+              {/* Modifiable Dishes - dishes with allergens that can be removed */}
+              {categorizedDishes.modifiable.length > 0 && (
                 <section>
                   <h2 className="text-2xl font-bold text-orange-700 mb-4 flex items-center">
                     <span className="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
-                    {categorizedDishes.unsafe.length > 0 
-                      ? `Contains Required Allergens (${categorizedDishes.unsafe.length})`
-                      : `⚠️ May Be Modifiable (${categorizedDishes.modifiable.length})`
-                    }
+                    ⚠️ May Be Modifiable ({categorizedDishes.modifiable.length})
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* Show modifiable dishes first */}
                     {categorizedDishes.modifiable.map(({ dish, safety }) => (
-                      <DishCard 
-                        key={dish.id}
-                        dish={dish} 
-                        safetyStatus={safety}
-                        showPrices={restaurant?.showPrices !== false}
-                        currency={restaurant?.currency || 'EUR'}
-                        onCardSelect={handleCardSelect}
-                        onCardLongPress={handleCardLongPress}
-                      />
-                    ))}
-                    {/* Then show unsafe dishes */}
-                    {categorizedDishes.unsafe.map(({ dish, safety }) => (
                       <DishCard 
                         key={dish.id}
                         dish={dish} 
