@@ -30,7 +30,6 @@ export default function DishManager() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [selectedDishes, setSelectedDishes] = useState<string[]>([]);
   const [itemsPerPage, setItemsPerPage] = useState(25);
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
@@ -144,72 +143,16 @@ export default function DishManager() {
     return (d.category as any)?.name || d.category || "Uncategorized";
   })))];
 
+  const getCategoryDisplayName = (dish: Dish) => {
+    return (dish.category as any)?.name || dish.category || "Uncategorized";
+  };
+
   const handleSort = (field: string) => {
     if (sortBy === field) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
       setSortBy(field);
       setSortOrder("asc");
-    }
-  };
-
-  const handleSelectDish = (dishId: string) => {
-    setSelectedDishes(prev => 
-      prev.includes(dishId) 
-        ? prev.filter(id => id !== dishId)
-        : [...prev, dishId]
-    );
-  };
-
-  const handleSelectAllVisible = () => {
-    const visibleIds = paginatedDishes.map(d => d.id);
-    const allSelected = visibleIds.every(id => selectedDishes.includes(id));
-    
-    if (allSelected) {
-      setSelectedDishes(prev => prev.filter(id => !visibleIds.includes(id)));
-    } else {
-      setSelectedDishes(prev => [...new Set([...prev, ...visibleIds])]);
-    }
-  };
-
-  const handleBulkStatusChange = async (active: boolean) => {
-    if (selectedDishes.length === 0) return;
-    
-    const confirmed = window.confirm(
-      `Are you sure you want to ${active ? 'activate' : 'deactivate'} ${selectedDishes.length} selected dishes?`
-    );
-    
-    if (confirmed) {
-      for (const dishId of selectedDishes) {
-        try {
-          await updateDishMutation.mutateAsync({
-            id: dishId,
-            dish: { is_active: active }
-          });
-        } catch (error) {
-          console.error(`Failed to update dish ${dishId}:`, error);
-        }
-      }
-      setSelectedDishes([]);
-    }
-  };
-
-  const handleBulkDelete = async () => {
-    if (selectedDishes.length === 0) return;
-    
-    const confirmed = window.confirm(
-      `Are you sure you want to delete ${selectedDishes.length} selected dishes? This action cannot be undone.`
-    );
-    
-    if (confirmed) {
-      for (const dishId of selectedDishes) {
-        try {
-          await deleteDishMutation.mutateAsync(dishId);
-        } catch (error) {
-          console.error(`Failed to delete dish ${dishId}:`, error);
-        }
-      }
-      setSelectedDishes([]);
     }
   };
 
@@ -376,45 +319,6 @@ export default function DishManager() {
             </select>
           </div>
         </div>
-
-        {/* Bulk Actions */}
-        {selectedDishes.length > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-semibold text-blue-900">
-                  {selectedDishes.length} dish{selectedDishes.length !== 1 ? 'es' : ''} selected
-                </span>
-                <button
-                  onClick={() => setSelectedDishes([])}
-                  className="text-blue-600 hover:text-blue-800 text-sm"
-                >
-                  Clear selection
-                </button>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleBulkStatusChange(true)}
-                  className="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
-                >
-                  Activate
-                </button>
-                <button
-                  onClick={() => handleBulkStatusChange(false)}
-                  className="bg-yellow-600 text-white px-3 py-2 rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium"
-                >
-                  Deactivate
-                </button>
-                <button
-                  onClick={handleBulkDelete}
-                  className="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Professional Table View */}
@@ -424,14 +328,6 @@ export default function DishManager() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-4 text-left">
-                    <input
-                      type="checkbox"
-                      onChange={handleSelectAllVisible}
-                      checked={paginatedDishes.length > 0 && paginatedDishes.every(dish => selectedDishes.includes(dish.id))}
-                      className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                    />
-                  </th>
                   <th 
                     className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort("name")}
@@ -493,17 +389,8 @@ export default function DishManager() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedDishes.map((dish) => (
-                  <tr key={dish.id} className={`hover:bg-gray-50 ${dish.is_active === false ? 'bg-gray-25 opacity-75' : ''} ${selectedDishes.includes(dish.id) ? 'bg-blue-25 border-blue-200' : ''}`}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <input
-                        type="checkbox"
-                        checked={selectedDishes.includes(dish.id)}
-                        onChange={() => handleSelectDish(dish.id)}
-                        className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                      />
-                    </td>
-                    
+                {paginatedDishes.map((dish, index) => (
+                  <tr key={dish.id} className={`hover:bg-gray-50 transition-colors ${dish.is_active === false ? 'bg-gray-25 opacity-75' : ''} ${index % 2 === 0 ? '' : 'bg-gray-25'}`}>
                     <td className="px-6 py-4">
                       <div className="max-w-xs">
                         <div className="flex items-center">
@@ -536,25 +423,31 @@ export default function DishManager() {
                     </td>
                     
                     <td className="px-6 py-4">
-                      <div className="max-w-sm">
+                      <div className="max-w-xs">
                         {Array.isArray(dish.ingredients) && dish.ingredients.length > 0 ? (
-                          <div className="flex flex-wrap gap-1">
-                            {dish.ingredients.slice(0, 3).map((ingredient) => (
-                              <span
-                                key={ingredient}
-                                className="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-full border border-blue-200"
-                              >
-                                {ingredient}
-                              </span>
-                            ))}
-                            {dish.ingredients.length > 3 && (
-                              <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
-                                +{dish.ingredients.length - 3}
-                              </span>
+                          <div className="space-y-1">
+                            <div className="flex flex-wrap gap-1 max-h-16 overflow-hidden">
+                              {dish.ingredients.slice(0, 4).map((ingredient) => (
+                                <span
+                                  key={ingredient}
+                                  className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-blue-50 text-blue-700 rounded-md border border-blue-200 truncate max-w-[120px]"
+                                  title={ingredient}
+                                >
+                                  {ingredient}
+                                </span>
+                              ))}
+                            </div>
+                            {dish.ingredients.length > 4 && (
+                              <div className="text-xs text-gray-500">
+                                +{dish.ingredients.length - 4} more ingredients
+                              </div>
                             )}
+                            <div className="text-xs text-gray-400 pt-1">
+                              Total: {dish.ingredients.length} ingredients
+                            </div>
                           </div>
                         ) : (
-                          <span className="text-sm text-gray-400">No ingredients</span>
+                          <span className="text-sm text-gray-400 italic">No ingredients</span>
                         )}
                       </div>
                     </td>
@@ -667,6 +560,181 @@ export default function DishManager() {
           )}
         </div>
       )}
+
+      {/* Grid View */}
+      {viewMode === "grid" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {paginatedDishes.map((dish) => (
+            <div key={dish.id} className="bg-white shadow-sm rounded-xl overflow-hidden hover:shadow-md transition-shadow duration-200 border border-gray-100">
+              {/* Card Header */}
+              <div className="p-4 border-b border-gray-100">
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <h3 className="font-semibold text-gray-900 text-lg line-clamp-1" title={dish.name}>
+                      {dish.name}
+                    </h3>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <button
+                      onClick={() => handleToggleActivation(dish)}
+                      className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${
+                        dish.is_active
+                          ? "bg-green-100 text-green-800 hover:bg-green-200"
+                          : "bg-red-100 text-red-800 hover:bg-red-200"
+                      }`}
+                    >
+                      {dish.is_active ? "Active" : "Inactive"}
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Price and Category */}
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-semibold text-green-600 text-lg">
+                    {formatPrice(dish.price || 0, restaurant?.currency || 'EUR')}
+                  </span>
+                  <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-md text-xs">
+                    {getCategoryDisplayName(dish)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Card Body */}
+              <div className="p-4">
+                {/* Description */}
+                {dish.description && (
+                  <p className="text-sm text-gray-600 mb-3 line-clamp-2" title={dish.description}>
+                    {dish.description}
+                  </p>
+                )}
+
+                {/* Ingredients */}
+                <div className="mb-4">
+                  <div className="text-xs font-medium text-gray-500 mb-1">
+                    Ingredients ({Array.isArray(dish.ingredients) ? dish.ingredients.length : 0})
+                  </div>
+                  {Array.isArray(dish.ingredients) && dish.ingredients.length > 0 ? (
+                    <div className="flex flex-wrap gap-1">
+                      {dish.ingredients.slice(0, 3).map((ingredient) => (
+                        <span
+                          key={ingredient}
+                          className="inline-flex items-center px-2 py-0.5 text-xs bg-blue-50 text-blue-700 rounded-md border border-blue-200 truncate max-w-[80px]"
+                          title={ingredient}
+                        >
+                          {ingredient}
+                        </span>
+                      ))}
+                      {dish.ingredients.length > 3 && (
+                        <span className="text-xs text-gray-500 px-1">
+                          +{dish.ingredients.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="text-xs text-gray-400 italic">No ingredients</span>
+                  )}
+                </div>
+
+                {/* Allergens */}
+                {Array.isArray(dish.allergen_tags) && dish.allergen_tags.length > 0 && (
+                  <div className="mb-3">
+                    <div className="text-xs font-medium text-gray-500 mb-1">Allergens</div>
+                    <div className="flex flex-wrap gap-1">
+                      {dish.allergen_tags.slice(0, 4).map((allergen) => (
+                        <span
+                          key={allergen}
+                          className="inline-flex items-center px-1.5 py-0.5 text-xs bg-red-50 text-red-700 rounded border border-red-200"
+                        >
+                          {allergen}
+                        </span>
+                      ))}
+                      {dish.allergen_tags.length > 4 && (
+                        <span className="text-xs text-gray-500 px-1">
+                          +{dish.allergen_tags.length - 4}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Card Footer */}
+              <div className="px-4 pb-4 flex items-center justify-between">
+                <div className="text-xs text-gray-500">
+                  ID: {dish.id.slice(0, 8)}...
+                </div>
+                <div className="flex items-center space-x-1">
+                  <button
+                    onClick={() => setEditingDish(dish)}
+                    className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                    title="Edit dish"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => handleDeleteDish(dish.id)}
+                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                    title="Delete dish"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Grid Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-6 bg-white rounded-xl p-4 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <span>Page {currentPage} of {totalPages}</span>
+              <span className="text-gray-400">•</span>
+              <span>{filteredAndSortedDishes.length} total dishes</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400"
+              >
+                Previous
+              </button>
+              
+              <div className="flex space-x-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const pageNumber = currentPage <= 3 ? i + 1 : currentPage - 2 + i;
+                  if (pageNumber > totalPages) return null;
+                  return (
+                    <button
+                      key={pageNumber}
+                      onClick={() => setCurrentPage(pageNumber)}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        currentPage === pageNumber
+                          ? "bg-green-600 text-white"
+                          : "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+                      }`}
+                    >
+                      {pageNumber}
+                    </button>
+                  );
+                })}
+              </div>
+              
+              <button
+                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
 
       {/* Empty State */}
       {filteredAndSortedDishes.length === 0 && (

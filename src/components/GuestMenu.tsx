@@ -316,10 +316,16 @@ export default function GuestMenu() {
                 <section>
                   <h2 className="text-2xl font-bold text-orange-700 mb-4 flex items-center">
                     <span className="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
-                    {t('warningDishesTitle')} ({categorizedDishes.modifiable.length + categorizedDishes.unsafe.length})
+                    {categorizedDishes.unsafe.length > 0 
+                      ? `❌ Contains Required Allergens (${categorizedDishes.unsafe.length})`
+                      : `⚠️ May Be Modifiable (${categorizedDishes.modifiable.length})`
+                    }
                   </h2>
                   <p className="text-orange-600 mb-4 p-3 bg-orange-50 rounded-lg border border-orange-200">
-                    {t('warningDishesInfo')}
+                    {categorizedDishes.unsafe.length > 0 
+                      ? "❌ Not safe - allergens are in required ingredients that cannot be removed."
+                      : "These dishes contain allergens in components that may be removable. Please ask your server about modifications."
+                    }
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {/* Show modifiable dishes first */}

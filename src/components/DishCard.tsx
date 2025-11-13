@@ -81,23 +81,23 @@ export default function DishCard({
 
   return (
     <div 
-      className="bg-white border border-warm-gray-200 rounded-lg p-3 transition-shadow duration-200 hover:shadow-sm"
+      className="bg-white border border-warm-gray-200 rounded-lg p-3 transition-shadow duration-200 hover:shadow-sm relative"
       {...cardGestures}
     >
-      {/* Traditional Menu Header - More compact */}
-      <div className="flex items-start justify-between mb-2">
+      {/* Price in top-right corner */}
+      {showPrices && dish.price && (
+        <div className="absolute top-3 right-3 bg-green-50 text-green-700 px-2 py-1 rounded-md text-sm font-semibold border border-green-200">
+          {formatPrice(dish.price, currency)}
+        </div>
+      )}
+
+      {/* Dish Header - Compact */}
+      <div className="flex items-start justify-between mb-2 pr-16">
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="text-base font-semibold text-warm-gray-900">{dish.name}</h3>
+            <h3 className="text-base font-semibold text-warm-gray-900 leading-tight">{dish.name}</h3>
             <span className="text-base">{getStatusIcon()}</span>
           </div>
-          
-          {/* Price - More subtle */}
-          {showPrices && dish.price && (
-            <div className="text-sm font-medium text-warm-gray-700 mt-0.5">
-              {formatPrice(dish.price, currency)}
-            </div>
-          )}
         </div>
       </div>
 
@@ -112,7 +112,9 @@ export default function DishCard({
       {userAvoidedAllergens.length > 0 && (
         <div className="border-t border-gray-100 pt-3">
           <div className="text-xs font-medium text-gray-500 mb-2">
-            ⚠️ Contains Your Allergens:
+            {safetyStatus.status === "unsafe" ? "❌ Contains Required Allergens:" :
+             safetyStatus.status === "modifiable" ? "⚠️ Contains Removable Allergens:" :
+             "⚠️ Contains Your Allergens:"}
           </div>
           <div className="space-y-2">
             {userAvoidedAllergens.map((allergen) => (
@@ -123,7 +125,9 @@ export default function DishCard({
                 >
                   <span className="capitalize">{allergen.displayName}</span>
                 </span>
-                <span className="text-xs font-medium text-warm-gray-700 bg-warm-gray-100 px-2.5 py-1.5 min-h-[32px] rounded-md flex items-center">
+                <span className={`text-xs font-medium px-2.5 py-1.5 min-h-[32px] rounded-md flex items-center ${
+                  allergen.canModify ? 'bg-orange-50 text-orange-700 border border-orange-200' : 'bg-red-50 text-red-700 border border-red-200'
+                }`}>
                   in {allergen.component || 'Base'}
                   {allergen.canModify && (
                     <span className="text-green-600 ml-1 font-medium">(removable)</span>
@@ -140,14 +144,14 @@ export default function DishCard({
           {safetyStatus.status === "modifiable" && safetyStatus.modificationSuggestion && (
             <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
               <div className="text-sm text-orange-700 font-medium">
-                💡 {safetyStatus.modificationSuggestion}
+                💡 Ask server about removing: {safetyStatus.modificationSuggestion}
               </div>
             </div>
           )}
           {safetyStatus.status === "unsafe" && (
             <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
               <div className="text-sm text-red-700 font-medium">
-                ⚠️ Contains allergens in required components - cannot be safely modified
+                ❌ Not safe - allergens are in required ingredients
               </div>
             </div>
           )}
