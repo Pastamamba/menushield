@@ -321,12 +321,6 @@ export default function GuestMenu() {
                       : `⚠️ May Be Modifiable (${categorizedDishes.modifiable.length})`
                     }
                   </h2>
-                  <p className="text-orange-600 mb-4 p-3 bg-orange-50 rounded-lg border border-orange-200">
-                    {categorizedDishes.unsafe.length > 0 
-                      ? "❌ Not safe - allergens are in required ingredients that cannot be removed."
-                      : "These dishes contain allergens in components that may be removable. Please ask your server about modifications."
-                    }
-                  </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {/* Show modifiable dishes first */}
                     {categorizedDishes.modifiable.map(({ dish, safety }) => (

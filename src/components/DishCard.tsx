@@ -148,13 +148,6 @@ export default function DishCard({
               </div>
             </div>
           )}
-          {safetyStatus.status === "unsafe" && (
-            <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <div className="text-sm text-red-700 font-medium">
-                ❌ Not safe - allergens are in required ingredients
-              </div>
-            </div>
-          )}
         </div>
       )}
 
