@@ -20,39 +20,6 @@ export default function DishManager() {
   // Store current language for use in nested functions
   const lang = currentLanguage as AllergenLanguage;
   
-  // CSV import
-  const handleCSVImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const text = await file.text();
-    // Simple CSV parser: name,description,price,category,ingredients,allergen_tags,components
-    const rows = text.split(/\r?\n/).filter(Boolean);
-    const header = rows[0].split(",").map((h) => h.trim());
-    const dishes: CreateDishRequest[] = rows.slice(1).map((row) => {
-      const cols = row.split(",");
-      const obj: any = {};
-      header.forEach((h, i) => {
-        obj[h] = cols[i]?.trim() || "";
-      });
-      // Parse arrays
-      obj.ingredients = obj.ingredients ? obj.ingredients.split(";").map((v: string) => v.trim()) : [];
-      obj.allergen_tags = obj.allergen_tags ? obj.allergen_tags.split(";").map((v: string) => v.trim()) : [];
-      // Parse components (main;sauce;side)
-      obj.components = obj.components ? obj.components.split(";").map((c: string) => ({ name: c, type: "other", ingredients: [], allergen_tags: [], is_required: true })) : [];
-      obj.price = obj.price ? parseFloat(obj.price) : undefined;
-      return obj;
-    });
-    // Bulk create
-    for (const dish of dishes) {
-      try {
-        await createDishMutation.mutateAsync(dish);
-      } catch (err) {
-        console.error("CSV import error:", err);
-      }
-    }
-    alert(`Imported ${dishes.length} dishes!`);
-  };
-  
   const { data: dishes = [], isLoading, error } = useAdminDishes();
   const { data: availableIngredients = [] } = useAdminIngredients();
   const { data: restaurant } = useRestaurant();
@@ -60,7 +27,13 @@ export default function DishManager() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all"); // all, active, inactive
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [selectedDishes, setSelectedDishes] = useState<string[]>([]);
+  const [itemsPerPage, setItemsPerPage] = useState(25);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [viewMode, setViewMode] = useState<"table" | "grid">("table");
 
   // Prevent body scroll when modals are open
   useEffect(() => {
@@ -71,7 +44,6 @@ export default function DishManager() {
       document.body.style.overflow = 'unset';
     }
     
-    // Cleanup on unmount
     return () => {
       document.body.style.overflow = 'unset';
     };
@@ -81,15 +53,18 @@ export default function DishManager() {
   const updateDishMutation = useUpdateDish();
   const deleteDishMutation = useDeleteDish();
   
-  // Debug logs to trace the data
-  logger.debug('DishManager data:', { dishes, availableIngredients, restaurant });
-
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <h2 className="text-2xl font-semibold text-gray-900">Dish Manager</h2>
-        <div className="bg-white shadow rounded-lg p-6">
-          <p className="text-gray-600">Loading dishes...</p>
+        <div className="bg-white shadow-sm rounded-xl p-8">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+            <div className="space-y-3">
+              <div className="h-4 bg-gray-200 rounded"></div>
+              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+              <div className="h-4 bg-gray-200 rounded w-4/6"></div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -98,50 +73,152 @@ export default function DishManager() {
   if (error) {
     return (
       <div className="space-y-6">
-        <h2 className="text-2xl font-semibold text-gray-900">Dish Manager</h2>
-        <div className="bg-white shadow rounded-lg p-6">
-          <p className="text-red-600">Error loading dishes: {error.message}</p>
+        <div className="bg-white shadow-sm rounded-xl p-8">
+          <div className="text-center">
+            <div className="text-red-500 text-6xl mb-4">⚠️</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Dishes</h2>
+            <p className="text-gray-600 mb-6">{error.message}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
-  // Filter and group dishes  
-  const filteredDishes = dishes.filter(dish => {
-    const matchesSearch = dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         dish.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    // Handle category as either string or object
-    const categoryName = (dish.category as any)?.name || dish.category || "Uncategorized";
-    const matchesCategory = selectedCategory === "all" || categoryName === selectedCategory;
-    
-    const matchesStatus = statusFilter === "all" || 
-                         (statusFilter === "active" && dish.is_active !== false) ||
-                         (statusFilter === "inactive" && dish.is_active === false);
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
+  // Advanced filtering and sorting
+  const filteredAndSortedDishes = dishes
+    .filter(dish => {
+      const matchesSearch = dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           dish.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const categoryName = (dish.category as any)?.name || dish.category || "Uncategorized";
+      const matchesCategory = selectedCategory === "all" || categoryName === selectedCategory;
+      
+      const matchesStatus = statusFilter === "all" || 
+                           (statusFilter === "active" && dish.is_active !== false) ||
+                           (statusFilter === "inactive" && dish.is_active === false);
+      return matchesSearch && matchesCategory && matchesStatus;
+    })
+    .sort((a, b) => {
+      let aVal, bVal;
+      switch (sortBy) {
+        case "name":
+          aVal = a.name.toLowerCase();
+          bVal = b.name.toLowerCase();
+          break;
+        case "price":
+          aVal = a.price || 0;
+          bVal = b.price || 0;
+          break;
+        case "category":
+          aVal = ((a.category as any)?.name || a.category || "").toLowerCase();
+          bVal = ((b.category as any)?.name || b.category || "").toLowerCase();
+          break;
+        case "ingredients":
+          aVal = Array.isArray(a.ingredients) ? a.ingredients.length : 0;
+          bVal = Array.isArray(b.ingredients) ? b.ingredients.length : 0;
+          break;
+        default:
+          aVal = a.name.toLowerCase();
+          bVal = b.name.toLowerCase();
+      }
+      
+      if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
 
-  // Get unique categories for filter dropdown - handle both string and object categories
+  // Pagination
+  const totalItems = filteredAndSortedDishes.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedDishes = filteredAndSortedDishes.slice(startIndex, startIndex + itemsPerPage);
+
+  // Get unique categories
   const allCategories = ["all", ...Array.from(new Set(dishes.map(d => {
     return (d.category as any)?.name || d.category || "Uncategorized";
   })))];
 
-  logger.debug('Categories for dropdown:', allCategories);
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(field);
+      setSortOrder("asc");
+    }
+  };
+
+  const handleSelectDish = (dishId: string) => {
+    setSelectedDishes(prev => 
+      prev.includes(dishId) 
+        ? prev.filter(id => id !== dishId)
+        : [...prev, dishId]
+    );
+  };
+
+  const handleSelectAllVisible = () => {
+    const visibleIds = paginatedDishes.map(d => d.id);
+    const allSelected = visibleIds.every(id => selectedDishes.includes(id));
+    
+    if (allSelected) {
+      setSelectedDishes(prev => prev.filter(id => !visibleIds.includes(id)));
+    } else {
+      setSelectedDishes(prev => [...new Set([...prev, ...visibleIds])]);
+    }
+  };
+
+  const handleBulkStatusChange = async (active: boolean) => {
+    if (selectedDishes.length === 0) return;
+    
+    const confirmed = window.confirm(
+      `Are you sure you want to ${active ? 'activate' : 'deactivate'} ${selectedDishes.length} selected dishes?`
+    );
+    
+    if (confirmed) {
+      for (const dishId of selectedDishes) {
+        try {
+          await updateDishMutation.mutateAsync({
+            id: dishId,
+            dish: { is_active: active }
+          });
+        } catch (error) {
+          console.error(`Failed to update dish ${dishId}:`, error);
+        }
+      }
+      setSelectedDishes([]);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedDishes.length === 0) return;
+    
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${selectedDishes.length} selected dishes? This action cannot be undone.`
+    );
+    
+    if (confirmed) {
+      for (const dishId of selectedDishes) {
+        try {
+          await deleteDishMutation.mutateAsync(dishId);
+        } catch (error) {
+          console.error(`Failed to delete dish ${dishId}:`, error);
+        }
+      }
+      setSelectedDishes([]);
+    }
+  };
 
   const handleCreateDish = async (dishData: CreateDishRequest) => {
     try {
-      console.log('🍽️ DishManager: Attempting to create dish:', dishData);
-      const result = await createDishMutation.mutateAsync(dishData);
-      console.log('✅ DishManager: Dish created successfully');
-      
-      // Check if it's a local dish (starts with 'local-')
-      if (result.id.startsWith('local-')) {
-        alert('⚠️ Backend unavailable - Dish saved locally!\n\nThe dish has been saved to your local storage and will appear in the list. It will be synced to the server when the backend is available.');
-      }
-      
+      await createDishMutation.mutateAsync(dishData);
       setShowCreateForm(false);
     } catch (error) {
-      console.error("🚨 DishManager: Failed to create dish:", error);
+      console.error("Failed to create dish:", error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       alert(`Failed to create dish: ${errorMessage}`);
     }
@@ -149,8 +226,6 @@ export default function DishManager() {
 
   const handleUpdateDish = async (id: string, dishData: Partial<CreateDishRequest>) => {
     try {
-      console.log('🔍 DishManager handleUpdateDish called with:', { id, dishData });
-      console.log('🔍 DishManager ingredients being sent:', dishData.ingredients);
       await updateDishMutation.mutateAsync({ id, dish: dishData });
       setEditingDish(null);
     } catch (error) {
@@ -172,9 +247,7 @@ export default function DishManager() {
     try {
       await updateDishMutation.mutateAsync({
         id: dish.id,
-        dish: {
-          is_active: !dish.is_active
-        }
+        dish: { is_active: !dish.is_active }
       });
     } catch (error) {
       console.error("Error toggling dish activation:", error);
@@ -183,209 +256,443 @@ export default function DishManager() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header with search and actions - More refined */}
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-        <h2 className="text-xl font-semibold text-warm-gray-900">Dishes ({filteredDishes.length})</h2>
-        
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setShowCreateForm(true)}
-            className="bg-sage-600 text-white px-3 py-2 rounded-lg hover:bg-sage-700 transition-all duration-200 active:scale-98 font-medium"
-          >
-            + Add Dish
-          </button>
-          <label className="bg-warm-gray-600 text-white px-3 py-2 rounded-lg hover:bg-warm-gray-700 cursor-pointer transition-all duration-200 active:scale-98 font-medium">
-            Import CSV
-            <input type="file" accept=".csv" style={{ display: "none" }} onChange={handleCSVImport} />
-          </label>
+    <div className="space-y-6 p-6">
+      {/* Professional Header */}
+      <div className="bg-white shadow-sm rounded-xl p-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Dish Management</h1>
+            <p className="text-gray-600 mt-1">
+              Manage your menu items ({filteredAndSortedDishes.length} of {dishes.length} dishes)
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowCreateForm(true)}
+              className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg hover:shadow-xl font-semibold flex items-center gap-2"
+            >
+              <span className="text-lg">+</span>
+              Add Dish
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Search and Filters - More compact */}
-      <div className="bg-white p-3 rounded-lg shadow-sm border border-warm-gray-200 flex flex-col sm:flex-row gap-3">
-        <div className="flex-1">
-          <input
-            type="text"
-            placeholder="Search dishes by name or description..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full border border-warm-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-sage-500 focus:border-transparent"
-          />
-        </div>
-        <div className="sm:w-48">
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full border border-warm-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-sage-500 focus:border-transparent"
-          >
-            <option value="all">All Categories</option>
-            {allCategories.slice(1).map(category => (
-              <option key={category} value={category}>{category}</option>
-            ))}
-          </select>
-        </div>
-        <div className="sm:w-48">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          >
-            <option value="all">All Status</option>
-            <option value="active">Active Only</option>
-            <option value="inactive">Inactive Only</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Compact Dish List */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        <div className="divide-y divide-gray-200">
-          {filteredDishes.map((dish) => (
-            <div key={dish.id} className={`px-6 py-4 flex items-center justify-between hover:bg-gray-50 ${
-              dish.is_active === false ? 'opacity-60 bg-gray-50' : ''
-            }`}>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3">
-                  <h4 className={`text-lg font-medium truncate ${
-                    dish.is_active === false ? 'text-gray-500' : 'text-gray-900'
-                  }`}>{dish.name}</h4>
-                  {dish.is_active === false && (
-                    <span className="inline-flex px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
-                      Inactive
-                    </span>
-                  )}
-                  {((dish.category as any)?.name || dish.category) && (
-                    <span className="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
-                      {(dish.category as any)?.name || dish.category}
-                    </span>
-                  )}
-                  {dish.price && (
-                    <span className="text-lg font-semibold text-green-600">
-                      {formatPrice(dish.price, restaurant?.currency || 'EUR')}
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm text-gray-500 truncate mt-1">{dish.description}</p>
-                
-                {/* Ingredients chips */}
-                {Array.isArray(dish.ingredients) && dish.ingredients.length > 0 && (
-                  <div className="mt-2">
-                    <div className="flex flex-wrap gap-1">
-                      {dish.ingredients.slice(0, 4).map((ingredient) => (
-                        <span
-                          key={ingredient}
-                          className="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-full border border-blue-200"
-                        >
-                          {ingredient}
-                        </span>
-                      ))}
-                      {dish.ingredients.length > 4 && (
-                        <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
-                          +{dish.ingredients.length - 4} more
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Allergen chips */}
-                {Array.isArray(dish.allergen_tags) && dish.allergen_tags.length > 0 && (
-                  <div className="mt-2">
-                    <div className="flex flex-wrap gap-1">
-                      {getAllergenChips(dish.allergen_tags.slice(0, 3), lang).map((allergen) => (
-                        <span
-                          key={allergen.name}
-                          className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
-                        >
-                          <span className="capitalize">{allergen.displayName}</span>
-                        </span>
-                      ))}
-                      {dish.allergen_tags.length > 3 && (
-                        <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
-                          +{dish.allergen_tags.length - 3} more
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-center gap-4 mt-2">
-                  <span className="text-xs text-gray-400">
-                    {Array.isArray(dish.ingredients) ? dish.ingredients.length : 0} ingredients
-                  </span>
-                  <span className="text-xs text-gray-400">
-                    {Array.isArray(dish.allergen_tags) ? dish.allergen_tags.length : 0} allergens
-                  </span>
-                </div>
+      {/* Advanced Filters and Controls */}
+      <div className="bg-white shadow-sm rounded-xl p-6 space-y-4">
+        {/* Search and View Toggle */}
+        <div className="flex flex-col lg:flex-row gap-4">
+          <div className="flex-1">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
               </div>
-              
-              <div className="flex items-center gap-2 ml-4">
-                {/* Activation Toggle */}
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleToggleActivation(dish)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
-                      dish.is_active !== false ? 'bg-green-600' : 'bg-gray-300'
-                    }`}
-                    title={dish.is_active !== false ? t('deactivateDish') : t('activateDish')}
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        dish.is_active !== false ? 'translate-x-6' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
-                  <span className={`text-xs font-medium ${
-                    dish.is_active !== false ? 'text-green-700' : 'text-gray-500'
-                  }`}>
-                    {dish.is_active !== false ? 'Active' : 'Inactive'}
-                  </span>
-                </div>
-                
+              <input
+                type="text"
+                placeholder="Search dishes by name or description..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
+              />
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setViewMode(viewMode === "table" ? "grid" : "table")}
+              className={`px-4 py-3 rounded-lg transition-colors border ${
+                viewMode === "table" 
+                  ? "bg-green-50 border-green-200 text-green-700" 
+                  : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              {viewMode === "table" ? "📊 Table" : "🔲 Grid"}
+            </button>
+          </div>
+        </div>
+
+        {/* Filters Row */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            >
+              <option value="all">All Categories ({dishes.length})</option>
+              {allCategories.slice(1).map(category => (
+                <option key={category} value={category}>
+                  {category} ({dishes.filter(d => ((d.category as any)?.name || d.category) === category).length})
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            >
+              <option value="all">All Status</option>
+              <option value="active">Active Only</option>
+              <option value="inactive">Inactive Only</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            >
+              <option value="name">Name</option>
+              <option value="price">Price</option>
+              <option value="category">Category</option>
+              <option value="ingredients">Ingredient Count</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Items per page</label>
+            <select
+              value={itemsPerPage}
+              onChange={(e) => {
+                setItemsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            >
+              <option value={10}>10 per page</option>
+              <option value={25}>25 per page</option>
+              <option value={50}>50 per page</option>
+              <option value={100}>100 per page</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Bulk Actions */}
+        {selectedDishes.length > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-semibold text-blue-900">
+                  {selectedDishes.length} dish{selectedDishes.length !== 1 ? 'es' : ''} selected
+                </span>
                 <button
-                  onClick={() => setEditingDish(dish)}
-                  className="text-blue-600 hover:text-blue-800 p-2 hover:bg-blue-50 rounded transition-colors"
-                  title={t('editDish')}
+                  onClick={() => setSelectedDishes([])}
+                  className="text-blue-600 hover:text-blue-800 text-sm"
                 >
-                  Edit
+                  Clear selection
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleBulkStatusChange(true)}
+                  className="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                >
+                  Activate
                 </button>
                 <button
-                  onClick={() => handleDeleteDish(dish.id)}
-                  className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded transition-colors"
-                  title={t('deleteDish')}
+                  onClick={() => handleBulkStatusChange(false)}
+                  className="bg-yellow-600 text-white px-3 py-2 rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium"
+                >
+                  Deactivate
+                </button>
+                <button
+                  onClick={handleBulkDelete}
+                  className="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
                 >
                   Delete
                 </button>
               </div>
             </div>
-          ))}
-          
-          {filteredDishes.length === 0 && (
-            <div className="px-6 py-12 text-center">
-              <p className="text-gray-500">
-                {searchTerm || selectedCategory !== "all" 
-                  ? "No dishes match your search criteria"
-                  : "No dishes found. Add your first dish!"
-                }
-              </p>
+          </div>
+        )}
+      </div>
+
+      {/* Professional Table View */}
+      {viewMode === "table" && (
+        <div className="bg-white shadow-sm rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-4 text-left">
+                    <input
+                      type="checkbox"
+                      onChange={handleSelectAllVisible}
+                      checked={paginatedDishes.length > 0 && paginatedDishes.every(dish => selectedDishes.includes(dish.id))}
+                      className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                    />
+                  </th>
+                  <th 
+                    className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort("name")}
+                  >
+                    <div className="flex items-center">
+                      Dish
+                      {sortBy === "name" && (
+                        <span className="ml-1">
+                          {sortOrder === "asc" ? "↑" : "↓"}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort("category")}
+                  >
+                    <div className="flex items-center">
+                      Category
+                      {sortBy === "category" && (
+                        <span className="ml-1">
+                          {sortOrder === "asc" ? "↑" : "↓"}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort("price")}
+                  >
+                    <div className="flex items-center">
+                      Price
+                      {sortBy === "price" && (
+                        <span className="ml-1">
+                          {sortOrder === "asc" ? "↑" : "↓"}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort("ingredients")}
+                  >
+                    <div className="flex items-center">
+                      Ingredients
+                      {sortBy === "ingredients" && (
+                        <span className="ml-1">
+                          {sortOrder === "asc" ? "↑" : "↓"}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {paginatedDishes.map((dish) => (
+                  <tr key={dish.id} className={`hover:bg-gray-50 ${dish.is_active === false ? 'bg-gray-25 opacity-75' : ''} ${selectedDishes.includes(dish.id) ? 'bg-blue-25 border-blue-200' : ''}`}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        checked={selectedDishes.includes(dish.id)}
+                        onChange={() => handleSelectDish(dish.id)}
+                        className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                      />
+                    </td>
+                    
+                    <td className="px-6 py-4">
+                      <div className="max-w-xs">
+                        <div className="flex items-center">
+                          <h4 className={`text-sm font-semibold truncate ${dish.is_active === false ? 'text-gray-500' : 'text-gray-900'}`}>
+                            {dish.name}
+                          </h4>
+                        </div>
+                        {dish.description && (
+                          <p className="text-sm text-gray-500 truncate mt-1 max-w-xs">
+                            {dish.description}
+                          </p>
+                        )}
+                      </div>
+                    </td>
+                    
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {((dish.category as any)?.name || dish.category) && (
+                        <span className="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
+                          {(dish.category as any)?.name || dish.category}
+                        </span>
+                      )}
+                    </td>
+                    
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {dish.price && (
+                        <span className="text-lg font-semibold text-green-600">
+                          {formatPrice(dish.price, restaurant?.currency || 'EUR')}
+                        </span>
+                      )}
+                    </td>
+                    
+                    <td className="px-6 py-4">
+                      <div className="max-w-sm">
+                        {Array.isArray(dish.ingredients) && dish.ingredients.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {dish.ingredients.slice(0, 3).map((ingredient) => (
+                              <span
+                                key={ingredient}
+                                className="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-full border border-blue-200"
+                              >
+                                {ingredient}
+                              </span>
+                            ))}
+                            {dish.ingredients.length > 3 && (
+                              <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
+                                +{dish.ingredients.length - 3}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-sm text-gray-400">No ingredients</span>
+                        )}
+                      </div>
+                    </td>
+                    
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <button
+                          onClick={() => handleToggleActivation(dish)}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                            dish.is_active !== false ? 'bg-green-600' : 'bg-gray-300'
+                          }`}
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                              dish.is_active !== false ? 'translate-x-6' : 'translate-x-1'
+                            }`}
+                          />
+                        </button>
+                        <span className={`ml-3 text-sm font-medium ${
+                          dish.is_active !== false ? 'text-green-700' : 'text-gray-500'
+                        }`}>
+                          {dish.is_active !== false ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
+                    </td>
+                    
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => setEditingDish(dish)}
+                          className="text-indigo-600 hover:text-indigo-900 p-2 rounded-full hover:bg-indigo-50 transition-colors"
+                          title="Edit dish"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteDish(dish.id)}
+                          className="text-red-600 hover:text-red-900 p-2 rounded-full hover:bg-red-50 transition-colors"
+                          title="Delete dish"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="bg-white px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+              <div className="flex-1 flex justify-between items-center">
+                <p className="text-sm text-gray-700">
+                  Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, totalItems)} of {totalItems} dishes
+                </p>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400"
+                  >
+                    Previous
+                  </button>
+                  
+                  <div className="flex space-x-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNumber;
+                      if (totalPages <= 5) {
+                        pageNumber = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNumber = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNumber = totalPages - 4 + i;
+                      } else {
+                        pageNumber = currentPage - 2 + i;
+                      }
+                      
+                      return (
+                        <button
+                          key={pageNumber}
+                          onClick={() => setCurrentPage(pageNumber)}
+                          className={`px-4 py-2 text-sm font-medium rounded-lg ${
+                            currentPage === pageNumber
+                              ? 'bg-green-600 text-white'
+                              : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          {pageNumber}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  
+                  <button
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>
-      </div>
+      )}
 
-      {dishes.length === 0 && (
-        <div className="bg-white shadow rounded-lg p-6 text-center">
-          <p className="text-gray-600 mb-4">No dishes found. Add your first dish to get started!</p>
-          <button
-            onClick={() => setShowCreateForm(true)}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-          >
-            + Add First Dish
-          </button>
+      {/* Empty State */}
+      {filteredAndSortedDishes.length === 0 && (
+        <div className="bg-white shadow-sm rounded-xl p-12 text-center">
+          <div className="text-gray-400 text-8xl mb-4">🍽️</div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            {dishes.length === 0 ? "No dishes yet" : "No dishes match your filters"}
+          </h3>
+          <p className="text-gray-600 mb-6">
+            {dishes.length === 0 
+              ? "Get started by adding your first dish to the menu." 
+              : "Try adjusting your search criteria or filters."
+            }
+          </p>
+          {dishes.length === 0 && (
+            <button
+              onClick={() => setShowCreateForm(true)}
+              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-semibold"
+            >
+              Add Your First Dish
+            </button>
+          )}
         </div>
       )}
 
+      {/* Modals */}
       {showCreateForm && (
         <CreateDishModal
           onSubmit={handleCreateDish}
@@ -400,7 +707,6 @@ export default function DishManager() {
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm"
           onClick={(e) => e.target === e.currentTarget && setEditingDish(null)}
         >
-          {/* Centered professional modal */}
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden transform transition-all">
             <EditDishForm
               dish={editingDish}
