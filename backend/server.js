@@ -2006,10 +2006,10 @@ app.post("/api/emergency/create-admin", async (req, res) => {
   try {
     console.log("Emergency admin creation requested");
     
-    // Temporarily allow in production for emergency access
-    // if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_EMERGENCY_ADMIN) {
-    //   return res.status(403).json({ error: "Emergency admin creation not allowed in production" });
-    // }
+    // Only allow in development or if specific env var is set
+    if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_EMERGENCY_ADMIN) {
+      return res.status(403).json({ error: "Emergency admin creation not allowed in production" });
+    }
 
     // Check if demo restaurant exists
     let demoRestaurant = await prisma.restaurant.findUnique({
