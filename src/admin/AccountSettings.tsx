@@ -1,6 +1,8 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { LoadingShimmer } from '../components/LoadingShimmer';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
 const CacheManager = lazy(() => import('./CacheManager'));
 
 interface PasswordChangeForm {
@@ -52,7 +54,7 @@ export default function AccountSettings() {
   const loadUserProfile = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('/api/admin/profile', {
+      const response = await fetch(`${API_BASE}/api/admin/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -79,7 +81,7 @@ export default function AccountSettings() {
     
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('/api/admin/profile', {
+      const response = await fetch(`${API_BASE}/api/admin/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -123,7 +125,7 @@ export default function AccountSettings() {
     
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('/api/admin/change-password', {
+      const response = await fetch(`${API_BASE}/api/admin/change-password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
