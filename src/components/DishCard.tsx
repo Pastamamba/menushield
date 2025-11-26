@@ -81,89 +81,83 @@ export default function DishCard({
 
   return (
     <div 
-      className="bg-white border border-warm-gray-200 rounded-lg p-3 transition-shadow duration-200 hover:shadow-sm relative"
+      className="bg-white border border-gray-100 rounded-lg p-4 transition-all duration-200 hover:shadow-sm hover:border-gray-200 relative cursor-pointer"
       {...cardGestures}
     >
-      {/* Price in top-right corner */}
-      {showPrices && dish.price && (
-        <div className="absolute top-3 right-3 bg-green-50 text-green-700 px-2 py-1 rounded-md text-sm font-semibold border border-green-200">
-          {formatPrice(dish.price, currency)}
+      {/* Header with name, status, and price in one line */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <span className="text-sm">{getStatusIcon()}</span>
+          <h3 className="text-sm font-medium text-gray-900 truncate">{dish.name}</h3>
         </div>
-      )}
-
-      {/* Dish Header - Compact */}
-      <div className="flex items-start justify-between mb-2 pr-16">
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h3 className="text-base font-semibold text-warm-gray-900 leading-tight">{dish.name}</h3>
-            <span className="text-base">{getStatusIcon()}</span>
-          </div>
-        </div>
+        {showPrices && dish.price && (
+          <span className="text-sm font-medium text-gray-900 ml-2 flex-shrink-0">
+            {formatPrice(dish.price, currency)}
+          </span>
+        )}
       </div>
 
-      {/* Description - More compact */}
-      {dish.description && (
-        <p className="text-sm text-warm-gray-600 mb-2.5 line-clamp-2">
-          {dish.description}
-        </p>
-      )}
+      {/* Description - Very compact with consistent spacing */}
+      <div className="mb-3 min-h-[2.5rem] flex items-start">
+        {dish.description && (
+          <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
+            {dish.description}
+          </p>
+        )}
+      </div>
 
-      {/* Allergens with Components - Only User's Avoided Allergens */}
+      {/* Allergens - Compact inline display */}
       {userAvoidedAllergens.length > 0 && (
-        <div className="border-t border-gray-100 pt-3">
-          <div className="text-xs font-medium text-gray-500 mb-2">
-            {safetyStatus.status === "unsafe" ? "Contains Required Allergens:" :
-             safetyStatus.status === "modifiable" ? "⚠️ Contains Removable Allergens:" :
-             "⚠️ Contains Your Allergens:"}
-          </div>
-          <div className="space-y-2">
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-1">
             {userAvoidedAllergens.map((allergen) => (
-              <div key={allergen.name} className="flex items-center gap-2 text-sm">
-                <span 
-                  className={`inline-flex items-center gap-1 px-2.5 py-1.5 min-h-[36px] rounded-md text-sm font-medium transition-all duration-200 active:scale-98 ${allergen.color}`}
-                  onTouchStart={handleTouchFeedback}
-                >
-                  <span className="capitalize">{allergen.displayName}</span>
-                </span>
-              </div>
+              <span 
+                key={allergen.name}
+                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${allergen.color}`}
+                onTouchStart={handleTouchFeedback}
+              >
+                {allergen.displayName}
+              </span>
             ))}
           </div>
           
-          {/* Action suggestion */}
-          {safetyStatus.status === "modifiable" && safetyStatus.modificationSuggestion && (
-            <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-              <div className="text-sm text-orange-700 font-medium">
-                💡 Ask server about removing: {safetyStatus.modificationSuggestion}
-              </div>
+          {/* Status message - compact */}
+          {safetyStatus.status === "modifiable" && (
+            <div className="text-xs text-orange-700 bg-orange-50 px-2 py-1 rounded">
+              💡 May be modifiable - ask server
+            </div>
+          )}
+          
+          {safetyStatus.status === "unsafe" && (
+            <div className="text-xs text-red-700 bg-red-50 px-2 py-1 rounded">
+              ⚠️ Contains allergens in base ingredients
             </div>
           )}
         </div>
       )}
 
-      {/* Safe status message */}
-      {safetyStatus.status === "safe" && (
-        <div className="border-t border-gray-100 pt-3">
-          <div className="text-base text-green-600 font-medium py-2">
-            ✅ Safe for your allergens
-          </div>
+      {/* Category tag - inline at bottom - only show if there's content */}
+      {(dish.category || (safetyStatus.status === "safe" && userAvoidedAllergens.length === 0)) && (
+        <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-50">
+          {dish.category && (
+            <span className="text-xs text-gray-400 uppercase tracking-wide">
+              {dish.category}
+            </span>
+          )}
+          
+          {/* Safe status - minimal */}
+          {safetyStatus.status === "safe" && userAvoidedAllergens.length === 0 && (
+            <span className="text-xs text-green-600 font-medium">
+              ✅ Safe
+            </span>
+          )}
         </div>
       )}
 
-      {/* Category tag - minimal */}
-      {dish.category && (
-        <div className="mt-3 pt-2 border-t border-gray-100">
-          <span className="text-xs text-gray-400 uppercase tracking-wide">
-            {dish.category}
-          </span>
-        </div>
-      )}
-
-      {/* Offline indicator */}
+      {/* Offline indicator - minimal */}
       {isOffline && (
-        <div className="absolute top-3 right-3">
-          <span className="text-xs text-yellow-600 bg-yellow-50 px-2 py-1 rounded-full">
-            📱
-          </span>
+        <div className="absolute top-2 right-2">
+          <span className="w-2 h-2 bg-yellow-400 rounded-full"></span>
         </div>
       )}
     </div>

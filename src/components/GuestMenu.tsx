@@ -17,6 +17,7 @@ export default function GuestMenu() {
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showMobileFilter, setShowMobileFilter] = useState(false);
+  const [showModifiableOnly, setShowModifiableOnly] = useState(false);
   const menuSectionRef = useRef<HTMLDivElement>(null);
 
   // Enhanced touch gestures for mobile filter
@@ -124,24 +125,27 @@ export default function GuestMenu() {
   }
 
   // Filter dishes based on search term and modifiable filter
-  let filteredDishes = dishes.filter(dish =>
-    dish.is_active !== false &&
-    (
+  let filteredDishes = dishes.filter(dish => {
+    if (dish.is_active === false) return false;
+    
+    // Search term filter
+    const matchesSearch = !searchTerm || (
       dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       dish.description?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
-
-  // Categorize dishes by safety level - HIDE unsafe dishes completely when allergens are selected
-  const categorizedDishes = filteredDishes.reduce((acc, dish) => {
-    const safety = analyzeDishSafety(dish, selectedAllergens);
+    );
     
-    // If allergens are selected and dish is unsafe (allergens in required components), 
-    // don't show it at all - hide completely from the list
-    if (selectedAllergens.length > 0 && safety.status === 'unsafe') {
-      return acc; // Skip this dish completely - don't add to any category
+    // Modifiable filter - only show dishes that could be modified for user's allergens
+    if (showModifiableOnly && selectedAllergens.length > 0) {
+      const safety = analyzeDishSafety(dish, selectedAllergens);
+      return matchesSearch && safety.status === 'modifiable';
     }
     
+    return matchesSearch;
+  });
+
+  // Categorize dishes by safety level - Keep unsafe dishes visible but clearly marked
+  const categorizedDishes = filteredDishes.reduce((acc, dish) => {
+    const safety = analyzeDishSafety(dish, selectedAllergens);
     acc[safety.status].push({ dish, safety });
     return acc;
   }, {
@@ -242,7 +246,9 @@ export default function GuestMenu() {
                   }}
                   searchTerm={searchTerm}
                   onSearchChange={setSearchTerm}
-                    isMobile={true}
+                  isMobile={true}
+                  showModifiableOnly={showModifiableOnly}
+                  onModifiableToggle={() => setShowModifiableOnly(prev => !prev)}
                   />
               </div>
 
@@ -284,6 +290,8 @@ export default function GuestMenu() {
                     : [...prev, allergen]
                 );
               }}
+              showModifiableOnly={showModifiableOnly}
+              onModifiableToggle={() => setShowModifiableOnly(prev => !prev)}
             />
           </div>
         </div>
@@ -300,7 +308,7 @@ export default function GuestMenu() {
               <p className="text-gray-600 mb-4">
                 {t('selectAllergensHelp')}
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredDishes.map((dish) => (
                   <DishCard 
                     key={dish.id}
@@ -343,7 +351,7 @@ export default function GuestMenu() {
                     <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
                     {t('safeDishesTitle')} ({categorizedDishes.safe.length})
                   </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {categorizedDishes.safe.map(({ dish, safety }) => (
                       <DishCard 
                         key={dish.id}
@@ -366,8 +374,35 @@ export default function GuestMenu() {
                     <span className="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
                     ⚠️ May Be Modifiable ({categorizedDishes.modifiable.length})
                   </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {categorizedDishes.modifiable.map(({ dish, safety }) => (
+                      <DishCard 
+                        key={dish.id}
+                        dish={dish} 
+                        safetyStatus={safety}
+                        showPrices={restaurant?.showPrices !== false}
+                        currency={restaurant?.currency || 'EUR'}
+                        onCardSelect={handleCardSelect}
+                        onCardLongPress={handleCardLongPress}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Unsafe Dishes - dishes with allergens in base components but still visible */}
+              {categorizedDishes.unsafe.length > 0 && (
+                <section>
+                  <h2 className="text-2xl font-bold text-red-700 mb-4 flex items-center">
+                    <span className="w-3 h-3 bg-red-500 rounded-full mr-3"></span>
+                    ❌ Contains Your Allergens ({categorizedDishes.unsafe.length})
+                  </h2>
+                  <p className="text-red-600 mb-4 text-sm">
+                    These dishes contain your avoided allergens in base ingredients and cannot be easily modified. 
+                    Shown for awareness - please avoid these dishes.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 opacity-75">
+                    {categorizedDishes.unsafe.map(({ dish, safety }) => (
                       <DishCard 
                         key={dish.id}
                         dish={dish} 

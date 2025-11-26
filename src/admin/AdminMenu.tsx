@@ -62,23 +62,23 @@ export default function AdminMenu() {
   return (
     <div className="min-h-screen bg-warm-gray-50 flex relative">
       {/* Mobile Header - Refined and minimal */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white shadow-sm border-b border-warm-gray-200">
-        <div className="flex items-center justify-between px-3 py-2.5">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100">
+        <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center">
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-1.5 rounded-md hover:bg-warm-gray-100 transition-colors mr-2"
+              className="p-2 rounded-md hover:bg-gray-100 transition-colors mr-3"
             >
-              <svg className="w-5 h-5 text-warm-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <h1 className="text-lg font-semibold text-warm-gray-800">MenuShield</h1>
+            <h1 className="text-lg font-medium text-gray-900">MenuShield</h1>
           </div>
           
-          {/* Current tab indicator - more subtle */}
-          <div className="flex items-center text-sm text-warm-gray-600">
-            <span className="mr-1.5 text-base">{menuItems.find(item => item.id === activeTab)?.icon}</span>
+          {/* Current tab indicator - minimal */}
+          <div className="flex items-center text-sm text-gray-600">
+            <span className="mr-2 text-base opacity-60">{menuItems.find(item => item.id === activeTab)?.icon}</span>
             <span className="font-medium">{menuItems.find(item => item.id === activeTab)?.label}</span>
           </div>
         </div>
@@ -92,75 +92,75 @@ export default function AdminMenu() {
         />
       )}
 
-      {/* Sidebar - More refined and compact */}
+      {/* Sidebar - Minimalistic design */}
       <aside className={`
-        fixed lg:static inset-y-0 left-0 z-50 w-60 bg-white shadow-md transform transition-transform duration-300 ease-in-out border-r border-warm-gray-200
+        fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white transform transition-transform duration-300 ease-in-out border-r border-gray-100
         lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        {/* Desktop Header - More compact */}
-        <div className="hidden lg:block p-4 border-b border-warm-gray-200">
+        {/* Desktop Header - Clean and minimal */}
+        <div className="hidden lg:block p-6 border-b border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-lg font-semibold text-warm-gray-800">MenuShield</h1>
-              <p className="text-sm text-warm-gray-500">{t('adminPanel')}</p>
+              <h1 className="text-xl font-light text-gray-900">MenuShield</h1>
+              <p className="text-sm text-gray-500 mt-0.5">{t('adminPanel')}</p>
             </div>
             <LanguageSelector variant="compact" />
           </div>
         </div>
 
-        {/* Restaurant Switcher - More minimal */}
-        <div className="p-3 border-b border-warm-gray-200 bg-warm-gray-50">
+        {/* Restaurant Switcher - Minimal */}
+        <div className="p-4 border-b border-gray-100 bg-gray-50">
           <RestaurantSwitcher />
         </div>
 
-        {/* Mobile Header - Refined */}
-        <div className="lg:hidden p-3 border-b border-warm-gray-200 flex items-center justify-between">
+        {/* Mobile Header - Clean */}
+        <div className="lg:hidden p-4 border-b border-gray-100 flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-semibold text-warm-gray-800">MenuShield</h1>
-            <p className="text-sm text-warm-gray-500">{t('adminPanel')}</p>
+            <h1 className="text-lg font-medium text-gray-900">MenuShield</h1>
+            <p className="text-sm text-gray-500">{t('adminPanel')}</p>
           </div>
           <LanguageSelector variant="compact" />
           <button
             onClick={() => setIsSidebarOpen(false)}
-            className="p-1.5 rounded-md hover:bg-warm-gray-100 transition-colors"
+            className="p-2 rounded-md hover:bg-gray-100 transition-colors"
           >
-            <svg className="w-5 h-5 text-warm-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
         
-        <nav className="mt-4 flex-1">
+        <nav className="mt-2 flex-1">
           {menuItems.map((item) => (
             <button
               key={item.id}
               onClick={() => handleMenuClick(item.id)}
-              className={`w-full flex items-center px-4 py-3 text-left hover:bg-warm-gray-50 transition-all duration-200 ${
+              className={`w-full flex items-center px-6 py-4 text-left hover:bg-gray-50 transition-all duration-200 ${
                 activeTab === item.id
-                  ? "bg-sage-50 text-sage-700 border-r-2 border-sage-500 font-medium"
-                  : "text-warm-gray-600 hover:text-warm-gray-800"
+                  ? "bg-gray-50 text-gray-900 border-r-2 border-gray-900 font-medium"
+                  : "text-gray-600 hover:text-gray-800"
               }`}
             >
-              <span className="mr-3 text-base">{item.icon}</span>
-              <span className="font-medium">{item.label}</span>
+              <span className="mr-4 text-lg opacity-60">{item.icon}</span>
+              <span className="font-medium text-sm">{item.label}</span>
             </button>
           ))}
         </nav>
 
-        {/* Logout Button - More refined */}
-        <div className="p-4 border-t border-warm-gray-200">
+        {/* Logout Button - Minimal */}
+        <div className="p-6 border-t border-gray-100">
           <button
             onClick={logout}
-            className="w-full bg-red-500 text-white px-3 py-2.5 rounded-lg hover:bg-red-600 transition-all duration-200 font-medium text-sm active:scale-98"
+            className="w-full bg-gray-900 text-white px-4 py-3 rounded-md hover:bg-gray-800 transition-all duration-200 font-medium text-sm"
           >
-            🚪 {t('logout')}
+            {t('logout')}
           </button>
         </div>
       </aside>
 
-      {/* Main Content - Reduced padding */}
-      <main className="flex-1 lg:ml-0 pt-14 lg:pt-0">
-        <div className="p-3 lg:p-6">{/* More compact padding */}
+      {/* Main Content - Consistent with profile page */}
+      <main className="flex-1 lg:ml-0 pt-16 lg:pt-0 bg-gray-50">
+        <div className="p-4 lg:p-8">
           {/* Dashboard = DishManager */}
           {activeTab === "dashboard" && (
             <Suspense fallback={<LoadingShimmer />}>

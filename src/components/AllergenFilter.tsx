@@ -93,15 +93,15 @@ export default function AllergenFilter({
           </svg>
         </div>
 
-        {/* Modifiable Dishes Filter - More refined */}
+        {/* Modifiable Dishes Filter - Clean design */}
         {onModifiableToggle && (
-          <div className="border border-warm-gray-200 rounded-lg p-3 bg-gradient-to-r from-sage-50 to-cream-50">
+          <div className="border border-gray-200 rounded-lg p-4 bg-blue-50">
             <div className="flex items-start space-x-3">
               <button
                 type="button"
                 onClick={() => onModifiableToggle(!showModifiableOnly)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                  showModifiableOnly ? 'bg-blue-600' : 'bg-gray-300'
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 ${
+                  showModifiableOnly ? 'bg-gray-800' : 'bg-gray-300'
                 }`}
               >
                 <span
@@ -114,12 +114,9 @@ export default function AllergenFilter({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t('showOnlyModifiable')}
                 </label>
-                <p className="text-xs text-gray-600 mb-2">
-                  These dishes may be modifiable. Please check with staff to confirm.
+                <p className="text-xs text-gray-600">
+                  Show only dishes that may be modifiable by staff.
                 </p>
-                <div className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-md inline-block">
-                  ℹ️ Staff can modify ingredients in some dishes
-                </div>
               </div>
             </div>
           </div>
@@ -234,24 +231,21 @@ export default function AllergenFilter({
 
       {/* Desktop Modifiable Dishes Filter */}
       {onModifiableToggle && (
-        <div className="border border-gray-200 rounded-xl p-4 bg-gradient-to-r from-blue-50 to-green-50">
+        <div className="border border-gray-200 rounded-lg p-4 bg-blue-50">
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t('showOnlyModifiable')}
               </label>
-              <p className="text-xs text-gray-600 mb-1">
-                These dishes may be modifiable. Please check with staff to confirm.
+              <p className="text-xs text-gray-600">
+                Show only dishes that may be modifiable by staff.
               </p>
-              <div className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-md inline-block">
-                ℹ️ Staff can modify ingredients in some dishes
-              </div>
             </div>
             <button
               type="button"
               onClick={() => onModifiableToggle(!showModifiableOnly)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ml-4 ${
-                showModifiableOnly ? 'bg-blue-600' : 'bg-gray-300'
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 ml-4 ${
+                showModifiableOnly ? 'bg-gray-800' : 'bg-gray-300'
               }`}
             >
               <span

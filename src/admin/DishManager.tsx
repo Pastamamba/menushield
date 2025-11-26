@@ -10,15 +10,12 @@ import type { Dish, CreateDishRequest } from "../types";
 import type { AllergenLanguage } from "../utils/allergenTranslations";
 
 export default function DishManager() {
-  const { t, currentLanguage } = useAdminTranslations();
+  const { currentLanguage } = useAdminTranslations();
   
   // Ensure currentLanguage is available before using it
   if (!currentLanguage) {
     return <div className="p-6">Loading...</div>;
   }
-
-  // Store current language for use in nested functions
-  const lang = currentLanguage as AllergenLanguage;
   
   const { data: dishes = [], isLoading, error } = useAdminDishes();
   const { data: availableIngredients = [] } = useAdminIngredients();

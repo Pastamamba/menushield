@@ -1,16 +1,12 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { prefetchMenuData } from '../utils/dishApi';
-import { queryClient } from '../utils/queryClient';
 import logger from '../utils/logger';
 import type { Restaurant } from '../types';
 
 // API base URL (same as other API utils)
 const API_BASE = import.meta.env.VITE_API_URL || 'https://menushield-production.up.railway.app';
 
-// Helper function for API URLs
-const getApiUrl = (path: string) => API_BASE ? `${API_BASE}${path}` : path;
 
 // Debug log for development
 if (import.meta.env.DEV) {
