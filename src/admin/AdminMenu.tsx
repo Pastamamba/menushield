@@ -10,10 +10,9 @@ import { useAdminTranslations } from "../hooks/useAdminTranslations";
 const DishManager = lazy(() => import("./DishManager"));
 const IngredientAllergenManager = lazy(() => import("./IngredientAllergenManager"));
 const QRCodeManager = lazy(() => import("./QRCodeManager"));
-const RestaurantSettings = lazy(() => import("./RestaurantSettings"));
-const AccountSettings = lazy(() => import("./AccountSettings"));
+const ProfileInformation = lazy(() => import("./ProfileInformation"));
 
-type TabType = "dashboard" | "ingredients" | "qr-code" | "restaurant" | "settings";
+type TabType = "dashboard" | "ingredients" | "qr-code" | "profile";
 
 export default function AdminMenu() {
   const { logout } = useAuth();
@@ -23,7 +22,13 @@ export default function AdminMenu() {
   const [activeTab, setActiveTab] = useState<TabType>(() => {
     try {
       const saved = localStorage.getItem('admin-active-tab');
-      const validTabs: TabType[] = ["dashboard", "ingredients", "qr-code", "restaurant", "settings"];
+      const validTabs: TabType[] = ["dashboard", "ingredients", "qr-code", "profile"];
+      
+      // Migrate old tab names to new structure
+      if (saved === "restaurant" || saved === "settings") {
+        return "profile";
+      }
+      
       if (saved && validTabs.includes(saved as TabType)) {
         return saved as TabType;
       }
@@ -46,8 +51,7 @@ export default function AdminMenu() {
       ? [{ id: "ingredients" as const, label: "Ingredients", icon: "🧄" }] 
       : []),
     { id: "qr-code" as const, label: t('qrCode'), icon: "📱" },
-    { id: "restaurant" as const, label: t('restaurantName'), icon: "🏪" },
-    { id: "settings" as const, label: t('settings'), icon: "⚙️" },
+    { id: "profile" as const, label: "Profile", icon: "👤" },
   ];
 
   const handleMenuClick = (tabId: TabType) => {
@@ -173,14 +177,9 @@ export default function AdminMenu() {
               <QRCodeManager />
             </Suspense>
           )}
-          {activeTab === "restaurant" && (
+          {activeTab === "profile" && (
             <Suspense fallback={<LoadingShimmer />}>
-              <RestaurantSettings />
-            </Suspense>
-          )}
-          {activeTab === "settings" && (
-            <Suspense fallback={<LoadingShimmer />}>
-              <AccountSettings />
+              <ProfileInformation />
             </Suspense>
           )}
         </div>
