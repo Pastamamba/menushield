@@ -139,6 +139,7 @@ function translateIngredient(ingredient, language) {
     ...ingredient,
     name: getTranslatedContent(ingredient, language, "name"),
     description: getTranslatedContent(ingredient, language, "description"),
+    allergen_tags: safeParseArray(ingredient.allergenTags), // Parse JSON string to array
   };
 }
 
