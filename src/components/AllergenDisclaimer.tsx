@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useMenuTranslations } from "../hooks/useMenuTranslations";
 
 interface AllergenDisclaimerProps {
@@ -16,13 +16,51 @@ export default function AllergenDisclaimer({
 }: AllergenDisclaimerProps) {
   const { currentLanguage } = useMenuTranslations();
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
+  const [manuallyConfirmed, setManuallyConfirmed] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const canAccept = hasScrolledToBottom || manuallyConfirmed;
+
+  // Check if content is scrollable on mount and when modal opens
+  useEffect(() => {
+    if (isOpen && scrollRef.current) {
+      const element = scrollRef.current;
+      // If content is not scrollable (content height <= container height), enable button immediately
+      if (element.scrollHeight <= element.clientHeight + 5) {
+        setHasScrolledToBottom(true);
+      } else {
+        setHasScrolledToBottom(false);
+      }
+    }
+  }, [isOpen]);
+
+  // Fallback timer - enable button after 10 seconds regardless of scroll position
+  useEffect(() => {
+    if (isOpen && !hasScrolledToBottom) {
+      const timer = setTimeout(() => {
+        console.log('Timer fallback: enabling accept button after 10 seconds');
+        setHasScrolledToBottom(true);
+      }, 10000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, hasScrolledToBottom]);
 
   if (!isOpen) return null;
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.target as HTMLDivElement;
-    const isAtBottom = target.scrollTop + target.clientHeight >= target.scrollHeight - 10;
-    if (isAtBottom) {
+    const scrollTop = target.scrollTop;
+    const scrollHeight = target.scrollHeight;
+    const clientHeight = target.clientHeight;
+    
+    // More generous tolerance for scroll detection (20px instead of 10px)
+    const tolerance = 20;
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight - tolerance;
+    
+    console.log('Scroll debug:', { scrollTop, scrollHeight, clientHeight, isAtBottom });
+    
+    if (isAtBottom && !hasScrolledToBottom) {
       setHasScrolledToBottom(true);
     }
   };
@@ -144,6 +182,7 @@ The MenuShield system provides allergen information to help you make informed fo
 
         {/* Content */}
         <div 
+          ref={scrollRef}
           className="flex-1 overflow-y-auto px-6 py-4"
           onScroll={handleScroll}
         >
@@ -196,6 +235,22 @@ The MenuShield system provides allergen information to help you make informed fo
             </div>
           )}
           
+          {/* Manual confirmation checkbox */}
+          {!hasScrolledToBottom && (
+            <div className="mb-4 flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="manual-confirm"
+                checked={manuallyConfirmed}
+                onChange={(e) => setManuallyConfirmed(e.target.checked)}
+                className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500"
+              />
+              <label htmlFor="manual-confirm" className="text-sm text-gray-700">
+                I have read and understand the entire disclaimer
+              </label>
+            </div>
+          )}
+          
           <div className="flex gap-3">
             {onDecline && (
               <button
@@ -207,16 +262,16 @@ The MenuShield system provides allergen information to help you make informed fo
             )}
             <button
               onClick={onAccept}
-              disabled={!hasScrolledToBottom}
+              disabled={!canAccept}
               className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 disabled:text-gray-500 text-white font-medium py-3 px-4 rounded-lg transition-colors"
             >
               {disclaimerText.accept}
             </button>
           </div>
           
-          {!hasScrolledToBottom && (
+          {!canAccept && (
             <p className="text-xs text-gray-500 mt-2 text-center">
-              Scroll to bottom to enable the accept button
+              {hasScrolledToBottom ? "" : "Scroll to bottom or check the box above to enable the accept button"}
             </p>
           )}
         </div>
