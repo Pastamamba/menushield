@@ -2008,6 +2008,54 @@ app.get("/api/restaurants/slug/:slug", async (req, res) => {
   }
 });
 
+// GET /api/restaurants/:id - Get restaurant by ID (for login redirect)
+app.get("/api/restaurants/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const restaurant = await prisma.restaurant.findUnique({
+      where: { id },
+      include: {
+        dishes: {
+          where: { isActive: true },
+          orderBy: { displayOrder: "asc" },
+        },
+        users: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            role: true,
+            isActive: true,
+          },
+        },
+      },
+    });
+
+    if (!restaurant) {
+      return res.status(404).json({ error: "Restaurant not found" });
+    }
+
+    // Transform for frontend compatibility
+    const transformedRestaurant = {
+      ...restaurant,
+      default_language: restaurant.defaultLanguage,
+      supported_languages: JSON.parse(restaurant.supportedLanguages || "[]"),
+      show_prices: restaurant.showPrices,
+      subscription_tier: restaurant.subscriptionTier,
+      is_active: restaurant.isActive,
+      created_at: restaurant.createdAt,
+      updated_at: restaurant.updatedAt,
+    };
+
+    res.json(transformedRestaurant);
+  } catch (error) {
+    console.error("Error fetching restaurant by ID:", error);
+    res.status(500).json({ error: "Failed to fetch restaurant" });
+  }
+});
+
 // GET /api/restaurants/my-restaurants - Get restaurants for current user (for restaurant switcher)
 app.get("/api/restaurants/my-restaurants", requireAuth, async (req, res) => {
   try {

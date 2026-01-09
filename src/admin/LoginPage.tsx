@@ -41,20 +41,41 @@ export default function LoginPage() {
       }
       
       // Get restaurant slug for the user's restaurant
+      // Parse JWT token to get restaurantId immediately after login
       try {
-        const response = await fetch(`/api/restaurants/${user?.restaurantId || 'unknown'}`);
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          console.error('No auth token found after login');
+          navigate('/admin');
+          return;
+        }
+
+        // Parse JWT to get restaurantId
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const restaurantId = payload.restaurantId;
+        
+        if (!restaurantId) {
+          console.error('No restaurantId found in JWT token:', payload);
+          navigate('/admin');
+          return;
+        }
+
+        console.log('Fetching restaurant with ID:', restaurantId);
+        const response = await fetch(`/api/restaurants/${restaurantId}`);
+        
         if (response.ok) {
           const restaurant = await response.json();
           const targetPath = `/r/${restaurant.slug}/admin`;
-          console.log("Login successful, navigating to:", targetPath);
+          console.log("Login successful, navigating to:", targetPath, restaurant);
           navigate(targetPath);
         } else {
+          console.error('Restaurant API error:', response.status, await response.text());
           // Fallback to legacy route if restaurant not found
           console.log("Restaurant not found, using legacy route");
           navigate("/admin");
         }
       } catch (error) {
-        console.error('Error fetching restaurant:', error);
+        console.error('Error in login redirect:', error);
         // Fallback to legacy route
         navigate("/admin");
       }
