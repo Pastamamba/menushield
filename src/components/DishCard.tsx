@@ -20,8 +20,8 @@ export default function DishCard({
   safetyStatus,
   isOffline,
   showPrices = true,
-  currency = 'SEK',
-  language = 'en',
+  currency = "SEK",
+  language = "en",
   onCardSelect,
   onCardLongPress,
 }: DishCardProps) {
@@ -44,24 +44,26 @@ export default function DishCard({
     }
 
     // Extract allergen tags and get their info
-    const allergenTags = safetyStatus.allergens.map(allergen => allergen.tag);
+    const allergenTags = safetyStatus.allergens.map((allergen) => allergen.tag);
     const allergenChips = getAllergenChips(allergenTags, language);
-    
-    return allergenChips.map(allergen => {
+
+    return allergenChips.map((allergen) => {
       // Find which component contains this allergen
-      const allergenInfo = safetyStatus.allergens.find(a => a.tag === allergen.name);
-      
+      const allergenInfo = safetyStatus.allergens.find(
+        (a) => a.tag === allergen.name
+      );
+
       return {
         ...allergen,
-        component: allergenInfo?.component || '',
-        canModify: allergenInfo?.canModify || false
+        component: allergenInfo?.component || "",
+        canModify: allergenInfo?.canModify || false,
       };
     });
   };
 
   // Mobile haptic feedback helper
   const handleTouchFeedback = () => {
-    if ('vibrate' in navigator) {
+    if ("vibrate" in navigator) {
       navigator.vibrate(50);
     }
   };
@@ -80,7 +82,7 @@ export default function DishCard({
   const userAvoidedAllergens = getUserAvoidedAllergens();
 
   return (
-    <div 
+    <div
       className="bg-white border border-gray-100 rounded-lg p-4 transition-all duration-200 hover:shadow-sm hover:border-gray-200 relative cursor-pointer"
       {...cardGestures}
     >
@@ -88,7 +90,9 @@ export default function DishCard({
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <span className="text-sm">{getStatusIcon()}</span>
-          <h3 className="text-sm font-medium text-gray-900 truncate">{dish.name}</h3>
+          <h3 className="text-sm font-medium text-gray-900 truncate">
+            {dish.name}
+          </h3>
         </div>
         {showPrices && dish.price && dish.price > 0 && (
           <span className="text-sm font-medium text-gray-900 ml-2 flex-shrink-0">
@@ -111,7 +115,7 @@ export default function DishCard({
         <div className="space-y-2">
           <div className="flex flex-wrap gap-1">
             {userAvoidedAllergens.map((allergen) => (
-              <span 
+              <span
                 key={allergen.name}
                 className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${allergen.color}`}
                 onTouchStart={handleTouchFeedback}
@@ -120,37 +124,34 @@ export default function DishCard({
               </span>
             ))}
           </div>
-          
+
           {/* Status message - compact */}
           {safetyStatus.status === "modifiable" && (
             <div className="text-xs text-orange-700 bg-orange-50 px-2 py-1 rounded">
               💡 May be modifiable - ask server
             </div>
           )}
-          
-          {safetyStatus.status === "unsafe" && (
-            <div className="text-xs text-red-700 bg-red-50 px-2 py-1 rounded">
-              ⚠️ Contains allergens in base ingredients
-            </div>
-          )}
         </div>
       )}
 
       {/* Category tag - inline at bottom - only show if there's content */}
-      {(dish.category || (safetyStatus.status === "safe" && userAvoidedAllergens.length === 0)) && (
+      {(dish.category ||
+        (safetyStatus.status === "safe" &&
+          userAvoidedAllergens.length === 0)) && (
         <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-50">
           {dish.category && (
             <span className="text-xs text-gray-400 uppercase tracking-wide">
               {dish.category}
             </span>
           )}
-          
+
           {/* Safe status - minimal */}
-          {safetyStatus.status === "safe" && userAvoidedAllergens.length === 0 && (
-            <span className="text-xs text-green-600 font-medium">
-              ✅ Safe
-            </span>
-          )}
+          {safetyStatus.status === "safe" &&
+            userAvoidedAllergens.length === 0 && (
+              <span className="text-xs text-green-600 font-medium">
+                ✅ Safe
+              </span>
+            )}
         </div>
       )}
 

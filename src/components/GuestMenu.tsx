@@ -30,7 +30,9 @@ export default function GuestMenu() {
 
   // Check if user has accepted the allergen disclaimer
   useEffect(() => {
-    const hasAcceptedDisclaimer = localStorage.getItem('allergen-disclaimer-accepted');
+    const hasAcceptedDisclaimer = localStorage.getItem(
+      "allergen-disclaimer-accepted"
+    );
     if (!hasAcceptedDisclaimer) {
       setShowAllergenDisclaimer(true);
     }
@@ -39,17 +41,19 @@ export default function GuestMenu() {
   // Check if we should show disclaimer when allergens are selected for first time
   useEffect(() => {
     if (selectedAllergens.length > 0) {
-      const hasSeenAllergenDisclaimer = localStorage.getItem('allergen-disclaimer-seen');
+      const hasSeenAllergenDisclaimer = localStorage.getItem(
+        "allergen-disclaimer-seen"
+      );
       if (!hasSeenAllergenDisclaimer) {
         setShowAllergenDisclaimer(true);
-        localStorage.setItem('allergen-disclaimer-seen', 'true');
+        localStorage.setItem("allergen-disclaimer-seen", "true");
       }
     }
   }, [selectedAllergens]);
 
   const handleAllergenDisclaimerAccept = () => {
-    localStorage.setItem('allergen-disclaimer-accepted', 'true');
-    localStorage.setItem('allergen-disclaimer-seen', 'true');
+    localStorage.setItem("allergen-disclaimer-accepted", "true");
+    localStorage.setItem("allergen-disclaimer-seen", "true");
     setShowAllergenDisclaimer(false);
   };
 
@@ -62,21 +66,24 @@ export default function GuestMenu() {
   // Close mobile filter when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (showMobileFilter && !(event.target as Element).closest('[data-drawer="mobile-filter"]')) {
+      if (
+        showMobileFilter &&
+        !(event.target as Element).closest('[data-drawer="mobile-filter"]')
+      ) {
         setShowMobileFilter(false);
       }
     };
 
     if (showMobileFilter) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+      document.addEventListener("mousedown", handleClickOutside);
+      document.body.style.overflow = "hidden"; // Prevent background scrolling
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = 'unset';
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.body.style.overflow = "unset";
     };
   }, [showMobileFilter]);
 
@@ -84,11 +91,13 @@ export default function GuestMenu() {
     setShowMobileFilter(false); // Close mobile filter when showing dishes
     setTimeout(() => {
       if (menuSectionRef.current) {
-        const headerHeight = document.querySelector('.mobile-header')?.clientHeight || 80;
-        const targetPosition = menuSectionRef.current.offsetTop - headerHeight - 20;
+        const headerHeight =
+          document.querySelector(".mobile-header")?.clientHeight || 80;
+        const targetPosition =
+          menuSectionRef.current.offsetTop - headerHeight - 20;
         window.scrollTo({
           top: targetPosition,
-          behavior: 'smooth'
+          behavior: "smooth",
         });
       }
     }, 300); // Wait for drawer close animation
@@ -97,12 +106,12 @@ export default function GuestMenu() {
   // Enhanced card interactions for native mobile feel
   const handleCardSelect = (dish: any) => {
     // Could show dish details modal or add to order
-    console.log('Card selected:', dish.name);
+    console.log("Card selected:", dish.name);
   };
 
   const handleCardLongPress = (dish: any) => {
     // Could show context menu or quick actions
-    console.log('Card long pressed:', dish.name);
+    console.log("Card long pressed:", dish.name);
   };
 
   if (isLoading) {
@@ -132,7 +141,7 @@ export default function GuestMenu() {
         <div className="container mx-auto px-4 py-6">
           {/* Filter Skeleton */}
           <SkeletonLoader type="filter" />
-          
+
           {/* Dish Grid Skeleton */}
           <SkeletonLoader type="dish-grid" count={9} />
         </div>
@@ -144,12 +153,14 @@ export default function GuestMenu() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 mb-4">{t('errorLoading')}: {error.message}</p>
-          <button 
-            onClick={() => window.location.reload()} 
+          <p className="text-red-600 mb-4">
+            {t("errorLoading")}: {error.message}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
             className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
           >
-            {t('tryAgain')}
+            {t("tryAgain")}
           </button>
         </div>
       </div>
@@ -157,36 +168,45 @@ export default function GuestMenu() {
   }
 
   // Filter dishes based on search term
-  let filteredDishes = dishes.filter(dish => {
+  let filteredDishes = dishes.filter((dish) => {
     if (dish.is_active === false) return false;
-    
+
     // Search term filter
-    const matchesSearch = !searchTerm || (
+    const matchesSearch =
+      !searchTerm ||
       dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dish.description?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    
+      dish.description?.toLowerCase().includes(searchTerm.toLowerCase());
+
     return matchesSearch;
   });
 
   // Categorize dishes by safety level - Keep unsafe dishes visible but clearly marked
-  const categorizedDishes = filteredDishes.reduce((acc, dish) => {
-    const safety = analyzeDishSafety(dish, selectedAllergens);
-    acc[safety.status].push({ dish, safety });
-    return acc;
-  }, {
-    safe: [] as Array<{ dish: Dish; safety: ReturnType<typeof analyzeDishSafety> }>,
-    unsafe: [] as Array<{ dish: Dish; safety: ReturnType<typeof analyzeDishSafety> }>
-  });
+  const categorizedDishes = filteredDishes.reduce(
+    (acc, dish) => {
+      const safety = analyzeDishSafety(dish, selectedAllergens);
+      acc[safety.status].push({ dish, safety });
+      return acc;
+    },
+    {
+      safe: [] as Array<{
+        dish: Dish;
+        safety: ReturnType<typeof analyzeDishSafety>;
+      }>,
+      unsafe: [] as Array<{
+        dish: Dish;
+        safety: ReturnType<typeof analyzeDishSafety>;
+      }>,
+    }
+  );
 
   return (
     <div className="min-h-screen bg-warm-gray-50">
       {/* Allergen Disclaimer Modal */}
-      <AllergenDisclaimer 
+      <AllergenDisclaimer
         isOpen={showAllergenDisclaimer}
         onAccept={handleAllergenDisclaimerAccept}
         onDecline={handleAllergenDisclaimerDecline}
-        restaurantName={restaurant?.name || 'this restaurant'}
+        restaurantName={restaurant?.name || "this restaurant"}
       />
       {/* Mobile Header - Refined dining aesthetic */}
       <div className="mobile-header lg:hidden sticky top-0 z-40 bg-gradient-to-r from-sage-600 to-sage-500 shadow-md">
@@ -194,27 +214,37 @@ export default function GuestMenu() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-lg font-semibold text-white">MenuShield</h1>
-              <p className="text-sage-100 text-sm">{t('safeDining')}</p>
+              <p className="text-sage-100 text-sm">{t("safeDining")}</p>
             </div>
             <div className="flex items-center gap-2.5">
               <LanguageSelector variant="compact" className="z-50" />
               <button
-              onClick={() => setShowMobileFilter(true)}
-              className="bg-white/20 backdrop-blur-sm text-white px-3 py-2.5 rounded-lg flex items-center gap-2 hover:bg-white/30 transition-all duration-200 active:scale-98 shadow-sm"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586a1 1 0 01-.293.707l-2 2A1 1 0 0110 21v-8.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-              </svg>
-              <span className="font-medium text-sm">{t('filter')}</span>
-              {selectedAllergens.length > 0 && (
-                <span className="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[18px] font-semibold">
-                  {selectedAllergens.length}
-                </span>
-              )}
-            </button>
+                onClick={() => setShowMobileFilter(true)}
+                className="bg-white/20 backdrop-blur-sm text-white px-3 py-2.5 rounded-lg flex items-center gap-2 hover:bg-white/30 transition-all duration-200 active:scale-98 shadow-sm"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586a1 1 0 01-.293.707l-2 2A1 1 0 0110 21v-8.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                  />
+                </svg>
+                <span className="font-medium text-sm">{t("filter")}</span>
+                {selectedAllergens.length > 0 && (
+                  <span className="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[18px] font-semibold">
+                    {selectedAllergens.length}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
       </div>
 
       {/* Desktop Header - More refined and minimal */}
@@ -223,8 +253,10 @@ export default function GuestMenu() {
           <div className="flex items-center justify-between">
             <div className="flex-1"></div>
             <div className="text-center">
-              <h1 className="text-2xl font-semibold text-white mb-1">MenuShield</h1>
-              <p className="text-sage-100 text-sm">{t('safeDining')}</p>
+              <h1 className="text-2xl font-semibold text-white mb-1">
+                MenuShield
+              </h1>
+              <p className="text-sage-100 text-sm">{t("safeDining")}</p>
             </div>
             <div className="flex-1 flex justify-end">
               <LanguageSelector variant="compact" className="z-50" />
@@ -238,28 +270,45 @@ export default function GuestMenu() {
         <>
           {/* Backdrop */}
           <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity animate-fade-in" />
-          
+
           {/* Drawer */}
-          <div 
+          <div
             ref={swipeRef as any}
             data-drawer="mobile-filter"
             className="lg:hidden fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white z-50 shadow-2xl transform transition-transform translate-x-0 rounded-l-2xl animate-slide-in-right"
-            style={{ animationDuration: '0.3s', animationTimingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)' }}
+            style={{
+              animationDuration: "0.3s",
+              animationTimingFunction: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+            }}
           >
             <div className="flex flex-col h-full">
               {/* Drawer Header */}
               <div className="bg-gradient-to-r from-green-500 to-blue-600 p-6 rounded-tl-2xl">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-bold text-white">{t('filterMenu')}</h2>
-                    <p className="text-green-100 text-sm mt-1">{t('findSafeDishes')}</p>
+                    <h2 className="text-xl font-bold text-white">
+                      {t("filterMenu")}
+                    </h2>
+                    <p className="text-green-100 text-sm mt-1">
+                      {t("findSafeDishes")}
+                    </p>
                   </div>
                   <button
                     onClick={() => setShowMobileFilter(false)}
                     className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white/10 transition-colors"
                   >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -270,27 +319,38 @@ export default function GuestMenu() {
                 <AllergenFilter
                   selectedAllergens={selectedAllergens}
                   onAllergenToggle={(allergen) => {
-                    setSelectedAllergens(prev =>
+                    setSelectedAllergens((prev) =>
                       prev.includes(allergen)
-                        ? prev.filter(a => a !== allergen)
+                        ? prev.filter((a) => a !== allergen)
                         : [...prev, allergen]
                     );
                   }}
                   isMobile={true}
-                  />
+                />
               </div>
 
               {/* Drawer Footer */}
               <div className="border-t border-gray-200 p-6 bg-gray-50 rounded-br-2xl">
-                  <button
-                    onClick={scrollToMenu}
-                    className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-4 rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transition-all shadow-lg active:scale-95 flex items-center justify-center min-h-[48px]"
+                <button
+                  onClick={scrollToMenu}
+                  className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-4 rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transition-all shadow-lg active:scale-95 flex items-center justify-center min-h-[48px]"
+                >
+                  <svg
+                    className="w-5 h-5 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                    {t('showSafeDishes')}
-                  </button>                {selectedAllergens.length > 0 && (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                  {t("showSafeDishes")}
+                </button>{" "}
+                {selectedAllergens.length > 0 && (
                   <button
                     onClick={() => setSelectedAllergens([])}
                     className="w-full mt-3 text-gray-600 py-2 text-sm hover:text-gray-800 font-medium"
@@ -312,9 +372,9 @@ export default function GuestMenu() {
             <AllergenFilter
               selectedAllergens={selectedAllergens}
               onAllergenToggle={(allergen) => {
-                setSelectedAllergens(prev => 
+                setSelectedAllergens((prev) =>
                   prev.includes(allergen)
-                    ? prev.filter(a => a !== allergen)
+                    ? prev.filter((a) => a !== allergen)
                     : [...prev, allergen]
                 );
               }}
@@ -329,22 +389,20 @@ export default function GuestMenu() {
             <section>
               <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
                 <span className="w-3 h-3 bg-gray-500 rounded-full mr-3"></span>
-                {`${t('allDishes')} (${filteredDishes.length})`}
+                {`${t("allDishes")} (${filteredDishes.length})`}
               </h2>
-              <p className="text-gray-600 mb-4">
-                {t('selectAllergensHelp')}
-              </p>
+              <p className="text-gray-600 mb-4">{t("selectAllergensHelp")}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredDishes.map((dish) => (
-                  <DishCard 
+                  <DishCard
                     key={dish.id}
-                    dish={dish} 
-                    safetyStatus={{ 
-                      status: "safe", 
-                      allergens: [] 
+                    dish={dish}
+                    safetyStatus={{
+                      status: "safe",
+                      allergens: [],
                     }}
                     showPrices={restaurant?.showPrices !== false}
-                    currency={restaurant?.currency || 'SEK'}
+                    currency={restaurant?.currency || "SEK"}
                     language={currentLanguage as any}
                     onCardSelect={handleCardSelect}
                     onCardLongPress={handleCardLongPress}
@@ -360,16 +418,16 @@ export default function GuestMenu() {
                 <section>
                   <h2 className="text-2xl font-bold text-green-700 mb-4 flex items-center">
                     <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
-                    {t('safeDishesTitle')} ({categorizedDishes.safe.length})
+                    {t("safeDishesTitle")} ({categorizedDishes.safe.length})
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {categorizedDishes.safe.map(({ dish, safety }) => (
-                      <DishCard 
+                      <DishCard
                         key={dish.id}
-                        dish={dish} 
+                        dish={dish}
                         safetyStatus={safety}
                         showPrices={restaurant?.showPrices !== false}
-                        currency={restaurant?.currency || 'SEK'}
+                        currency={restaurant?.currency || "SEK"}
                         onCardSelect={handleCardSelect}
                         onCardLongPress={handleCardLongPress}
                       />
@@ -383,20 +441,17 @@ export default function GuestMenu() {
                 <section>
                   <h2 className="text-2xl font-bold text-red-700 mb-4 flex items-center">
                     <span className="w-3 h-3 bg-red-500 rounded-full mr-3"></span>
-                    ❌ Contains Your Allergens ({categorizedDishes.unsafe.length})
+                    ❌ Contains Your Allergens (
+                    {categorizedDishes.unsafe.length})
                   </h2>
-                  <p className="text-red-600 mb-4 text-sm">
-                    These dishes contain your avoided allergens in base ingredients and cannot be easily modified. 
-                    Shown for awareness - please avoid these dishes.
-                  </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 opacity-75">
                     {categorizedDishes.unsafe.map(({ dish, safety }) => (
-                      <DishCard 
+                      <DishCard
                         key={dish.id}
-                        dish={dish} 
+                        dish={dish}
                         safetyStatus={safety}
                         showPrices={restaurant?.showPrices !== false}
-                        currency={restaurant?.currency || 'SEK'}
+                        currency={restaurant?.currency || "SEK"}
                         onCardSelect={handleCardSelect}
                         onCardLongPress={handleCardLongPress}
                       />
@@ -412,12 +467,26 @@ export default function GuestMenu() {
         {filteredDishes.length === 0 && (
           <div className="text-center py-12">
             <div className="text-gray-400 mb-4">
-              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <svg
+                className="w-16 h-16 mx-auto"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1}
+                  d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No dishes found</h3>
-            <p className="text-gray-600">Try adjusting your search or allergen filters</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No dishes found
+            </h3>
+            <p className="text-gray-600">
+              Try adjusting your search or allergen filters
+            </p>
           </div>
         )}
       </main>
