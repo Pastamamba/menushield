@@ -89,7 +89,7 @@ model Ingredient {
   id           String    @id @default(auto()) @map("_id") @db.ObjectId
   name         String
   description  String?
-  allergenTags String?   @map("allergen_tags")  // Allow null values
+  allergenTags Json?     @map("allergen_tags")  // MongoDB array as Json type
   isActive     Boolean   @default(true) @map("is_active")
   
   // Make restaurantId optional - ingredients can be global
