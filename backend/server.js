@@ -1563,7 +1563,6 @@ app.get("/api/admin/ingredients", requireAuth, async (req, res) => {
     console.log("🔍 Requested language:", language);
 
     let ingredients;
-    let usingFallback = false;
     try {
       console.log("🎯 Querying Ingredient collection from MongoDB...");
       ingredients = await prisma.ingredient.findMany({
@@ -1575,93 +1574,12 @@ app.get("/api/admin/ingredients", requireAuth, async (req, res) => {
       console.log(`🔍 Found ${ingredients.length} ingredients in database`);
 
       if (ingredients.length === 0) {
-        console.log("🔍 Database is empty, using fallback JSON data");
-        throw new Error("No ingredients in database");
+        console.log("❌ No ingredients found in database");
+        return res.status(404).json({ error: "No ingredients found in database" });
       }
     } catch (dbError) {
-      console.error(
-        "🔍 Database error, falling back to JSON data:",
-        dbError.message
-      );
-      usingFallback = true;
-      // Fallback to JSON data if database fails
-      const ingredientsPath = path.join(__dirname, "data", "ingredients.json");
-
-      if (fs.existsSync(ingredientsPath)) {
-        const rawData = fs.readFileSync(ingredientsPath, "utf8");
-        const jsonIngredients = JSON.parse(rawData);
-        console.log(
-          `🔍 Using fallback JSON data with ${jsonIngredients.length} ingredients`
-        );
-
-        // Transform JSON data to match expected format
-        ingredients = jsonIngredients.map((ing) => {
-          // Add default translations if not present
-          let translations = ing.translations || {};
-          if (!translations.name) {
-            // Create basic translations based on the Finnish name
-            const englishNames = {
-              Lohi: "Salmon",
-              Taimen: "Trout",
-              Kala: "Fish",
-              Parmesan: "Parmesan",
-              Juusto: "Cheese",
-              Vehnäjauho: "Wheat Flour",
-              Maapähkinä: "Peanut",
-              Kananmuna: "Egg",
-              Maito: "Milk",
-              Voi: "Butter",
-              Soija: "Soy",
-              Seesami: "Sesame",
-              Sulfiitti: "Sulphite",
-            };
-
-            const swedishNames = {
-              Lohi: "Lax",
-              Taimen: "Öring",
-              Kala: "Fisk",
-              Parmesan: "Parmesan",
-              Juusto: "Ost",
-              Vehnäjauho: "Vetemjöl",
-              Maapähkinä: "Jordnöt",
-              Kananmuna: "Ägg",
-              Maito: "Mjölk",
-              Voi: "Smör",
-              Soija: "Soja",
-              Seesami: "Sesam",
-              Sulfiitti: "Sulfit",
-            };
-
-            translations = {
-              name: {
-                en: englishNames[ing.name] || ing.name,
-                fi: ing.name,
-                sv: swedishNames[ing.name] || ing.name,
-              },
-              description: {
-                en: ing.description || "",
-                fi: ing.description || "",
-                sv: ing.description || "",
-              },
-            };
-          }
-
-          return {
-            id: ing.id,
-            name: ing.name,
-            description: ing.description || "",
-            allergenTags: JSON.stringify(ing.allergen_tags || []),
-            category: null,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            translations: translations,
-          };
-        });
-      } else {
-        throw new Error(
-          "No database connection and no fallback data available"
-        );
-      }
+      console.error("💥 Database error:", dbError.message);
+      return res.status(500).json({ error: "Database connection failed", details: dbError.message });
     }
 
     // Transform to match frontend expectations with translation support
@@ -1687,9 +1605,7 @@ app.get("/api/admin/ingredients", requireAuth, async (req, res) => {
       };
     });
 
-    console.log(
-      `🔍 Returning ${transformedIngredients.length} transformed ingredients (fallback: ${usingFallback})`
-    );
+    console.log(`🔍 Returning ${transformedIngredients.length} transformed ingredients`);
     res.json(transformedIngredients);
   } catch (error) {
     console.error("Error fetching ingredients:", error);
