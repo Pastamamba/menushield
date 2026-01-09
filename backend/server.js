@@ -1883,6 +1883,32 @@ app.put("/api/admin/categories/:id", requireAuth, async (req, res) => {
 
 // ============== RESTAURANT SLUG ROUTING ENDPOINTS ==============
 
+// GET /api/restaurants - Get all active restaurants for public listing
+app.get("/api/restaurants", async (req, res) => {
+  try {
+    const restaurants = await prisma.restaurant.findMany({
+      where: {
+        isActive: true
+      },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        description: true,
+        isActive: true
+      },
+      orderBy: {
+        name: 'asc'
+      }
+    });
+
+    res.json(restaurants);
+  } catch (error) {
+    console.error("Error fetching restaurants:", error);
+    res.status(500).json({ error: "Failed to fetch restaurants" });
+  }
+});
+
 // GET /api/restaurants/slug/:slug - Get restaurant by slug for new URL structure
 app.get("/api/restaurants/slug/:slug", async (req, res) => {
   try {

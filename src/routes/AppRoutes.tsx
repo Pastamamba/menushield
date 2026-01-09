@@ -1,6 +1,7 @@
 // src/routes/AppRoutes.tsx
 import { Routes, Route, Navigate } from "react-router-dom";
 import GuestMenu from "../components/GuestMenu";
+import RestaurantList from "../components/RestaurantList";
 import LoginPage from "../admin/LoginPage";
 import SignupPage from "../admin/SignupPage";
 import ForgotPasswordPage from "../admin/ForgotPasswordPage";
@@ -93,8 +94,8 @@ export default function AppRoutes() {
           } 
         />
         
-        {/* Default redirect to demo restaurant or restaurant selection */}
-        <Route path="/" element={<Navigate to="/r/demo-restaurant" replace />} />
+        {/* Home page with restaurant list */}
+        <Route path="/" element={<RestaurantList />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </ErrorBoundary>
