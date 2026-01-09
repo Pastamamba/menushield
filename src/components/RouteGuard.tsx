@@ -30,7 +30,7 @@ export const RouteGuard: React.FC<RouteGuardProps> = ({
     const redirectPath = `${location.pathname}${location.search}`;
     return (
       <Navigate
-        to={`/login?redirect=${encodeURIComponent(redirectPath)}`}
+        to={`/admin/login?redirect=${encodeURIComponent(redirectPath)}`}
         replace
       />
     );
@@ -38,7 +38,7 @@ export const RouteGuard: React.FC<RouteGuardProps> = ({
 
   // Admin-only routes
   if (adminOnly && !isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/admin/login" replace />;
   }
 
   return <>{children}</>;
