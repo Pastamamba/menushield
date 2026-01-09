@@ -298,28 +298,10 @@ app.post("/api/seed", async (req, res) => {
       if (isDev) console.log(`✅ Created ${categories.length} categories`);
     }
 
-    // Check if ingredients exist
+    // Check if ingredients exist - DISABLED: Using pre-populated MongoDB data
     const existingIngredients = await prisma.ingredient.count();
-    if (existingIngredients === 0) {
-      // Create ingredients
-      const ingredients = [
-        { name: "Chicken Breast", allergenTags: JSON.stringify([]) },
-        { name: "Salmon", allergenTags: JSON.stringify(["fish"]) },
-        { name: "Mozzarella", allergenTags: JSON.stringify(["dairy"]) },
-        { name: "Spinach", allergenTags: JSON.stringify([]) },
-        { name: "Tomatoes", allergenTags: JSON.stringify([]) },
-        { name: "Quinoa", allergenTags: JSON.stringify([]) },
-        { name: "Avocado", allergenTags: JSON.stringify([]) },
-        { name: "Eggs", allergenTags: JSON.stringify(["eggs"]) },
-        { name: "Wheat Flour", allergenTags: JSON.stringify(["gluten"]) },
-        { name: "Basil", allergenTags: JSON.stringify([]) },
-      ];
-
-      for (const ingredient of ingredients) {
-        await prisma.ingredient.create({ data: ingredient });
-      }
-      if (isDev) console.log(`✅ Created ${ingredients.length} ingredients`);
-    }
+    console.log(`🎯 Found ${existingIngredients} ingredients in Ingredient collection`);
+    // Skip auto-creation - using pre-populated data
 
     // Check if admin user exists
     const existingUsers = await prisma.user.count();
