@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -30,12 +30,34 @@ export default function LoginPage() {
 
     const ok = await login(email, password);
     if (ok) {
-      // Check for redirect parameter
+      // Check for redirect parameter first
       const urlParams = new URLSearchParams(location.search);
       const redirect = urlParams.get("redirect");
-      const targetPath = redirect || "/admin/menu";
-      console.log("Login successful, navigating to:", targetPath);
-      navigate(targetPath);
+      
+      if (redirect) {
+        console.log("Login successful, navigating to redirect:", redirect);
+        navigate(redirect);
+        return;
+      }
+      
+      // Get restaurant slug for the user's restaurant
+      try {
+        const response = await fetch(`/api/restaurants/${user?.restaurantId || 'unknown'}`);
+        if (response.ok) {
+          const restaurant = await response.json();
+          const targetPath = `/r/${restaurant.slug}/admin`;
+          console.log("Login successful, navigating to:", targetPath);
+          navigate(targetPath);
+        } else {
+          // Fallback to legacy route if restaurant not found
+          console.log("Restaurant not found, using legacy route");
+          navigate("/admin");
+        }
+      } catch (error) {
+        console.error('Error fetching restaurant:', error);
+        // Fallback to legacy route
+        navigate("/admin");
+      }
     } else {
       setError("Invalid credentials");
     }

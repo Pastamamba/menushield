@@ -71,21 +71,25 @@ export default function AppRoutes() {
           } 
         />
         
-        {/* Legacy admin routes - redirect to restaurant-specific */}
+        {/* Legacy admin routes - wrapped with RestaurantProvider for compatibility */}
         <Route 
           path="/admin" 
           element={
-            <RouteGuard requireAuth adminOnly>
-              <AdminMenu />
-            </RouteGuard>
+            <RestaurantLayout>
+              <RouteGuard requireAuth adminOnly>
+                <AdminMenu />
+              </RouteGuard>
+            </RestaurantLayout>
           } 
         />
         <Route 
           path="/admin/menu" 
           element={
-            <RouteGuard requireAuth adminOnly>
-              <AdminMenu />
-            </RouteGuard>
+            <RestaurantLayout>
+              <RouteGuard requireAuth adminOnly>
+                <AdminMenu />
+              </RouteGuard>
+            </RestaurantLayout>
           } 
         />
         
