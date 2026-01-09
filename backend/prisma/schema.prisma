@@ -89,7 +89,7 @@ model Ingredient {
   id           String    @id @default(auto()) @map("_id") @db.ObjectId
   name         String
   description  String?
-  allergenTags String    @map("allergen_tags")
+  allergenTags String?   @map("allergen_tags")  // Allow null values
   isActive     Boolean   @default(true) @map("is_active")
   
   // Make restaurantId optional - ingredients can be global
