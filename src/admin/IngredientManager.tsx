@@ -121,6 +121,16 @@ export default function IngredientManager(_props: IngredientManagerProps) {
                 
                 {/* Allergen chips */}
                 <div className="mt-2">
+                  {(() => {
+                    console.log(`🔍 ${ingredient.name} allergen debug:`, {
+                      allergen_tags: ingredient.allergen_tags,
+                      type: typeof ingredient.allergen_tags,
+                      isArray: Array.isArray(ingredient.allergen_tags),
+                      length: ingredient.allergen_tags?.length,
+                      fullIngredient: ingredient
+                    });
+                    return null;
+                  })()}
                   {ingredient.allergen_tags && ingredient.allergen_tags.length > 0 ? (
                     <div className="flex flex-wrap gap-1">
                       {getAllergenChips(ingredient.allergen_tags, currentLanguage as AllergenLanguage).map((allergen) => (
