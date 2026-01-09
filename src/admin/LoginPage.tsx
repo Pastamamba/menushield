@@ -24,7 +24,6 @@ export default function LoginPage() {
     }
   }, [location]);
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -35,48 +34,56 @@ export default function LoginPage() {
       // Check for redirect parameter first
       const urlParams = new URLSearchParams(location.search);
       const redirect = urlParams.get("redirect");
-      
+
       if (redirect) {
         console.log("Login successful, navigating to redirect:", redirect);
         navigate(redirect);
         return;
       }
-      
+
       // Get restaurant slug for the user's restaurant from JWT token
       try {
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem("authToken");
         if (!token) {
-          console.error('No auth token found after login');
-          navigate('/admin');
+          console.error("No auth token found after login");
+          navigate("/admin");
           return;
         }
 
         // Parse JWT to get restaurantId
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = JSON.parse(atob(token.split(".")[1]));
         const restaurantId = payload.restaurantId;
-        
+
         if (!restaurantId) {
-          console.error('No restaurantId found in JWT token:', payload);
-          navigate('/admin');
+          console.error("No restaurantId found in JWT token:", payload);
+          navigate("/admin");
           return;
         }
 
-        console.log('Fetching restaurant with ID:', restaurantId);
+        console.log("Fetching restaurant with ID:", restaurantId);
         const response = await fetch(`/api/restaurants/${restaurantId}`);
-        
+
         if (response.ok) {
           const restaurant = await response.json();
           const targetPath = `/r/${restaurant.slug}/admin`;
-          console.log("Login successful, navigating to:", targetPath, restaurant);
+          console.log(
+            "Login successful, navigating to:",
+            targetPath,
+            restaurant
+          );
           navigate(targetPath);
         } else {
-          console.error('Restaurant API error:', response.status, await response.text());
+          console.error(
+            "Restaurant API error:",
+            response.status,
+            await response.text()
+          );
           // Fallback to legacy route if restaurant not found
           console.log("Restaurant not found, using legacy route");
           navigate("/admin");
         }
       } catch (error) {
-        console.error('Error in login redirect:', error);
+        console.error("Error in login redirect:", error);
         // Fallback to legacy route
         navigate("/admin");
       }
@@ -92,8 +99,10 @@ export default function LoginPage() {
       </div>
       <div className="bg-white p-6 rounded-lg shadow-sm border border-warm-gray-200 w-full max-w-sm">
         <div className="text-center mb-5">
-          <h2 className="text-2xl font-semibold text-warm-gray-800">MenuShield</h2>
-          <p className="text-warm-gray-600 mt-1 text-sm">{t('adminLogin')}</p>
+          <h2 className="text-2xl font-semibold text-warm-gray-800">
+            MenuShield
+          </h2>
+          <p className="text-warm-gray-600 mt-1 text-sm">{t("adminLogin")}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3">
@@ -111,7 +120,7 @@ export default function LoginPage() {
 
           <div>
             <label className="block text-sm font-medium text-warm-gray-700 mb-1">
-              {t('email')}
+              {t("email")}
             </label>
             <input
               type="email"
@@ -125,7 +134,7 @@ export default function LoginPage() {
 
           <div>
             <label className="block text-sm font-medium text-warm-gray-700 mb-1">
-              {t('password')}
+              {t("password")}
             </label>
             <input
               type="password"
@@ -141,7 +150,7 @@ export default function LoginPage() {
             type="submit"
             className="w-full bg-sage-600 text-white py-2.5 px-4 rounded-lg hover:bg-sage-700 transition-all duration-200 active:scale-98 font-medium"
           >
-            {t('login')}
+            {t("login")}
           </button>
         </form>
 
@@ -156,20 +165,14 @@ export default function LoginPage() {
 
         <div className="mt-5 text-center">
           <p className="text-warm-gray-600 text-sm">
-            {t('noAccount')}{" "}
+            {t("noAccount")}{" "}
             <button
               onClick={() => navigate("/admin/signup")}
               className="text-sage-600 hover:text-sage-800 font-medium"
             >
-              {t('signUpHere')}
+              {t("signUpHere")}
             </button>
           </p>
-        </div>
-
-        <div className="mt-4 p-3 bg-warm-gray-50 rounded text-sm text-warm-gray-600">
-          <p className="font-medium mb-1">Demo Account:</p>
-          <p>Email: admin@example.com</p>
-          <p>Password: supersecret</p>
         </div>
       </div>
     </div>

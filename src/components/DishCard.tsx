@@ -28,7 +28,7 @@ export default function DishCard({
   const getStatusIcon = () => {
     switch (safetyStatus.status) {
       case "safe":
-        return "✅";
+        return "";
       case "modifiable":
         return "⚠️";
       case "unsafe":

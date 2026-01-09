@@ -71,9 +71,9 @@ export function useMenuTranslations() {
       sv: "Säker matupplevelse för alla",
     },
     showSafeDishes: {
-      en: "Show my safe dishes",
-      fi: "Näytä turvalliset ruokani",
-      sv: "Visa mina säkra rätter",
+      en: "Show dishes",
+      fi: "Näytä ruoat",
+      sv: "Visa rätter",
     },
     searchAllergens: {
       en: "Search allergens...",
