@@ -38,36 +38,64 @@ const app = express();
 
 // Helper to safely parse allergenTags as array
 function safeParseArray(val) {
+  console.log('🔍 safeParseArray DEBUG:', {
+    input: val, 
+    type: typeof val,
+    isArray: Array.isArray(val),
+    constructor: val?.constructor?.name
+  });
+  
   // If already an array, return as-is
-  if (Array.isArray(val)) return val;
+  if (Array.isArray(val)) {
+    console.log('✅ Already array, returning:', val);
+    return val;
+  }
   
   // If null or undefined, return empty array
-  if (!val) return [];
+  if (!val) {
+    console.log('⚪ Null/undefined, returning []');
+    return [];
+  }
   
   if (typeof val === "string") {
+    console.log('🔍 Processing string:', val);
     // Handle double-encoded JSON strings like "["fish"]" 
     let cleanVal = val.trim();
     
     // If string starts and ends with quotes and contains JSON array, remove outer quotes
     if (cleanVal.startsWith('"') && cleanVal.endsWith('"') && cleanVal.includes('[')) {
       cleanVal = cleanVal.slice(1, -1); // Remove outer quotes
+      console.log('🔍 Removed outer quotes:', cleanVal);
     }
     
     try {
       const parsed = JSON.parse(cleanVal);
       const result = Array.isArray(parsed) ? parsed : [parsed];
+      console.log('✅ Parsed result:', result);
       return result;
     } catch (e) {
+      console.log('❌ Parse failed, returning as single item:', [val]);
       return [val]; // If all parsing fails, return original as single item
     }
   }
   
+  // Handle MongoDB/Prisma array-like objects
   if (val && typeof val === "object" && "length" in val) {
-    return Array.from(val);
+    const result = Array.from(val);
+    console.log('✅ Array-like object converted:', result);
+    return result;
   }
+  
+  // Handle plain objects with array values
   if (val && typeof val === "object") {
-    return Object.values(val).filter((v) => typeof v === "string");
+    const result = Object.values(val).filter((v) => typeof v === "string");
+    console.log('✅ Object values filtered:', result);
+    return result;
   }
+  
+  console.log('❌ Fallback to empty array');
+  return [];
+}
   return [];
 }
 
