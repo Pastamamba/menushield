@@ -135,35 +135,33 @@ async function updateAllIngredientsWithAllergens() {
     // Process all ingredients
     for (const ingredient of ingredients) {
       const allergens = findAllergens(ingredient.name);
-      const allergenJson = JSON.stringify(allergens);
       
-      // Prepare bulk update
+      // Store as actual array, NOT JSON string!
+      const updates = [];
       updates.push({
         updateOne: {
           filter: { _id: ingredient._id },
           update: { 
             $set: { 
-              allergenTags: allergenJson 
+              allergenTags: allergens // Direct array, not JSON.stringify()!
             }
           }
         }
       });
 
       if (allergens.length > 0) {
-        console.log(`✅ ${ingredient.name} → ${allergenJson}`);
+        console.log(`✅ ${ingredient.name} → ${JSON.stringify(allergens)}`);
         updatedWithAllergens++;
       } else {
         console.log(`⚪ ${ingredient.name} → []`);
         updatedWithoutAllergens++;
       }
+      
+      // Execute individual update immediately to avoid memory issues
+      await collection.bulkWrite(updates);
     }
 
-    // Execute bulk update
-    console.log(`\n🚀 Executing bulk update for ${updates.length} ingredients...`);
-    const result = await collection.bulkWrite(updates);
-    
     console.log(`\n🎯 RESULTS:`);
-    console.log(`   Modified: ${result.modifiedCount}`);
     console.log(`   With allergens: ${updatedWithAllergens}`);
     console.log(`   Without allergens: ${updatedWithoutAllergens}`);
     console.log(`   Total processed: ${ingredients.length}`);
@@ -174,11 +172,11 @@ async function updateAllIngredientsWithAllergens() {
     const yogurt = await collection.findOne({ name: { $regex: /greek yogurt/i } });
     const oats = await collection.findOne({ name: { $regex: /^oats$/i } });
     
-    console.log(`   Salmon allergenTags: ${salmon?.allergenTags || 'NOT FOUND'}`);
-    console.log(`   Greek Yogurt allergenTags: ${yogurt?.allergenTags || 'NOT FOUND'}`);  
-    console.log(`   Oats allergenTags: ${oats?.allergenTags || 'NOT FOUND'}`);
+    console.log(`   Salmon allergenTags: ${JSON.stringify(salmon?.allergenTags)} (type: ${typeof salmon?.allergenTags})`);
+    console.log(`   Greek Yogurt allergenTags: ${JSON.stringify(yogurt?.allergenTags)} (type: ${typeof yogurt?.allergenTags})`);  
+    console.log(`   Oats allergenTags: ${JSON.stringify(oats?.allergenTags)} (type: ${typeof oats?.allergenTags})`);
     
-    console.log(`\n✅ COMPLETE! All ingredients updated with correct allergen data.`);
+    console.log(`\n✅ COMPLETE! All ingredients updated with ARRAY allergen data.`);
     
   } catch (error) {
     console.error('❌ ERROR:', error);
