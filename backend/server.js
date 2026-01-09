@@ -38,20 +38,26 @@ const app = express();
 
 // Helper to safely parse allergenTags as array
 function safeParseArray(val) {
+  console.log('🔍 safeParseArray input:', val, typeof val);
   if (Array.isArray(val)) return val;
   if (typeof val === "string") {
     // Handle double-encoded JSON strings like "["fish"]"  
     let cleanVal = val.trim();
+    console.log('🔍 Trimmed value:', cleanVal);
     
     // If string starts and ends with quotes and contains JSON array, remove outer quotes
     if (cleanVal.startsWith('"') && cleanVal.endsWith('"') && cleanVal.includes('[')) {
       cleanVal = cleanVal.slice(1, -1); // Remove outer quotes
+      console.log('🔍 Removed outer quotes:', cleanVal);
     }
     
     try {
       const parsed = JSON.parse(cleanVal);
-      return Array.isArray(parsed) ? parsed : [parsed];
-    } catch {
+      const result = Array.isArray(parsed) ? parsed : [parsed];
+      console.log('🔍 safeParseArray result:', result);
+      return result;
+    } catch (e) {
+      console.log('❌ JSON parse failed for:', cleanVal, 'Error:', e.message);
       return [val]; // If all parsing fails, return original as single item
     }
   }
