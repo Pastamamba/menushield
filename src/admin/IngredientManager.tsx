@@ -121,9 +121,9 @@ export default function IngredientManager(_props: IngredientManagerProps) {
                 
                 {/* Allergen chips */}
                 <div className="mt-2">
-                  {ingredient.allergenTags && ingredient.allergenTags.length > 0 ? (
+                  {ingredient.allergen_tags && ingredient.allergen_tags.length > 0 ? (
                     <div className="flex flex-wrap gap-1">
-                      {getAllergenChips(ingredient.allergenTags, currentLanguage as AllergenLanguage).map((allergen) => (
+                      {getAllergenChips(ingredient.allergen_tags, currentLanguage as AllergenLanguage).map((allergen) => (
                         <span
                           key={allergen.name}
                           className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${allergen.color}`}
@@ -366,7 +366,7 @@ function EditIngredientForm({ ingredient, onSubmit, onCancel }: {
   const [form, setForm] = useState<Partial<CreateIngredientRequest>>({
     name: ingredient.name,
     category: typeof ingredient.category === 'string' ? ingredient.category : ingredient.category?.name,
-    allergen_tags: ingredient.allergenTags || [],
+    allergen_tags: ingredient.allergen_tags || [],
   });
   const [error, setError] = useState("");
 

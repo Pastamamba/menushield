@@ -83,8 +83,8 @@ export interface Ingredient {
   category?: string | IngredientCategory; // Can be string name or object
   // Multilingual support
   translations?: any; // JSON object containing translations
-  createdAt: string; // Matches database: created_at
-  updatedAt: string; // Matches database: updated_at
+  createdAt?: string; // Matches database: created_at
+  updatedAt?: string; // Matches database: updated_at
 }
 
 export interface IngredientCategory {

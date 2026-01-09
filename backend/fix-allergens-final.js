@@ -1,6 +1,6 @@
 import { MongoClient } from 'mongodb';
 
-const MONGODB_URI = 'mongodb+srv://admin:W6bsyBbJ4qglqDvC@clustermenushield.uhfmg.mongodb.net/menushield?retryWrites=true&w=majority&appName=ClusterMenuShield';
+const MONGODB_URI = 'mongodb+srv://menushield:kyDz4WivhZiEvZdM@menushield-cluster.azrzcxz.mongodb.net/menushield?retryWrites=true&w=majority&appName=menushield-cluster';
 
 // Complete allergen mappings for all major ingredients
 const ingredientAllergens = {
