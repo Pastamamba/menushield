@@ -11,8 +11,7 @@ const API_BASE = import.meta.env.VITE_API_URL || 'https://menushield-production.
 
 // Debug log for development
 if (import.meta.env.DEV) {
-  console.log('RestaurantContext - API_BASE:', API_BASE);
-  console.log('RestaurantContext - VITE_API_URL:', import.meta.env.VITE_API_URL);
+
 }
 
 interface RestaurantContextType {
@@ -47,7 +46,7 @@ export function RestaurantProvider({ children }: RestaurantProviderProps) {
     try {
       // Using Vite proxy now
       const url = `/api/restaurants/slug/${slug}`;
-      console.log('🔍 PROXY URL:', url);
+
       const response = await fetch(url);
       
       if (!response.ok) {
@@ -68,7 +67,7 @@ export function RestaurantProvider({ children }: RestaurantProviderProps) {
   const fetchRestaurantById = async (restaurantId: string): Promise<Restaurant | null> => {
     try {
       const url = `/api/restaurants/${restaurantId}`;
-      console.log('🔍 Fetching restaurant by ID:', url);
+
       const response = await fetch(url);
       
       if (!response.ok) {
@@ -115,7 +114,7 @@ export function RestaurantProvider({ children }: RestaurantProviderProps) {
         setRestaurant(restaurantData);
       } else {
         // No restaurant data available - redirect to demo
-        console.log('No restaurant data available, redirecting to demo');
+
         if (window.location.pathname !== '/r/demo-restaurant') {
           navigate('/r/demo-restaurant', { replace: true });
         }

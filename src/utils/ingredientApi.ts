@@ -12,24 +12,15 @@ const getApiUrl = (path: string) => API_BASE ? `${API_BASE}${path}` : path;
 
 // Ingredients API functions
 async function fetchIngredients(token: string, language = 'en'): Promise<Ingredient[]> {
-  console.log('🔍 fetchIngredients - token:', token ? `${token.substring(0, 20)}...` : 'missing');
-  console.log('🔍 fetchIngredients - language:', language);
-  console.log('🔍 fetchIngredients - URL:', `/api/admin/ingredients?lang=${language}`);
-  
   const headers = { 
     Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json'
   };
-  console.log('🔍 fetchIngredients - headers:', headers);
   
   try {
     const response = await fetch(`/api/admin/ingredients?lang=${language}`, {
       headers,
     });
-    
-    console.log('🔍 fetchIngredients - response status:', response.status);
-    console.log('🔍 fetchIngredients - response ok:', response.ok);
-    console.log('🔍 fetchIngredients - response headers:', Object.fromEntries(response.headers));
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -39,7 +30,6 @@ async function fetchIngredients(token: string, language = 'en'): Promise<Ingredi
     }
     
     const data = await response.json();
-    console.log('🔍 fetchIngredients - success data:', data);
     return data;
   } catch (error) {
     console.error('🔍 fetchIngredients - network error:', error);
@@ -170,13 +160,10 @@ export function useAdminIngredients() {
   const { token } = useAuth();
   const { currentLanguage } = useLanguage();
   
-  console.log('🔍 useAdminIngredients - currentLanguage from context:', currentLanguage);
-  
   return useQuery({
     queryKey: ['admin', 'ingredients', currentLanguage],
     queryFn: () => {
       if (!token) throw new Error('No authentication token');
-      console.log('🔍 useAdminIngredients - calling fetchIngredients with language:', currentLanguage);
       return fetchIngredients(token, currentLanguage);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

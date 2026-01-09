@@ -918,7 +918,7 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
         ...form,
         price: form.price || 0 // Convert undefined to 0 for backend
       };
-      console.log('🔍 Submitting dish with components:', submitData.components);
+
       await onSubmit(submitData);
     } catch (error) {
       console.error('Submission error:', error);
@@ -1255,14 +1255,11 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
   const [error, setError] = useState("");
 
   // Debug logging
-  console.log('🔍 EditDishModal - dish.category:', dish.category);
-  console.log('🔍 EditDishModal - typeof dish.category:', typeof dish.category);
-  console.log('🔍 EditDishModal - form.category:', form.category);
-  console.log('🔍 EditDishModal - available options: ["Appetizer", "Main Course", "Dessert", "Beverage", "Salad", "Soup", "Side Dish"]');
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    console.log('🔍 EditDishModal handleChange:', { name, value, type });
+
     setForm(prev => {
       const newForm = {
         ...prev,
