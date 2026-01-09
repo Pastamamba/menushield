@@ -31,6 +31,7 @@ if (isDev) {
 
 // Force production to use MongoDB ingredients - v2.1
 console.log("🎯 MenuShield v2.1 - Using MongoDB ingredient database");
+console.log("🔗 DATABASE_URL:", process.env.DATABASE_URL?.slice(0, 50) + "...");
 
 const prisma = new PrismaClient();
 const app = express();
@@ -1582,6 +1583,7 @@ app.get("/api/admin/ingredients", requireAuth, async (req, res) => {
     let ingredients;
     let usingFallback = false;
     try {
+      console.log("🎯 Querying Ingredient collection from MongoDB...");
       ingredients = await prisma.ingredient.findMany({
         include: {
           category: true,
