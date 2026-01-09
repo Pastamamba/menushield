@@ -23,8 +23,6 @@ interface AllergenFilterProps {
   onSearchChange?: (searchTerm: string) => void;
   searchPlaceholder?: string; // Add this prop for compatibility
   isMobile?: boolean;
-  showModifiableOnly?: boolean;
-  onModifiableToggle?: (show: boolean) => void;
 }
 
 export default function AllergenFilter({
@@ -37,8 +35,6 @@ export default function AllergenFilter({
   onSearchChange,
   searchPlaceholder = "Search allergens...",
   isMobile = false,
-  showModifiableOnly = false,
-  onModifiableToggle,
 }: AllergenFilterProps) {
   const { t } = useMenuTranslations();
   const [searchQuery, setSearchQuery] = useState("");
@@ -79,49 +75,6 @@ export default function AllergenFilter({
   if (isMobile) {
     return (
       <div className="space-y-4">
-        {/* Search Input - More refined */}
-        <div className="relative">
-          <input
-            type="text"
-            placeholder={t('searchAllergens')}
-            value={currentSearchTerm}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full px-3 py-3 text-base border border-warm-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent bg-warm-gray-50 min-h-[44px]"
-          />
-          <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-warm-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
-
-        {/* Modifiable Dishes Filter - Clean design */}
-        {onModifiableToggle && (
-          <div className="border border-gray-200 rounded-lg p-4 bg-blue-50">
-            <div className="flex items-start space-x-3">
-              <button
-                type="button"
-                onClick={() => onModifiableToggle(!showModifiableOnly)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 ${
-                  showModifiableOnly ? 'bg-gray-800' : 'bg-gray-300'
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    showModifiableOnly ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                />
-              </button>
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('showOnlyModifiable')}
-                </label>
-                <p className="text-xs text-gray-600">
-                  Show only dishes that may be modifiable by staff.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Allergen Grid - Mobile Optimized with refined styling */}
         <div className="grid grid-cols-2 gap-3">
           {displayAllergens.map((allergen) => {
@@ -229,34 +182,7 @@ export default function AllergenFilter({
         )}
       </div>
 
-      {/* Desktop Modifiable Dishes Filter */}
-      {onModifiableToggle && (
-        <div className="border border-gray-200 rounded-lg p-4 bg-blue-50">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('showOnlyModifiable')}
-              </label>
-              <p className="text-xs text-gray-600">
-                Show only dishes that may be modifiable by staff.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => onModifiableToggle(!showModifiableOnly)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 ml-4 ${
-                showModifiableOnly ? 'bg-gray-800' : 'bg-gray-300'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  showModifiableOnly ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
-        </div>
-      )}
+
 
       {/* Compact Allergens Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">

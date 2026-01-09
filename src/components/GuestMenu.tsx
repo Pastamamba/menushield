@@ -18,7 +18,6 @@ export default function GuestMenu() {
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showMobileFilter, setShowMobileFilter] = useState(false);
-  const [showModifiableOnly, setShowModifiableOnly] = useState(false);
   const [showAllergenDisclaimer, setShowAllergenDisclaimer] = useState(false);
   const menuSectionRef = useRef<HTMLDivElement>(null);
 
@@ -157,7 +156,7 @@ export default function GuestMenu() {
     );
   }
 
-  // Filter dishes based on search term and modifiable filter
+  // Filter dishes based on search term
   let filteredDishes = dishes.filter(dish => {
     if (dish.is_active === false) return false;
     
@@ -166,12 +165,6 @@ export default function GuestMenu() {
       dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       dish.description?.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    
-    // Modifiable filter - only show dishes that could be modified for user's allergens
-    if (showModifiableOnly && selectedAllergens.length > 0) {
-      const safety = analyzeDishSafety(dish, selectedAllergens);
-      return matchesSearch && safety.status === 'modifiable';
-    }
     
     return matchesSearch;
   });
@@ -183,7 +176,6 @@ export default function GuestMenu() {
     return acc;
   }, {
     safe: [] as Array<{ dish: Dish; safety: ReturnType<typeof analyzeDishSafety> }>,
-    modifiable: [] as Array<{ dish: Dish; safety: ReturnType<typeof analyzeDishSafety> }>,
     unsafe: [] as Array<{ dish: Dish; safety: ReturnType<typeof analyzeDishSafety> }>
   });
 
@@ -287,8 +279,6 @@ export default function GuestMenu() {
                   searchTerm={searchTerm}
                   onSearchChange={setSearchTerm}
                   isMobile={true}
-                  showModifiableOnly={showModifiableOnly}
-                  onModifiableToggle={() => setShowModifiableOnly(prev => !prev)}
                   />
               </div>
 
@@ -330,8 +320,6 @@ export default function GuestMenu() {
                     : [...prev, allergen]
                 );
               }}
-              showModifiableOnly={showModifiableOnly}
-              onModifiableToggle={() => setShowModifiableOnly(prev => !prev)}
             />
           </div>
         </div>
@@ -339,83 +327,36 @@ export default function GuestMenu() {
         {/* Dishes by Safety Level */}
         <div className="space-y-8">
           {selectedAllergens.length === 0 ? (
-            showModifiableOnly ? (
-              /* Show message when modifiable filter is on but no allergens selected */
-              <div className="text-center py-12">
-                <div className="text-orange-400 mb-4">
-                  <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Select allergens to see modifiable dishes</h3>
-                <p className="text-gray-600">Choose your allergens above to see which dishes can be modified for you</p>
+            /* Show all dishes when no allergens selected */
+            <section>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                <span className="w-3 h-3 bg-gray-500 rounded-full mr-3"></span>
+                {`${t('allDishes')} (${filteredDishes.length})`}
+              </h2>
+              <p className="text-gray-600 mb-4">
+                {t('selectAllergensHelp')}
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredDishes.map((dish) => (
+                  <DishCard 
+                    key={dish.id}
+                    dish={dish} 
+                    safetyStatus={{ 
+                      status: "safe", 
+                      allergens: [] 
+                    }}
+                    showPrices={restaurant?.showPrices !== false}
+                    currency={restaurant?.currency || 'EUR'}
+                    language={currentLanguage as any}
+                    onCardSelect={handleCardSelect}
+                    onCardLongPress={handleCardLongPress}
+                  />
+                ))}
               </div>
-            ) : (
-              /* Show all dishes when no allergens selected */
-              <section>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                  <span className="w-3 h-3 bg-gray-500 rounded-full mr-3"></span>
-                  {`${t('allDishes')} (${filteredDishes.length})`}
-                </h2>
-                <p className="text-gray-600 mb-4">
-                  {t('selectAllergensHelp')}
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredDishes.map((dish) => (
-                    <DishCard 
-                      key={dish.id}
-                      dish={dish} 
-                      safetyStatus={{ 
-                        status: "safe", 
-                        allergens: [] 
-                      }}
-                      showPrices={restaurant?.showPrices !== false}
-                      currency={restaurant?.currency || 'EUR'}
-                      language={currentLanguage as any}
-                      onCardSelect={handleCardSelect}
-                      onCardLongPress={handleCardLongPress}
-                    />
-                  ))}
-                </div>
-              </section>
-            )
+            </section>
           ) : (
             /* Show filtered dishes by safety when allergens are selected */
             <>
-              {/* Show modifiable-only notification if filter is active */}
-              {showModifiableOnly && (
-                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
-                  <div className="flex items-start gap-3">
-                    <svg className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                    <div>
-                      <h3 className="font-medium text-orange-900 mb-1">{t('showingModifiableOnly')}</h3>
-                      <p className="text-orange-700 text-sm">
-                        {t('modifiableDishesInfo')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {/* Info message about hidden dishes - only when not showing modifiable only */}
-              {!showModifiableOnly && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                  <div className="flex items-start gap-3">
-                    <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div>
-                      <h3 className="font-medium text-blue-900 mb-1">{t('saferMenuTitle')}</h3>
-                      <p className="text-blue-700 text-sm">
-                        {t('hiddenDishesExplanation')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {/* Safe Dishes */}
               {categorizedDishes.safe.length > 0 && (
                 <section>
