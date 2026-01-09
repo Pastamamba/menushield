@@ -29,6 +29,9 @@ if (isDev) {
   console.log("JWT_SECRET exists:", !!process.env.JWT_SECRET);
 }
 
+// Force production to use MongoDB ingredients - v2.1
+console.log("🎯 MenuShield v2.1 - Using MongoDB ingredient database");
+
 const prisma = new PrismaClient();
 const app = express();
 
