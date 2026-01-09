@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRestaurant as useRestaurantContext } from '../contexts/RestaurantContext';
 import type { Restaurant } from '../types';
 
 interface UpdateRestaurantRequest {
@@ -11,27 +12,27 @@ interface UpdateRestaurantRequest {
   supportedLanguages?: string;
 }
 
-// Fetch restaurant info (public)
+// Fetch restaurant info (uses context)
 export const useRestaurant = () => {
-  return useQuery({
-    queryKey: ['restaurant'],
-    queryFn: async (): Promise<Restaurant> => {
-      const response = await fetch(`/api/restaurant`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch restaurant info');
-      }
-      return response.json();
-    },
-  });
+  const { restaurant, isLoading, error } = useRestaurantContext();
+  
+  return {
+    data: restaurant,
+    isLoading,
+    error,
+    isSuccess: !isLoading && !error,
+    isError: !!error
+  };
 };
 
 // Update restaurant settings (admin only)
 export const useUpdateRestaurant = () => {
   const queryClient = useQueryClient();
+  const { refreshRestaurant } = useRestaurantContext();
   
   return useMutation({
     mutationFn: async (data: UpdateRestaurantRequest): Promise<Restaurant> => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken'); // Use correct token key
       const response = await fetch(`/api/admin/restaurant`, {
         method: 'PUT',
         headers: {
@@ -48,8 +49,10 @@ export const useUpdateRestaurant = () => {
       
       return response.json();
     },
-    onSuccess: () => {
-      // Invalidate and refetch restaurant data
+    onSuccess: async () => {
+      // Refresh the restaurant context to get updated data
+      await refreshRestaurant();
+      // Also invalidate React Query cache
       queryClient.invalidateQueries({ queryKey: ['restaurant'] });
     },
   });
