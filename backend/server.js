@@ -40,11 +40,19 @@ const app = express();
 function safeParseArray(val) {
   if (Array.isArray(val)) return val;
   if (typeof val === "string") {
+    // Handle double-encoded JSON strings like "["fish"]"  
+    let cleanVal = val.trim();
+    
+    // If string starts and ends with quotes and contains JSON array, remove outer quotes
+    if (cleanVal.startsWith('"') && cleanVal.endsWith('"') && cleanVal.includes('[')) {
+      cleanVal = cleanVal.slice(1, -1); // Remove outer quotes
+    }
+    
     try {
-      const parsed = JSON.parse(val);
+      const parsed = JSON.parse(cleanVal);
       return Array.isArray(parsed) ? parsed : [parsed];
     } catch {
-      return [val];
+      return [val]; // If all parsing fails, return original as single item
     }
   }
   if (val && typeof val === "object" && "length" in val) {
