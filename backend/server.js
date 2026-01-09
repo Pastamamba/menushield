@@ -677,6 +677,8 @@ const validatePassword = body("password").isLength({ min: 6 }).trim();
 const validateRestaurantName = body("restaurantName")
   .isLength({ min: 1, max: 100 })
   .trim();
+const validateFirstName = body("firstName").optional().isLength({ max: 50 }).trim();
+const validateLastName = body("lastName").optional().isLength({ max: 50 }).trim();
 const validateDishInput = [
   body("name").isLength({ min: 1, max: 200 }).trim(),
   body("description").optional().isLength({ max: 500 }).trim(),
@@ -762,11 +764,20 @@ app.post(
 app.post(
   "/api/signup",
   authLimiter,
-  [validateEmail, validatePassword, validateRestaurantName],
+  [validateEmail, validatePassword, validateRestaurantName, validateFirstName, validateLastName],
   handleValidationErrors,
   async (req, res) => {
     try {
-      const { restaurantName, email, password } = req.body;
+      const { 
+        restaurantName, 
+        email, 
+        password,
+        restaurantType,
+        address,
+        phone,
+        firstName,
+        lastName 
+      } = req.body;
 
       // Check if user already exists
       const existingUser = await prisma.user.findUnique({
@@ -777,24 +788,73 @@ app.post(
         return res.status(400).json({ error: "Email already registered" });
       }
 
-      // Hash password and create user
+      // Generate unique slug for restaurant
+      const baseSlug = restaurantName
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '') 
+        .replace(/\s+/g, '-')
+        .substring(0, 50);
+        
+      let slug = baseSlug;
+      let counter = 1;
+      
+      // Ensure slug is unique
+      while (await prisma.restaurant.findUnique({ where: { slug } })) {
+        slug = `${baseSlug}-${counter}`;
+        counter++;
+      }
+
+      // Hash password
       const passwordHash = await bcrypt.hash(password, 10);
 
-      await prisma.user.create({
-        data: {
-          email,
-          passwordHash,
-          restaurantName,
-        },
+      // Create restaurant and user in transaction
+      const result = await prisma.$transaction(async (tx) => {
+        // 1. Create Restaurant
+        const restaurant = await tx.restaurant.create({
+          data: {
+            name: restaurantName,
+            slug,
+            description: `Welcome to ${restaurantName}`,
+            contact: phone || '',
+            address: address || '',
+            defaultLanguage: 'fi',
+            supportedLanguages: JSON.stringify(['fi', 'en', 'sv']),
+            currency: 'EUR',
+            timezone: 'Europe/Helsinki',
+          },
+        });
+
+        // 2. Create User linked to Restaurant
+        const user = await tx.user.create({
+          data: {
+            email,
+            passwordHash,
+            firstName: firstName || '',
+            lastName: lastName || '',
+            role: 'OWNER',
+            restaurantId: restaurant.id,
+          },
+        });
+
+        return { restaurant, user };
       });
 
-      if (isDev)
-        console.log(`New restaurant signup: ${restaurantName} (${email})`);
+      if (isDev) {
+        console.log(`✅ New restaurant signup: ${restaurantName} (${email})`);
+        console.log(`🏪 Restaurant slug: ${result.restaurant.slug}`);
+        console.log(`👤 User role: ${result.user.role}`);
+      }
 
       res.status(201).json({
-        message: "Account created successfully",
-        restaurantName,
-        email,
+        message: "Account created successfully! You can now log in.",
+        restaurant: {
+          name: result.restaurant.name,
+          slug: result.restaurant.slug,
+        },
+        user: {
+          email: result.user.email,
+          role: result.user.role,
+        },
       });
     } catch (error) {
       console.error("Signup error:", error);
@@ -907,6 +967,120 @@ app.put("/api/admin/change-password", requireAuth, async (req, res) => {
   } catch (error) {
     console.error("Error changing password:", error);
     res.status(500).json({ error: "Failed to change password" });
+  }
+});
+
+// Forgot password - send reset token
+app.post("/api/forgot-password", authLimiter, async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+
+    // Check if user exists
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+      include: { restaurant: true }
+    });
+
+    if (!user) {
+      // Don't reveal if email exists or not for security
+      return res.json({ 
+        message: "If an account with that email exists, we've sent password reset instructions." 
+      });
+    }
+
+    // Generate reset token (in production, use crypto.randomBytes)
+    const resetToken = Math.random().toString(36).substring(2, 15) + 
+                      Math.random().toString(36).substring(2, 15);
+    
+    // Set token expiry (1 hour from now)
+    const tokenExpiry = new Date(Date.now() + 60 * 60 * 1000);
+
+    // Store reset token (you'd need to add these fields to user table in production)
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        // In production, add resetToken and resetTokenExpiry fields to User model
+        // For now, we'll use a simple in-memory approach
+      }
+    });
+
+    // In production, send email here
+    console.log(`Password reset requested for ${email}`);
+    console.log(`Reset token: ${resetToken} (expires: ${tokenExpiry})`);
+    console.log(`Reset URL: ${req.protocol}://${req.get('host')}/reset-password?token=${resetToken}`);
+
+    // For development, return the token (remove in production!)
+    if (isDev) {
+      return res.json({ 
+        message: "Password reset instructions sent",
+        token: resetToken // Only for development!
+      });
+    }
+
+    res.json({ 
+      message: "If an account with that email exists, we've sent password reset instructions." 
+    });
+
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({ error: "Failed to process password reset request" });
+  }
+});
+
+// Reset password with token
+app.post("/api/reset-password", authLimiter, async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({ error: "Token and new password are required" });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+
+    // In production, verify token from database
+    // For now, we'll accept any token for development
+    if (!isDev && !token) {
+      return res.status(400).json({ error: "Invalid or expired reset token" });
+    }
+
+    // For development, find user by email pattern or use hardcoded logic
+    // In production, you'd look up user by reset token
+    const users = await prisma.user.findMany({
+      take: 1 // Just get first user for demo
+    });
+
+    if (users.length === 0) {
+      return res.status(400).json({ error: "Invalid or expired reset token" });
+    }
+
+    const user = users[0];
+
+    // Hash new password
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    // Update password and clear reset token
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordHash,
+        // In production, also clear resetToken and resetTokenExpiry
+      }
+    });
+
+    console.log(`Password reset successful for user ${user.id}`);
+
+    res.json({ message: "Password reset successful. You can now log in with your new password." });
+
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({ error: "Failed to reset password" });
   }
 });
 

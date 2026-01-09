@@ -7,12 +7,12 @@ export default function SignupPage() {
   const { t } = useAdminTranslations();
   const [formData, setFormData] = useState({
     restaurantName: "",
-    username: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
-    emailConfirmation: "",
-    // New onboarding fields
+    // Restaurant details
     restaurantType: "",
     address: "",
     phone: "",
@@ -53,6 +53,13 @@ export default function SignupPage() {
       return;
     }
 
+    // Check for valid email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -60,22 +67,23 @@ export default function SignupPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          restaurantName: formData.restaurantName,
-          username: formData.username,
-          email: formData.email,
+          restaurantName: formData.restaurantName.trim(),
+          firstName: formData.firstName.trim(),
+          lastName: formData.lastName.trim(),
+          email: formData.email.trim().toLowerCase(),
           password: formData.password,
-          emailConfirmation: formData.emailConfirmation,
           restaurantType: formData.restaurantType,
-          address: formData.address,
-          phone: formData.phone,
+          address: formData.address.trim(),
+          phone: formData.phone.trim(),
           acceptMarketing: formData.acceptMarketing,
         }),
       });
 
       if (res.ok) {
-        // Redirect to login page with success message
+        const data = await res.json();
+        // Redirect to login page with success message and restaurant info
         navigate(
-          "/admin/login?message=Account created successfully! Please log in to get started."
+          `/admin/login?message=${encodeURIComponent(data.message)}&restaurant=${encodeURIComponent(data.restaurant.name)}`
         );
       } else {
         const data = await res.json();
@@ -119,7 +127,7 @@ export default function SignupPage() {
           {/* Restaurant Information Section */}
           <div className="bg-warm-gray-50 p-4 rounded-lg">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <span className="mr-2">🏪</span>
+              <span className="mr-2">�</span>
               Restaurant Information
             </h3>
             
@@ -157,15 +165,14 @@ export default function SignupPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Username (@username)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
                 <input
-                  type="text"
-                  name="username"
-                  required
-                  value={formData.username}
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-green-500"
-                  placeholder="unique username for your restaurant"
+                  placeholder="+358 40 123 4567"
                 />
               </div>
               
@@ -180,18 +187,6 @@ export default function SignupPage() {
                   placeholder="Restaurant address"
                 />
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-green-500"
-                  placeholder="+46 123 456 789"
-                />
-              </div>
             </div>
           </div>
 
@@ -203,6 +198,34 @@ export default function SignupPage() {
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  First Name
+                </label>
+                <input
+                  type="text"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-green-500"
+                  placeholder="Your first name"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Last Name
+                </label>
+                <input
+                  type="text"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-green-500"
+                  placeholder="Your last name"
+                />
+              </div>
+              
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email Address *

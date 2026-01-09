@@ -893,9 +893,9 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
   // Update ingredients whenever any category changes
   useEffect(() => {
     updateAllIngredients();
-  }, [baseIngredients, sideIngredients, sauceIngredients, toppingIngredients]);
+  }, [baseIngredients, sideIngredients, sauceIngredients, toppingIngredients, availableIngredients]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) {
       setError("Dish name is required");
@@ -907,12 +907,23 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
     }
     setError("");
     
-    // Ensure price is handled correctly for submission
-    const submitData = {
-      ...form,
-      price: form.price || 0 // Convert undefined to 0 for backend
-    };
-    onSubmit(submitData);
+    try {
+      // Ensure ingredients and components are up to date before submission
+      updateAllIngredients();
+      
+      // Wait a tick to ensure state is updated, then submit
+      await new Promise(resolve => setTimeout(resolve, 0));
+      
+      const submitData = {
+        ...form,
+        price: form.price || 0 // Convert undefined to 0 for backend
+      };
+      console.log('🔍 Submitting dish with components:', submitData.components);
+      await onSubmit(submitData);
+    } catch (error) {
+      console.error('Submission error:', error);
+      setError(error instanceof Error ? error.message : 'Failed to save dish');
+    }
   };
 
   const handleBackdropClick = (e: React.MouseEvent) => {

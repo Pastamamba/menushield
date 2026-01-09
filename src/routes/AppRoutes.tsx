@@ -3,6 +3,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import GuestMenu from "../components/GuestMenu";
 import LoginPage from "../admin/LoginPage";
 import SignupPage from "../admin/SignupPage";
+import ForgotPasswordPage from "../admin/ForgotPasswordPage";
+import ResetPasswordPage from "../admin/ResetPasswordPage";
 import AdminMenu from "../admin/AdminMenu";
 import { RouteGuard } from "../components/RouteGuard";
 import { ErrorBoundary } from "../components/ErrorBoundary";
@@ -42,6 +44,10 @@ export default function AppRoutes() {
         {/* Authentication routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/admin/login" element={<LoginPage />} />
+        <Route path="/admin/signup" element={<SignupPage />} />
+        <Route path="/admin/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/admin/reset-password" element={<ResetPasswordPage />} />
         
         {/* Protected admin routes - restaurant-specific */}
         <Route 
