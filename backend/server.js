@@ -1598,7 +1598,7 @@ app.get("/api/admin/ingredients", requireAuth, async (req, res) => {
         name: translatedIngredient.name,
         description: translatedIngredient.description,
         category: ingredient.category?.name?.toLowerCase() || "other",
-        allergen_tags: JSON.parse(ingredient.allergenTags || "[]"),
+        allergen_tags: safeParseArray(ingredient.allergenTags), // Use safe parser instead of JSON.parse
         createdAt: ingredient.createdAt,
         updatedAt: ingredient.updatedAt,
         // Include original translations for admin editing
