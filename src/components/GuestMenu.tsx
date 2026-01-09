@@ -213,7 +213,9 @@ export default function GuestMenu() {
         <div className="px-3 py-3">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-lg font-semibold text-white">MenuShield</h1>
+              {restaurant?.name && (
+                <h1 className="text-lg font-semibold text-white">{restaurant.name}</h1>
+              )}
               <p className="text-sage-100 text-sm">{t("safeDining")}</p>
             </div>
             <div className="flex items-center gap-2.5">
@@ -253,9 +255,11 @@ export default function GuestMenu() {
           <div className="flex items-center justify-between">
             <div className="flex-1"></div>
             <div className="text-center">
-              <h1 className="text-2xl font-semibold text-white mb-1">
-                MenuShield
-              </h1>
+              {restaurant?.name && (
+                <h1 className="text-2xl font-semibold text-white mb-1">
+                  {restaurant.name}
+                </h1>
+              )}
               <p className="text-sage-100 text-sm">{t("safeDining")}</p>
             </div>
             <div className="flex-1 flex justify-end">
