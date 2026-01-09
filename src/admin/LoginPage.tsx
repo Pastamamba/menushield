@@ -5,22 +5,12 @@ import { useAuth } from "../auth/AuthContext";
 import LanguageSelector from "../components/LanguageSelector";
 import { useAdminTranslations } from "../hooks/useAdminTranslations";
 
-interface Restaurant {
-  id: string;
-  slug: string;
-  name: string;
-  isActive: boolean;
-}
-
 export default function LoginPage() {
   const { t } = useAdminTranslations();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [selectedRestaurant, setSelectedRestaurant] = useState<string>("");
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [loadingRestaurants, setLoadingRestaurants] = useState(true);
   const { login, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -32,39 +22,13 @@ export default function LoginPage() {
     if (message) {
       setSuccessMessage(message);
     }
-    
-    // Fetch restaurants for selection
-    fetchRestaurants();
   }, [location]);
 
-  const fetchRestaurants = async () => {
-    try {
-      const response = await fetch('/api/restaurants');
-      if (response.ok) {
-        const restaurantData = await response.json();
-        setRestaurants(restaurantData);
-        // Auto-select first restaurant if only one available
-        if (restaurantData.length === 1) {
-          setSelectedRestaurant(restaurantData[0].slug);
-        }
-      } else {
-        console.error('Failed to fetch restaurants');
-      }
-    } catch (error) {
-      console.error('Error fetching restaurants:', error);
-    } finally {
-      setLoadingRestaurants(false);
-    }
-  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccessMessage("");
-
-    if (!selectedRestaurant) {
-      setError("Please select a restaurant");
-      return;
-    }
 
     const ok = await login(email, password);
     if (ok) {
@@ -78,10 +42,44 @@ export default function LoginPage() {
         return;
       }
       
-      // Navigate to selected restaurant admin
-      const targetPath = `/r/${selectedRestaurant}/admin`;
-      console.log("Login successful, navigating to:", targetPath);
-      navigate(targetPath);
+      // Get restaurant slug for the user's restaurant from JWT token
+      try {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          console.error('No auth token found after login');
+          navigate('/admin');
+          return;
+        }
+
+        // Parse JWT to get restaurantId
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const restaurantId = payload.restaurantId;
+        
+        if (!restaurantId) {
+          console.error('No restaurantId found in JWT token:', payload);
+          navigate('/admin');
+          return;
+        }
+
+        console.log('Fetching restaurant with ID:', restaurantId);
+        const response = await fetch(`/api/restaurants/${restaurantId}`);
+        
+        if (response.ok) {
+          const restaurant = await response.json();
+          const targetPath = `/r/${restaurant.slug}/admin`;
+          console.log("Login successful, navigating to:", targetPath, restaurant);
+          navigate(targetPath);
+        } else {
+          console.error('Restaurant API error:', response.status, await response.text());
+          // Fallback to legacy route if restaurant not found
+          console.log("Restaurant not found, using legacy route");
+          navigate("/admin");
+        }
+      } catch (error) {
+        console.error('Error in login redirect:', error);
+        // Fallback to legacy route
+        navigate("/admin");
+      }
     } else {
       setError("Invalid credentials");
     }
@@ -110,34 +108,6 @@ export default function LoginPage() {
               {successMessage}
             </div>
           )}
-
-          {/* Restaurant Selection */}
-          <div>
-            <label className="block text-sm font-medium text-warm-gray-700 mb-1">
-              Restaurant
-            </label>
-            <div className="relative">
-              {loadingRestaurants ? (
-                <div className="w-full px-3 py-2 border border-warm-gray-300 rounded bg-warm-gray-50 text-warm-gray-500">
-                  Loading restaurants...
-                </div>
-              ) : (
-                <select
-                  value={selectedRestaurant}
-                  onChange={(e) => setSelectedRestaurant(e.target.value)}
-                  className="w-full border border-warm-gray-300 rounded px-3 py-2 focus:outline-none focus:border-sage-500 focus:ring-1 focus:ring-sage-500"
-                  required
-                >
-                  <option value="">Select a restaurant</option>
-                  {restaurants.map((restaurant) => (
-                    <option key={restaurant.slug} value={restaurant.slug}>
-                      {restaurant.name}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-          </div>
 
           <div>
             <label className="block text-sm font-medium text-warm-gray-700 mb-1">
