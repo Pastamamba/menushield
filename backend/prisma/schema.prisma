@@ -99,8 +99,8 @@ model Ingredient {
   categoryId   String?   @map("category_id") @db.ObjectId
   category     Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
+  createdAt    DateTime? @default(now()) @map("created_at")
+  updatedAt    DateTime? @updatedAt @map("updated_at")
 
   dishIngredients DishIngredient[]
 
