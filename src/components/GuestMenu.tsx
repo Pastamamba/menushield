@@ -276,8 +276,6 @@ export default function GuestMenu() {
                         : [...prev, allergen]
                     );
                   }}
-                  searchTerm={searchTerm}
-                  onSearchChange={setSearchTerm}
                   isMobile={true}
                   />
               </div>

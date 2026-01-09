@@ -1,8 +1,6 @@
-import { useState } from "react";
 import {
   COMMON_ALLERGENS,
   ALL_ALLERGENS,
-  searchAllergens,
 } from "../utils/dishAnalyzer";
 import { useMenuTranslations } from '../hooks/useMenuTranslations';
 
@@ -19,9 +17,6 @@ interface AllergenFilterProps {
   selectedAllergens?: string[];
   onAllergenToggle?: (allergen: string) => void;
   onSelectionChange?: (allergens: string[]) => void; // Add this prop for compatibility
-  searchTerm?: string;
-  onSearchChange?: (searchTerm: string) => void;
-  searchPlaceholder?: string; // Add this prop for compatibility
   isMobile?: boolean;
 }
 
@@ -31,13 +26,9 @@ export default function AllergenFilter({
   selectedAllergens = [],
   onAllergenToggle,
   onSelectionChange,
-  searchTerm = "",
-  onSearchChange,
-  searchPlaceholder = "Search allergens...",
   isMobile = false,
 }: AllergenFilterProps) {
   const { t } = useMenuTranslations();
-  const [searchQuery, setSearchQuery] = useState("");
 
   // Use new props if available, fallback to old props
   const currentAllergens = onAllergenToggle ? selectedAllergens : avoid;
@@ -59,11 +50,8 @@ export default function AllergenFilter({
       setAvoid(newAllergens);
     }
   };
-  const currentSearchTerm = searchTerm || searchQuery;
-  const handleSearchChange = onSearchChange || setSearchQuery;
-
-  const searchResults = searchAllergens(currentSearchTerm);
-  const displayAllergens = currentSearchTerm ? searchResults : COMMON_ALLERGENS;
+// Show common allergens always
+  const displayAllergens = COMMON_ALLERGENS;
 
   const toggleAllergen = (allergenId: string) => {
     handleToggle(allergenId);
@@ -158,32 +146,6 @@ export default function AllergenFilter({
 
   return (
     <div className="space-y-4">
-      {/* Always Visible Search Input */}
-      <div className="relative">
-        <input
-          type="text"
-          placeholder={t('searchAllergens')}
-          value={currentSearchTerm}
-          onChange={(e) => handleSearchChange(e.target.value)}
-          className="w-full px-4 py-4 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50 min-h-[48px]"
-        />
-        <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-        {currentSearchTerm && (
-          <button
-            onClick={() => handleSearchChange("")}
-            className="absolute right-10 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 hover:text-gray-600"
-          >
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        )}
-      </div>
-
-
-
       {/* Compact Allergens Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {displayAllergens.map((allergen) => (
