@@ -96,8 +96,6 @@ function safeParseArray(val) {
   console.log('❌ Fallback to empty array');
   return [];
 }
-  return [];
-}
 
 // Helper to get translated content from translations JSON field
 function getTranslatedContent(
