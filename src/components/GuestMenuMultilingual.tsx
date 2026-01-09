@@ -317,7 +317,7 @@ export default function GuestMenuMultilingual() {
                       dish={dish}
                       safetyStatus={{ status: "safe", allergens: [] }}
                       showPrices={restaurant?.showPrices !== false}
-                      currency={restaurant?.currency || 'EUR'}
+                      currency={restaurant?.currency || 'SEK'}
                     />
                   ))}
                 </div>

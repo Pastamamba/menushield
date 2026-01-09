@@ -414,7 +414,7 @@ export default function DishManager() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       {dish.price && (
                         <span className="text-lg font-semibold text-green-600">
-                          {formatPrice(dish.price, restaurant?.currency || 'EUR')}
+                          {formatPrice(dish.price, restaurant?.currency || 'SEK')}
                         </span>
                       )}
                     </td>
@@ -588,7 +588,7 @@ export default function DishManager() {
                 {/* Price and Category */}
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-semibold text-green-600 text-lg">
-                    {formatPrice(dish.price || 0, restaurant?.currency || 'EUR')}
+                    {formatPrice(dish.price || 0, restaurant?.currency || 'SEK')}
                   </span>
                   <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-md text-xs">
                     {getCategoryDisplayName(dish)}
@@ -1038,7 +1038,7 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Price ({getCurrencySymbol(restaurant?.currency || 'EUR')}) <span className="text-gray-500 text-xs">- optional</span>
+                  Price ({getCurrencySymbol(restaurant?.currency || 'SEK')}) <span className="text-gray-500 text-xs">- optional</span>
                 </label>
                 <input 
                   name="price" 
@@ -1372,7 +1372,7 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Price ({getCurrencySymbol(restaurant?.currency || 'EUR')}) <span className="text-gray-500 text-xs">- optional</span>
+            Price ({getCurrencySymbol(restaurant?.currency || 'SEK')}) <span className="text-gray-500 text-xs">- optional</span>
           </label>
           <input 
             name="price" 

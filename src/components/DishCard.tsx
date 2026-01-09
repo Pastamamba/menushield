@@ -20,7 +20,7 @@ export default function DishCard({
   safetyStatus,
   isOffline,
   showPrices = true,
-  currency = 'EUR',
+  currency = 'SEK',
   language = 'en',
   onCardSelect,
   onCardLongPress,
@@ -90,7 +90,7 @@ export default function DishCard({
           <span className="text-sm">{getStatusIcon()}</span>
           <h3 className="text-sm font-medium text-gray-900 truncate">{dish.name}</h3>
         </div>
-        {showPrices && dish.price && (
+        {showPrices && dish.price && dish.price > 0 && (
           <span className="text-sm font-medium text-gray-900 ml-2 flex-shrink-0">
             {formatPrice(dish.price, currency)}
           </span>

@@ -825,7 +825,7 @@ app.post(
             address: address || '',
             defaultLanguage: 'fi',
             supportedLanguages: JSON.stringify(['fi', 'en', 'sv']),
-            currency: 'EUR',
+            currency: 'SEK',
             timezone: 'Europe/Helsinki',
           },
         });
@@ -2169,7 +2169,7 @@ app.post("/api/emergency/create-admin", async (req, res) => {
           slug: 'demo-restaurant',
           address: 'Demo Address',
           showPrices: true,
-          currency: 'EUR',
+          currency: 'SEK',
           timezone: 'Europe/Helsinki',
           defaultLanguage: 'en',
           supportedLanguages: JSON.stringify(['en', 'fi']),
