@@ -83,28 +83,28 @@ export default function DishCard({
 
   return (
     <div
-      className="bg-white border border-gray-100 rounded-lg p-4 transition-all duration-200 hover:shadow-sm hover:border-gray-200 relative cursor-pointer"
+      className="bg-white border border-gray-100 rounded-lg p-3 transition-all duration-200 hover:shadow-sm hover:border-gray-200 relative cursor-pointer"
       {...cardGestures}
     >
       {/* Header with name, status, and price in one line */}
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <span className="text-sm">{getStatusIcon()}</span>
-          <h3 className="text-sm font-medium text-gray-900 truncate">
+      <div className="flex items-center justify-between mb-1.5">
+        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+          <span className="text-xs">{getStatusIcon()}</span>
+          <h3 className="text-xs font-medium text-gray-900 truncate">
             {dish.name}
           </h3>
         </div>
         {showPrices && dish.price && dish.price > 0 && (
-          <span className="text-sm font-medium text-gray-900 ml-2 flex-shrink-0">
+          <span className="text-xs font-semibold text-gray-900 ml-2 flex-shrink-0">
             {formatPrice(dish.price, currency)}
           </span>
         )}
       </div>
 
       {/* Description - Very compact with consistent spacing */}
-      <div className="mb-3 min-h-[2.5rem] flex items-start">
+      <div className="mb-2 min-h-[2rem] flex items-start">
         {dish.description && (
-          <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
+          <p className="text-xs text-gray-500 line-clamp-2 leading-snug">
             {dish.description}
           </p>
         )}
@@ -112,12 +112,12 @@ export default function DishCard({
 
       {/* Allergens - Compact inline display */}
       {userAvoidedAllergens.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <div className="flex flex-wrap gap-1">
             {userAvoidedAllergens.map((allergen) => (
               <span
                 key={allergen.name}
-                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${allergen.color}`}
+                className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${allergen.color}`}
                 onTouchStart={handleTouchFeedback}
               >
                 {allergen.displayName}
@@ -127,7 +127,7 @@ export default function DishCard({
 
           {/* Status message - compact */}
           {safetyStatus.status === "modifiable" && (
-            <div className="text-xs text-orange-700 bg-orange-50 px-2 py-1 rounded">
+            <div className="text-xs text-orange-700 bg-orange-50 px-2 py-0.5 rounded">
               💡 May be modifiable - ask server
             </div>
           )}
@@ -138,7 +138,7 @@ export default function DishCard({
       {(dish.category ||
         (safetyStatus.status === "safe" &&
           userAvoidedAllergens.length === 0)) && (
-        <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-50">
+        <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-gray-50">
           {dish.category && (
             <span className="text-xs text-gray-400 uppercase tracking-wide">
               {dish.category}
@@ -157,8 +157,8 @@ export default function DishCard({
 
       {/* Offline indicator - minimal */}
       {isOffline && (
-        <div className="absolute top-2 right-2">
-          <span className="w-2 h-2 bg-yellow-400 rounded-full"></span>
+        <div className="absolute top-1.5 right-1.5">
+          <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full"></span>
         </div>
       )}
     </div>

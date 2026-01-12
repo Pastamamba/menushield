@@ -62,9 +62,9 @@ export default function AllergenFilter({
   // Mobile version with better UX
   if (isMobile) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
         {/* Allergen Grid - Mobile Optimized with refined styling */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           {displayAllergens.map((allergen) => {
             const selected = isSelected(allergen.id);
             return (
@@ -72,25 +72,34 @@ export default function AllergenFilter({
                 key={allergen.id}
                 onClick={() => toggleAllergen(allergen.id)}
                 className={`
-                  relative p-3 rounded-lg text-left transition-all duration-200 active:scale-98 min-h-[44px] flex items-center
-                  ${selected 
-                    ? 'bg-red-500 text-white shadow-md border-2 border-red-600' 
-                    : 'bg-white text-warm-gray-700 border-2 border-warm-gray-200 hover:border-warm-gray-300'
+                  relative p-2.5 rounded-md text-left transition-all duration-200 active:scale-95 min-h-[40px] flex items-center
+                  ${
+                    selected
+                      ? "bg-red-500 text-white shadow-sm border border-red-600"
+                      : "bg-white text-gray-700 border border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                   }
                 `}
               >
-                <div className="flex items-center space-x-2.5 w-full">
-                  <div className="flex-1 min-w-0">
-                    <div className={`font-medium text-sm ${selected ? 'text-white' : 'text-warm-gray-900'}`}>
-                      {allergen.name}
-                    </div>
-                  </div>
+                <div className="flex items-center justify-between w-full">
+                  <span
+                    className={`font-medium text-xs ${
+                      selected ? "text-white" : "text-gray-900"
+                    }`}
+                  >
+                    {allergen.name}
+                  </span>
                   {selected && (
-                    <div className="flex-shrink-0">
-                      <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </div>
+                    <svg
+                      className="w-3.5 h-3.5 text-white flex-shrink-0"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
                   )}
                 </div>
               </button>
@@ -100,37 +109,37 @@ export default function AllergenFilter({
 
         {/* Selected Summary */}
         {currentAllergens.length > 0 && (
-          <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="font-semibold text-red-800">
-                Avoiding {currentAllergens.length} allergen{currentAllergens.length !== 1 ? 's' : ''}
+          <div className="bg-red-50 border border-red-200 rounded-md p-3">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="font-medium text-red-800 text-xs">
+                Vältetään {currentAllergens.length} allergeenia
               </h4>
               <button
                 onClick={() => {
                   if (onAllergenToggle) {
                     // Clear by toggling each selected allergen off
-                    currentAllergens.forEach(allergen => onAllergenToggle(allergen));
+                    currentAllergens.forEach((allergen) => onAllergenToggle(allergen));
                   } else if (setAvoid) {
                     setAvoid([]);
                   }
                 }}
-                className="text-sm text-red-600 hover:text-red-800 font-medium underline"
+                className="text-xs text-red-600 hover:text-red-800 font-medium"
               >
-                Clear All
+                Tyhjennä
               </button>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1">
               {currentAllergens.map((allergenId) => {
                 const allergen = ALL_ALLERGENS.find((a) => a.id === allergenId);
                 return allergen ? (
                   <span
                     key={allergenId}
-                    className="inline-flex items-center gap-1 bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium"
+                    className="inline-flex items-center gap-1 bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs font-medium"
                   >
                     <span>{allergen.name}</span>
                     <button
                       onClick={() => toggleAllergen(allergenId)}
-                      className="text-red-600 hover:text-red-800 ml-1 p-1 min-h-[32px] min-w-[32px] flex items-center justify-center rounded-full hover:bg-red-200 transition-colors"
+                      className="text-red-600 hover:text-red-800 ml-0.5 w-3 h-3 flex items-center justify-center"
                     >
                       ✕
                     </button>
@@ -145,26 +154,26 @@ export default function AllergenFilter({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Compact Allergens Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
         {displayAllergens.map((allergen) => (
           <button
             key={allergen.id}
             onClick={() => toggleAllergen(allergen.id)}
             className={`
-              p-4 rounded-xl border-2 transition-all duration-200 text-left min-h-[48px] flex items-center active:scale-95
+              p-3 rounded-md border transition-all duration-200 text-left min-h-[40px] flex items-center active:scale-95
               ${
                 isSelected(allergen.id)
                   ? "border-red-500 bg-red-50 text-red-800"
-                  : "border-gray-200 bg-white hover:border-gray-300 text-gray-700"
+                  : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 text-gray-700"
               }
             `}
           >
-            <div className="flex items-center gap-3 w-full">
-              <span className="font-medium text-sm">{allergen.name}</span>
+            <div className="flex items-center justify-between w-full">
+              <span className="font-medium text-xs">{allergen.name}</span>
               {isSelected(allergen.id) && (
-                <span className="text-red-600 ml-auto">✓</span>
+                <span className="text-red-600 ml-2 text-xs">✓</span>
               )}
             </div>
           </button>
@@ -173,37 +182,37 @@ export default function AllergenFilter({
 
       {/* Selected Allergens Summary */}
       {currentAllergens.length > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="text-sm font-medium text-red-800">
-              {t('avoidingAllergensCount')} ({currentAllergens.length})
+        <div className="bg-red-50 border border-red-200 rounded-md p-3">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-xs font-medium text-red-800">
+              Vältetään allergeeneja ({currentAllergens.length})
             </h4>
             <button
               onClick={() => {
                 if (onAllergenToggle) {
                   // Clear by toggling each selected allergen off
-                  currentAllergens.forEach(allergen => onAllergenToggle(allergen));
+                  currentAllergens.forEach((allergen) => onAllergenToggle(allergen));
                 } else if (setAvoid) {
                   setAvoid([]);
                 }
               }}
-              className="text-xs text-red-600 hover:text-red-800 underline"
+              className="text-xs text-red-600 hover:text-red-800"
             >
-              Clear All
+              Tyhjennä kaikki
             </button>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1">
             {currentAllergens.map((allergenId) => {
               const allergen = ALL_ALLERGENS.find((a) => a.id === allergenId);
               return allergen ? (
                 <span
                   key={allergenId}
-                  className="inline-flex items-center gap-1 bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs"
+                  className="inline-flex items-center gap-1 bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs"
                 >
                   <span>{allergen.name}</span>
                   <button
                     onClick={() => toggleAllergen(allergenId)}
-                    className="text-red-600 hover:text-red-800 ml-1"
+                    className="text-red-600 hover:text-red-800 ml-0.5"
                   >
                     ✕
                   </button>

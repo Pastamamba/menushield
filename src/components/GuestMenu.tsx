@@ -119,31 +119,55 @@ export default function GuestMenu() {
       <div className="min-h-screen bg-warm-gray-50">
         {/* Mobile Header */}
         <div className="mobile-header lg:hidden sticky top-0 z-40 bg-gradient-to-r from-sage-600 to-sage-500 shadow-md">
-          <div className="px-3 py-3">
+          <div className="px-3 py-2">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-lg font-semibold text-white">MenuShield</h1>
-                <p className="text-sage-100 text-sm">Ladataan menua...</p>
+                <h1 className="text-base font-medium text-white">MenuShield</h1>
+                <p className="text-sage-100 text-xs">Ladataan menua...</p>
               </div>
-              <div className="w-20 h-8 bg-white/20 rounded-lg animate-pulse"></div>
+              <div className="w-16 h-6 bg-white/20 rounded-md animate-pulse"></div>
             </div>
           </div>
         </div>
 
         {/* Desktop Header */}
-        <div className="hidden lg:block bg-white border-b border-gray-200">
-          <div className="container mx-auto px-4 py-6">
-            <SkeletonLoader type="header" />
+        <div className="hidden lg:block bg-gradient-to-r from-sage-600 to-sage-500 shadow-md">
+          <div className="max-w-6xl mx-auto px-4 py-3">
+            <div className="text-center">
+              <div className="h-5 bg-white/20 rounded w-48 mx-auto mb-1 animate-pulse"></div>
+              <div className="h-3 bg-white/10 rounded w-24 mx-auto animate-pulse"></div>
+            </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="container mx-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto px-3 py-4">
           {/* Filter Skeleton */}
-          <SkeletonLoader type="filter" />
+          <div className="hidden lg:block mb-6">
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+              <div className="h-4 bg-gray-200 rounded w-32 mb-3 animate-pulse"></div>
+              <div className="flex flex-wrap gap-2">
+                {[1,2,3,4,5,6].map(i => (
+                  <div key={i} className="h-8 bg-gray-100 rounded-full w-20 animate-pulse"></div>
+                ))}
+              </div>
+            </div>
+          </div>
 
           {/* Dish Grid Skeleton */}
-          <SkeletonLoader type="dish-grid" count={9} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {[1,2,3,4,5,6,7,8].map(i => (
+              <div key={i} className="bg-white border border-gray-100 rounded-lg p-3">
+                <div className="h-3 bg-gray-200 rounded w-3/4 mb-2 animate-pulse"></div>
+                <div className="h-2 bg-gray-100 rounded w-full mb-1 animate-pulse"></div>
+                <div className="h-2 bg-gray-100 rounded w-2/3 mb-2 animate-pulse"></div>
+                <div className="flex gap-1">
+                  <div className="h-5 bg-gray-100 rounded w-12 animate-pulse"></div>
+                  <div className="h-5 bg-gray-100 rounded w-16 animate-pulse"></div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -151,14 +175,22 @@ export default function GuestMenu() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">
-            {t("errorLoading")}: {error.message}
+      <div className="min-h-screen bg-warm-gray-50 flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <div className="w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+            <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 className="text-sm font-medium text-gray-900 mb-2">
+            {t("errorLoading")}
+          </h3>
+          <p className="text-xs text-gray-600 mb-4">
+            {error.message}
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+            className="bg-sage-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-sage-700 transition-colors"
           >
             {t("tryAgain")}
           </button>
@@ -210,22 +242,22 @@ export default function GuestMenu() {
       />
       {/* Mobile Header - Refined dining aesthetic */}
       <div className="mobile-header lg:hidden sticky top-0 z-40 bg-gradient-to-r from-sage-600 to-sage-500 shadow-md">
-        <div className="px-3 py-3">
+        <div className="px-3 py-2">
           <div className="flex items-center justify-between">
             <div>
               {restaurant?.name && (
-                <h1 className="text-lg font-semibold text-white">{restaurant.name}</h1>
+                <h1 className="text-base font-medium text-white">{restaurant.name}</h1>
               )}
-              <p className="text-sage-100 text-sm">{t("safeDining")}</p>
+              <p className="text-sage-100 text-xs">{t("safeDining")}</p>
             </div>
             <div className="flex items-center gap-2.5">
               <LanguageSelector variant="compact" className="z-50" />
               <button
                 onClick={() => setShowMobileFilter(true)}
-                className="bg-white/20 backdrop-blur-sm text-white px-3 py-2.5 rounded-lg flex items-center gap-2 hover:bg-white/30 transition-all duration-200 active:scale-98 shadow-sm"
+                className="bg-white/20 backdrop-blur-sm text-white px-2.5 py-1.5 rounded-md flex items-center gap-1.5 hover:bg-white/30 transition-all duration-200 active:scale-98 shadow-sm"
               >
                 <svg
-                  className="w-4 h-4"
+                  className="w-3.5 h-3.5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -237,7 +269,7 @@ export default function GuestMenu() {
                     d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586a1 1 0 01-.293.707l-2 2A1 1 0 0110 21v-8.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
                   />
                 </svg>
-                <span className="font-medium text-sm">{t("filter")}</span>
+                <span className="font-medium text-xs">{t("filter")}</span>
                 {selectedAllergens.length > 0 && (
                   <span className="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[18px] font-semibold">
                     {selectedAllergens.length}
@@ -251,16 +283,16 @@ export default function GuestMenu() {
 
       {/* Desktop Header - More refined and minimal */}
       <div className="hidden lg:block sticky top-0 z-40 bg-gradient-to-r from-sage-600 to-sage-500 shadow-md">
-        <div className="max-w-6xl mx-auto px-4 py-4">
+        <div className="max-w-6xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex-1"></div>
             <div className="text-center">
               {restaurant?.name && (
-                <h1 className="text-2xl font-semibold text-white mb-1">
+                <h1 className="text-xl font-medium text-white mb-0.5">
                   {restaurant.name}
                 </h1>
               )}
-              <p className="text-sage-100 text-sm">{t("safeDining")}</p>
+              <p className="text-sage-100 text-xs">{t("safeDining")}</p>
             </div>
             <div className="flex-1 flex justify-end">
               <LanguageSelector variant="compact" className="z-50" />
@@ -279,30 +311,30 @@ export default function GuestMenu() {
           <div
             ref={swipeRef as any}
             data-drawer="mobile-filter"
-            className="lg:hidden fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white z-50 shadow-2xl transform transition-transform translate-x-0 rounded-l-2xl animate-slide-in-right"
+            className="lg:hidden fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white z-50 shadow-2xl transform transition-transform translate-x-0 animate-slide-in-right"
             style={{
               animationDuration: "0.3s",
               animationTimingFunction: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
             }}
           >
             <div className="flex flex-col h-full">
-              {/* Drawer Header */}
-              <div className="bg-gradient-to-r from-green-500 to-blue-600 p-6 rounded-tl-2xl">
+              {/* Drawer Header - Clean minimal design matching admin */}
+              <div className="p-4 border-b border-gray-100 bg-white">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-bold text-white">
+                    <h2 className="text-lg font-medium text-gray-900">
                       {t("filterMenu")}
                     </h2>
-                    <p className="text-green-100 text-sm mt-1">
+                    <p className="text-sm text-gray-500 mt-0.5">
                       {t("findSafeDishes")}
                     </p>
                   </div>
                   <button
                     onClick={() => setShowMobileFilter(false)}
-                    className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white/10 transition-colors"
+                    className="p-2 rounded-md hover:bg-gray-100 transition-colors"
                   >
                     <svg
-                      className="w-6 h-6"
+                      className="w-5 h-5 text-gray-600"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -319,7 +351,7 @@ export default function GuestMenu() {
               </div>
 
               {/* Drawer Content */}
-              <div className="flex-1 overflow-y-auto p-4">
+              <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
                 <AllergenFilter
                   selectedAllergens={selectedAllergens}
                   onAllergenToggle={(allergen) => {
@@ -333,14 +365,14 @@ export default function GuestMenu() {
                 />
               </div>
 
-              {/* Drawer Footer */}
-              <div className="border-t border-gray-200 p-6 bg-gray-50 rounded-br-2xl">
+              {/* Drawer Footer - Clean design matching admin */}
+              <div className="border-t border-gray-100 p-4 bg-white">
                 <button
                   onClick={scrollToMenu}
-                  className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-4 rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transition-all shadow-lg active:scale-95 flex items-center justify-center min-h-[48px]"
+                  className="w-full bg-gray-900 text-white py-3 rounded-md font-medium hover:bg-gray-800 transition-all duration-200 flex items-center justify-center min-h-[44px]"
                 >
                   <svg
-                    className="w-5 h-5 mr-2"
+                    className="w-4 h-4 mr-2"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -352,12 +384,12 @@ export default function GuestMenu() {
                       d="M9 5l7 7-7 7"
                     />
                   </svg>
-                  {t("showSafeDishes")}
-                </button>{" "}
+                  <span className="text-sm">{t("showSafeDishes")}</span>
+                </button>
                 {selectedAllergens.length > 0 && (
                   <button
                     onClick={() => setSelectedAllergens([])}
-                    className="w-full mt-3 text-gray-600 py-2 text-sm hover:text-gray-800 font-medium"
+                    className="w-full mt-3 text-gray-600 py-2 text-sm hover:text-gray-800 font-medium transition-colors"
                   >
                     Clear all filters
                   </button>
@@ -369,10 +401,10 @@ export default function GuestMenu() {
       )}
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-6" ref={menuSectionRef}>
+      <main className="max-w-7xl mx-auto px-3 py-4" ref={menuSectionRef}>
         {/* Desktop Allergen Filter */}
-        <div className="hidden lg:block mb-8">
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div className="hidden lg:block mb-6">
+          <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
             <AllergenFilter
               selectedAllergens={selectedAllergens}
               onAllergenToggle={(allergen) => {
@@ -387,16 +419,16 @@ export default function GuestMenu() {
         </div>
 
         {/* Dishes by Safety Level */}
-        <div className="space-y-8">
+        <div className="space-y-6">
           {selectedAllergens.length === 0 ? (
             /* Show all dishes when no allergens selected */
             <section>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                <span className="w-3 h-3 bg-gray-500 rounded-full mr-3"></span>
+              <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                <span className="w-2.5 h-2.5 bg-gray-500 rounded-full mr-2"></span>
                 {`${t("allDishes")} (${filteredDishes.length})`}
               </h2>
-              <p className="text-gray-600 mb-4">{t("selectAllergensHelp")}</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <p className="text-gray-600 mb-3 text-sm">{t("selectAllergensHelp")}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                 {filteredDishes.map((dish) => (
                   <DishCard
                     key={dish.id}
@@ -420,11 +452,11 @@ export default function GuestMenu() {
               {/* Safe Dishes */}
               {categorizedDishes.safe.length > 0 && (
                 <section>
-                  <h2 className="text-2xl font-bold text-green-700 mb-4 flex items-center">
-                    <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                  <h2 className="text-lg font-semibold text-green-700 mb-3 flex items-center">
+                    <span className="w-2.5 h-2.5 bg-green-500 rounded-full mr-2"></span>
                     {t("safeDishesTitle")} ({categorizedDishes.safe.length})
                   </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                     {categorizedDishes.safe.map(({ dish, safety }) => (
                       <DishCard
                         key={dish.id}
@@ -443,12 +475,12 @@ export default function GuestMenu() {
               {/* Unsafe Dishes - dishes with allergens in base components but still visible */}
               {categorizedDishes.unsafe.length > 0 && (
                 <section>
-                  <h2 className="text-2xl font-bold text-red-700 mb-4 flex items-center">
-                    <span className="w-3 h-3 bg-red-500 rounded-full mr-3"></span>
+                  <h2 className="text-lg font-semibold text-red-700 mb-3 flex items-center">
+                    <span className="w-2.5 h-2.5 bg-red-500 rounded-full mr-2"></span>
                     ❌ Contains Your Allergens (
                     {categorizedDishes.unsafe.length})
                   </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 opacity-75">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 opacity-75">
                     {categorizedDishes.unsafe.map(({ dish, safety }) => (
                       <DishCard
                         key={dish.id}
@@ -469,10 +501,10 @@ export default function GuestMenu() {
 
         {/* No Results */}
         {filteredDishes.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
+          <div className="text-center py-8">
+            <div className="w-12 h-12 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
               <svg
-                className="w-16 h-16 mx-auto"
+                className="w-6 h-6 text-gray-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -480,16 +512,16 @@ export default function GuestMenu() {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={1}
-                  d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  strokeWidth={1.5}
+                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No dishes found
+            <h3 className="text-sm font-medium text-gray-900 mb-1">
+              Ei annoksia löytynyt
             </h3>
-            <p className="text-gray-600">
-              Try adjusting your search or allergen filters
+            <p className="text-xs text-gray-500 max-w-sm mx-auto">
+              Kokeile muuttaa hakuehtojen tai allergeenisuodattimien asetuksia
             </p>
           </div>
         )}
