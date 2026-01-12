@@ -112,7 +112,7 @@ export default function AllergenFilter({
           <div className="bg-red-50 border border-red-200 rounded-md p-3">
             <div className="flex items-center justify-between mb-2">
               <h4 className="font-medium text-red-800 text-xs">
-                Vältetään {currentAllergens.length} allergeenia
+                Avoiding {currentAllergens.length} allergen{currentAllergens.length !== 1 ? 's' : ''}
               </h4>
               <button
                 onClick={() => {
@@ -125,7 +125,7 @@ export default function AllergenFilter({
                 }}
                 className="text-xs text-red-600 hover:text-red-800 font-medium"
               >
-                Tyhjennä
+                Clear All
               </button>
             </div>
             <div className="flex flex-wrap gap-1">
@@ -185,7 +185,7 @@ export default function AllergenFilter({
         <div className="bg-red-50 border border-red-200 rounded-md p-3">
           <div className="flex items-center justify-between mb-2">
             <h4 className="text-xs font-medium text-red-800">
-              Vältetään allergeeneja ({currentAllergens.length})
+              Avoiding allergens ({currentAllergens.length})
             </h4>
             <button
               onClick={() => {
@@ -198,7 +198,7 @@ export default function AllergenFilter({
               }}
               className="text-xs text-red-600 hover:text-red-800"
             >
-              Tyhjennä kaikki
+              Clear All
             </button>
           </div>
           <div className="flex flex-wrap gap-1">

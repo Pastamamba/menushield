@@ -518,10 +518,10 @@ export default function GuestMenu() {
               </svg>
             </div>
             <h3 className="text-sm font-medium text-gray-900 mb-1">
-              Ei annoksia löytynyt
+              No dishes found
             </h3>
             <p className="text-xs text-gray-500 max-w-sm mx-auto">
-              Kokeile muuttaa hakuehtojen tai allergeenisuodattimien asetuksia
+              Try adjusting your search or allergen filters
             </p>
           </div>
         )}
