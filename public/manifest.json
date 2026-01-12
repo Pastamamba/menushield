@@ -1,7 +1,7 @@
 {
-  "name": "MenuShield - Turvallinen ruokailu allergeenejä vältteleville",
+  "name": "MenuShield - Safe Dining for Food Allergies",
   "short_name": "MenuShield",
-  "description": "Digitaalinen allergeenejä suodattava alusta turvallisempaan, yksityisempään ruokailuun. Suodata menuita allergeenien mukaan ja nauti turvallisesta ruokailusta.",
+  "description": "Digital allergen filtering platform for safer, more confident dining experiences. Filter menus by allergens and enjoy worry-free dining.",
   "start_url": "/",
   "scope": "/",
   "id": "/",
@@ -11,13 +11,13 @@
   "background_color": "#ffffff",
   "theme_color": "#059669",
   "categories": ["food", "health", "lifestyle", "medical", "productivity"],
-  "lang": "fi",
+  "lang": "en",
   "dir": "ltr",
   "shortcuts": [
     {
-      "name": "Suodata menu",
-      "short_name": "Suodata",
-      "description": "Suodata menu allergeenien mukaan",
+      "name": "Filter Menu",
+      "short_name": "Filter",
+      "description": "Filter menu by allergens",
       "url": "/?filter=open",
       "icons": [
         {
@@ -28,9 +28,9 @@
       ]
     },
     {
-      "name": "Turvalliset ruoat",
-      "short_name": "Turvalliset",
-      "description": "Näytä vain turvalliset ruoat",
+      "name": "Safe Dishes",
+      "short_name": "Safe",
+      "description": "Show only safe dishes",
       "url": "/?safe=true",
       "icons": [
         {
@@ -47,21 +47,21 @@
       "sizes": "390x844",
       "type": "image/png",
       "platform": "narrow",
-      "label": "Mobiilinäkymä - Allergeenisuodatin"
+      "label": "Mobile View - Allergen Filter"
     },
     {
       "src": "/screenshot-mobile-2.png",
       "sizes": "390x844",
       "type": "image/png",
       "platform": "narrow",
-      "label": "Mobiilinäkymä - Ruokalista"
+      "label": "Mobile View - Menu List"
     },
     {
       "src": "/screenshot-desktop-1.png",
       "sizes": "1280x720",
       "type": "image/png",
       "platform": "wide",
-      "label": "Työpöytänäkymä - Koko sovellus"
+      "label": "Desktop View - Full Application"
     }
   ],
   "icons": [
@@ -112,7 +112,7 @@
   "related_applications": [
     {
       "platform": "webapp",
-      "url": "https://menushield.fi/manifest.json"
+      "url": "https://menushield.app/manifest.json"
     }
   ],
   "edge_side_panel": {

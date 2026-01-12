@@ -118,33 +118,77 @@ export default function QRCodeManager() {
                         width: 100%;
                         max-width: 400px;
                         margin: 0 auto;
-                        border: 2px dashed #ccc;
-                        padding: 30px;
-                        background: white;
+                        border: 2px solid #e2e8f0;
+                        border-radius: 12px;
+                        padding: 24px;
+                        background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+                        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
                     }
-                    .qr-code {
-                        margin: 20px 0;
+                    .header {
+                        margin-bottom: 20px;
+                        border-bottom: 1px solid #e2e8f0;
+                        padding-bottom: 16px;
                     }
                     .title {
                         font-size: 24px;
-                        font-weight: bold;
-                        color: #16a34a;
-                        margin-bottom: 10px;
+                        font-weight: 700;
+                        color: #1a202c;
+                        margin-bottom: 4px;
                     }
                     .subtitle {
-                        font-size: 16px;
-                        color: #666;
-                        margin-bottom: 20px;
+                        font-size: 14px;
+                        color: #5a6e57;
+                        font-weight: 500;
+                    }
+                    .qr-section {
+                        margin: 20px 0;
+                        padding: 16px;
+                        background: white;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    }
+                    .qr-code {
+                        margin: 0;
                     }
                     .instructions {
+                        margin: 20px 0;
+                        text-align: left;
+                    }
+                    .scan-text {
+                        font-size: 16px;
+                        color: #2d3748;
+                        margin-bottom: 12px;
+                        text-align: center;
+                    }
+                    .features {
                         font-size: 14px;
-                        color: #333;
-                        line-height: 1.4;
+                        color: #4a5568;
+                        line-height: 1.6;
+                        background: #f7fafc;
+                        padding: 12px;
+                        border-radius: 6px;
+                        border-left: 3px solid #5a6e57;
+                    }
+                    .custom-text {
+                        margin-top: 12px;
+                        font-style: italic;
+                        color: #5a6e57;
+                        font-weight: 500;
+                    }
+                    .footer {
+                        margin-top: 20px;
+                        padding-top: 16px;
+                        border-top: 1px solid #e2e8f0;
+                    }
+                    .powered-by {
+                        font-size: 11px;
+                        color: #a0aec0;
+                        margin-bottom: 4px;
                     }
                     .url {
                         font-size: 12px;
-                        color: #666;
-                        margin-top: 15px;
+                        color: #718096;
+                        font-family: monospace;
                         word-break: break-all;
                     }
                     @media print {
@@ -154,17 +198,26 @@ export default function QRCodeManager() {
             </head>
             <body>
                 <div class="table-tent">
-                    <div class="title">MenuShield</div>
-                    <div class="subtitle">Allergy-Safe Menu</div>
-                    <div class="qr-code">${svgData}</div>
-                    <div class="instructions">
-                        <strong>Scan this QR code to:</strong><br>
-                        • View our allergy-safe menu<br>
-                        • Filter dishes by your allergens<br>
-                        • Find safe dining options<br>
-                        ${customText ? `<br><em>${customText}</em>` : ""}
+                    <div class="header">
+                        <div class="title">${restaurant?.name || 'Restaurant'}</div>
+                        <div class="subtitle">Allergen-Safe Digital Menu</div>
                     </div>
-                    <div class="url">${menuUrl}</div>
+                    <div class="qr-section">
+                        <div class="qr-code">${svgData}</div>
+                    </div>
+                    <div class="instructions">
+                        <div class="scan-text">📱 <strong>Scan to access menu</strong></div>
+                        <div class="features">
+                            ✓ Filter by your allergens<br>
+                            ✓ See safe dining options<br>
+                            ✓ Real-time ingredient info<br>
+                            ${customText ? `<br><div class="custom-text">${customText}</div>` : ""}
+                        </div>
+                    </div>
+                    <div class="footer">
+                        <div class="powered-by">Powered by MenuShield</div>
+                        <div class="url">${shortUrl || menuUrl}</div>
+                    </div>
                 </div>
                 <div class="no-print" style="margin-top: 30px;">
                     <button onclick="window.print()" style="
