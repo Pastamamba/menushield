@@ -31,6 +31,23 @@ export default function DishManager() {
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
 
+  // Responsive view mode effect
+  useEffect(() => {
+    const handleResize = () => {
+      // Auto-switch to grid view on mobile screens (< 768px)
+      if (window.innerWidth < 768) {
+        setViewMode("grid");
+      }
+    };
+
+    // Check on mount
+    handleResize();
+
+    // Listen for resize events
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Prevent body scroll when modals are open
   useEffect(() => {
     const isModalOpen = showCreateForm || editingDish;
@@ -232,7 +249,7 @@ export default function DishManager() {
               </div>
               <input
                 type="text"
-                placeholder="Search dishes by name or description..."
+                placeholder="Search..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
@@ -241,9 +258,10 @@ export default function DishManager() {
           </div>
           
           <div className="flex items-center gap-2">
+            {/* Hide toggle on mobile, show on desktop */}
             <button
               onClick={() => setViewMode(viewMode === "table" ? "grid" : "table")}
-              className={`px-4 py-3 rounded-lg transition-colors border ${
+              className={`hidden md:flex items-center px-4 py-3 rounded-lg transition-colors border ${
                 viewMode === "table" 
                   ? "bg-green-50 border-green-200 text-green-700" 
                   : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"
@@ -318,9 +336,9 @@ export default function DishManager() {
         </div>
       </div>
 
-      {/* Professional Table View */}
+      {/* Professional Table View - Desktop Only */}
       {viewMode === "table" && (
-        <div className="bg-white shadow-sm rounded-xl overflow-hidden">
+        <div className="hidden md:block bg-white shadow-sm rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -558,77 +576,75 @@ export default function DishManager() {
         </div>
       )}
 
-      {/* Grid View */}
+      {/* Grid View - Mobile First Design */}
       {viewMode === "grid" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {paginatedDishes.map((dish) => (
-            <div key={dish.id} className="bg-white shadow-sm rounded-xl overflow-hidden hover:shadow-md transition-shadow duration-200 border border-gray-100">
-              {/* Card Header */}
-              <div className="p-4 border-b border-gray-100">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-lg line-clamp-1" title={dish.name}>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+            {paginatedDishes.map((dish) => (
+              <div key={dish.id} className="bg-white shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all duration-200 border border-gray-100">
+              {/* Card Content */}
+              <div className="p-5">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1 mr-4">
+                    <h3 className="font-semibold text-gray-900 text-lg line-clamp-1 mb-1" title={dish.name}>
                       {dish.name}
                     </h3>
+                    {dish.description && (
+                      <p className="text-sm text-gray-500 line-clamp-2 mb-3">
+                        {dish.description}
+                      </p>
+                    )}
                   </div>
-                  <div className="flex items-center space-x-1">
-                    <button
-                      onClick={() => handleToggleActivation(dish)}
-                      className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${
-                        dish.is_active
-                          ? "bg-green-100 text-green-800 hover:bg-green-200"
-                          : "bg-red-100 text-red-800 hover:bg-red-200"
-                      }`}
-                    >
-                      {dish.is_active ? "Active" : "Inactive"}
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => handleToggleActivation(dish)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors shrink-0 ${
+                      dish.is_active
+                        ? "bg-green-100 text-green-700"
+                        : "bg-gray-100 text-gray-600"
+                    }`}
+                  >
+                    {dish.is_active ? "Active" : "Inactive"}
+                  </button>
                 </div>
                 
                 {/* Price and Category */}
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-semibold text-green-600 text-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="font-bold text-green-600 text-xl">
                     {formatPrice(dish.price || 0, restaurant?.currency || 'SEK')}
                   </span>
-                  <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-md text-xs">
-                    {getCategoryDisplayName(dish)}
-                  </span>
+                  {((dish.category as any)?.name || dish.category) && (
+                    <span className="px-3 py-1.5 bg-sage-50 text-sage-700 rounded-lg text-sm font-medium">
+                      {(dish.category as any)?.name || dish.category}
+                    </span>
+                  )}
                 </div>
-              </div>
-
-              {/* Card Body */}
-              <div className="p-4">
-                {/* Description */}
-                {dish.description && (
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2" title={dish.description}>
-                    {dish.description}
-                  </p>
-                )}
 
                 {/* Ingredients */}
                 <div className="mb-4">
-                  <div className="text-xs font-medium text-gray-500 mb-1">
-                    Ingredients ({Array.isArray(dish.ingredients) ? dish.ingredients.length : 0})
-                  </div>
                   {Array.isArray(dish.ingredients) && dish.ingredients.length > 0 ? (
-                    <div className="flex flex-wrap gap-1">
-                      {dish.ingredients.slice(0, 3).map((ingredient) => (
-                        <span
-                          key={ingredient}
-                          className="inline-flex items-center px-2 py-0.5 text-xs bg-blue-50 text-blue-700 rounded-md border border-blue-200 truncate max-w-[80px]"
-                          title={ingredient}
-                        >
-                          {ingredient}
-                        </span>
-                      ))}
-                      {dish.ingredients.length > 3 && (
-                        <span className="text-xs text-gray-500 px-1">
-                          +{dish.ingredients.length - 3}
-                        </span>
-                      )}
+                    <div className="space-y-2">
+                      <div className="text-xs font-medium text-gray-500 mb-2">
+                        {dish.ingredients.length} ingredient{dish.ingredients.length !== 1 ? 's' : ''}
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {dish.ingredients.slice(0, 5).map((ingredient) => (
+                          <span
+                            key={ingredient}
+                            className="inline-flex items-center px-2.5 py-1 text-xs bg-blue-50 text-blue-700 rounded-lg border border-blue-200 font-medium"
+                            title={ingredient}
+                          >
+                            {ingredient}
+                          </span>
+                        ))}
+                        {dish.ingredients.length > 5 && (
+                          <span className="text-xs text-gray-500 px-2 py-1">
+                            +{dish.ingredients.length - 5} more
+                          </span>
+                        )}
+                      </div>
                     </div>
                   ) : (
-                    <span className="text-xs text-gray-400 italic">No ingredients</span>
+                    <span className="text-sm text-gray-400 italic">No ingredients</span>
                   )}
                 </div>
 
@@ -653,40 +669,34 @@ export default function DishManager() {
                     </div>
                   </div>
                 )}
-              </div>
 
-              {/* Card Footer */}
-              <div className="px-4 pb-4 flex items-center justify-between">
-                <div className="text-xs text-gray-500">
-                  ID: {dish.id.slice(0, 8)}...
-                </div>
-                <div className="flex items-center space-x-1">
+                {/* Actions */}
+                <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-50">
                   <button
                     onClick={() => setEditingDish(dish)}
-                    className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                    title="Edit dish"
+                    className="flex items-center gap-2 px-4 py-2.5 text-sage-600 hover:text-sage-700 hover:bg-sage-50 rounded-lg transition-colors font-medium text-sm"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
+                    Edit
                   </button>
                   <button
                     onClick={() => handleDeleteDish(dish.id)}
-                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                    title="Delete dish"
+                    className="flex items-center gap-2 px-4 py-2.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors font-medium text-sm"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
+                    Delete
                   </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
-      )}
-
-      {/* Grid Pagination */}
+        
+        {/* Grid Pagination */}
         {totalPages > 1 && (
           <div className="mt-6 bg-white rounded-xl p-4 flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -733,6 +743,8 @@ export default function DishManager() {
             </div>
           </div>
         )}
+        </>
+      )}
 
       {/* Empty State */}
       {filteredAndSortedDishes.length === 0 && (
