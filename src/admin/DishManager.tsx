@@ -811,7 +811,9 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
   const lang = currentLanguage as AllergenLanguage;
   
   // Simplified ingredient categories - only show Base by default
-  const [showOptionalCategories, setShowOptionalCategories] = useState(false);
+  const [showSideCategory, setShowSideCategory] = useState(false);
+  const [showSauceCategory, setShowSauceCategory] = useState(false);
+  const [showToppingCategory, setShowToppingCategory] = useState(false);
   
   const [form, setForm] = useState<CreateDishRequest>({
     name: "",
@@ -1091,71 +1093,238 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
                 )}
               </div>
 
-              {/* Optional Categories */}
-              {!showOptionalCategories && (
-                <button
-                  type="button"
-                  onClick={() => setShowOptionalCategories(true)}
-                  className="w-full py-2 px-3 border border-dashed border-gray-300 rounded-lg text-gray-600 hover:text-gray-800 hover:border-gray-400 transition-colors text-sm"
-                >
-                  + Add optional ingredients (sides, sauces, toppings)
-                </button>
-              )}
+              {/* Optional Categories - Always visible but collapsible */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium text-gray-800">Optional Categories</h4>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const anyExpanded = showSideCategory || showSauceCategory || showToppingCategory;
+                      if (anyExpanded) {
+                        setShowSideCategory(false);
+                        setShowSauceCategory(false);
+                        setShowToppingCategory(false);
+                      } else {
+                        setShowSideCategory(true);
+                        setShowSauceCategory(true);
+                        setShowToppingCategory(true);
+                      }
+                    }}
+                    className="flex items-center gap-1 text-xs text-gray-600 hover:text-gray-800 transition-colors"
+                  >
+                    {(showSideCategory || showSauceCategory || showToppingCategory) ? 'Collapse All' : 'Expand All'}
+                    <svg 
+                      className={`w-4 h-4 transition-transform ${(showSideCategory || showSauceCategory || showToppingCategory) ? 'rotate-180' : ''}`}
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
 
-              {showOptionalCategories && (
-                <>
-                  {/* Side Dish */}
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-lg">🥗</span>
-                      <h4 className="font-medium text-gray-900">Side Dish</h4>
-                      <span className="px-2 py-1 text-xs rounded-full font-medium bg-green-100 text-green-700 border border-green-200">
-                        Optional
-                      </span>
-                    </div>
-                    <IngredientSelector 
-                      selectedIngredients={sideIngredients}
-                      availableIngredients={availableIngredients}
-                      onChange={setSideIngredients}
-                      placeholder="Select side ingredients..."
-                    />
-                  </div>
+                {(showSideCategory || showSauceCategory || showToppingCategory) ? (
+                  // Expanded view - individual boxes based on state
+                  <>
+                    {/* Side Dish */}
+                    {showSideCategory && (
+                      <div className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg">🥗</span>
+                            <h4 className="font-medium text-gray-900">Side Dish</h4>
+                            <span className="px-2 py-1 text-xs rounded-full font-medium bg-green-100 text-green-700 border border-green-200">
+                              Optional
+                            </span>
+                            {sideIngredients.length > 0 && (
+                              <span className="px-2 py-1 text-xs rounded-full font-medium bg-blue-100 text-blue-700 border border-blue-200">
+                                {sideIngredients.length} selected
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {sideIngredients.length > 0 && (
+                              <button 
+                                type="button"
+                                onClick={() => setSideIngredients([])}
+                                className="px-2 py-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                              >
+                                Clear
+                              </button>
+                            )}
+                            <button 
+                              type="button"
+                              onClick={() => setShowSideCategory(false)}
+                              className="px-2 py-1 text-xs text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                            >
+                              Done
+                            </button>
+                          </div>
+                        </div>
+                        <IngredientSelector 
+                          selectedIngredients={sideIngredients}
+                          availableIngredients={availableIngredients}
+                          onChange={(ingredients) => {
+                            setSideIngredients(ingredients);
+                            // Auto-collapse after selection if ingredients were added
+                            if (ingredients.length > sideIngredients.length) {
+                              setTimeout(() => setShowSideCategory(false), 1500);
+                            }
+                          }}
+                          placeholder="Select side ingredients..."
+                        />
+                      </div>
+                    )}
 
-                  {/* Sauce/Dip */}
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-lg">🫙</span>
-                      <h4 className="font-medium text-gray-900">Sauce/Dip</h4>
-                      <span className="px-2 py-1 text-xs rounded-full font-medium bg-green-100 text-green-700 border border-green-200">
-                        Optional
-                      </span>
-                    </div>
-                    <IngredientSelector 
-                      selectedIngredients={sauceIngredients}
-                      availableIngredients={availableIngredients}
-                      onChange={setSauceIngredients}
-                      placeholder="Select sauce ingredients..."
-                    />
-                  </div>
+                    {/* Sauce/Dip */}
+                    {showSauceCategory && (
+                      <div className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg">🫙</span>
+                            <h4 className="font-medium text-gray-900">Sauce/Dip</h4>
+                            <span className="px-2 py-1 text-xs rounded-full font-medium bg-green-100 text-green-700 border border-green-200">
+                              Optional
+                            </span>
+                            {sauceIngredients.length > 0 && (
+                              <span className="px-2 py-1 text-xs rounded-full font-medium bg-blue-100 text-blue-700 border border-blue-200">
+                                {sauceIngredients.length} selected
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {sauceIngredients.length > 0 && (
+                              <button 
+                                type="button"
+                                onClick={() => setSauceIngredients([])}
+                                className="px-2 py-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                              >
+                                Clear
+                              </button>
+                            )}
+                            <button 
+                              type="button"
+                              onClick={() => setShowSauceCategory(false)}
+                              className="px-2 py-1 text-xs text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                            >
+                              Done
+                            </button>
+                          </div>
+                        </div>
+                        <IngredientSelector 
+                          selectedIngredients={sauceIngredients}
+                          availableIngredients={availableIngredients}
+                          onChange={(ingredients) => {
+                            setSauceIngredients(ingredients);
+                            // Auto-collapse after selection if ingredients were added
+                            if (ingredients.length > sauceIngredients.length) {
+                              setTimeout(() => setShowSauceCategory(false), 1500);
+                            }
+                          }}
+                          placeholder="Select sauce ingredients..."
+                        />
+                      </div>
+                    )}
 
-                  {/* Topping/Garnish */}
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-lg">🌿</span>
-                      <h4 className="font-medium text-gray-900">Topping/Garnish</h4>
-                      <span className="px-2 py-1 text-xs rounded-full font-medium bg-green-100 text-green-700 border border-green-200">
-                        Optional
-                      </span>
-                    </div>
-                    <IngredientSelector 
-                      selectedIngredients={toppingIngredients}
-                      availableIngredients={availableIngredients}
-                      onChange={setToppingIngredients}
-                      placeholder="Select topping ingredients..."
-                    />
+                    {/* Topping/Garnish */}
+                    {showToppingCategory && (
+                      <div className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg">🌿</span>
+                            <h4 className="font-medium text-gray-900">Topping/Garnish</h4>
+                            <span className="px-2 py-1 text-xs rounded-full font-medium bg-green-100 text-green-700 border border-green-200">
+                              Optional
+                            </span>
+                            {toppingIngredients.length > 0 && (
+                              <span className="px-2 py-1 text-xs rounded-full font-medium bg-blue-100 text-blue-700 border border-blue-200">
+                                {toppingIngredients.length} selected
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {toppingIngredients.length > 0 && (
+                              <button 
+                                type="button"
+                                onClick={() => setToppingIngredients([])}
+                                className="px-2 py-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                              >
+                                Clear
+                              </button>
+                            )}
+                            <button 
+                              type="button"
+                              onClick={() => setShowToppingCategory(false)}
+                              className="px-2 py-1 text-xs text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                            >
+                              Done
+                            </button>
+                          </div>
+                        </div>
+                        <IngredientSelector 
+                          selectedIngredients={toppingIngredients}
+                          availableIngredients={availableIngredients}
+                          onChange={(ingredients) => {
+                            setToppingIngredients(ingredients);
+                            // Auto-collapse after selection if ingredients were added
+                            if (ingredients.length > toppingIngredients.length) {
+                              setTimeout(() => setShowToppingCategory(false), 1500);
+                            }
+                          }}
+                          placeholder="Select topping ingredients..."
+                        />
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  // Collapsed view - compact buttons
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowSideCategory(true)}
+                      className={`p-3 border border-dashed rounded-lg text-xs transition-colors text-center ${
+                        sideIngredients.length > 0 
+                          ? 'border-green-400 bg-green-50 text-green-700' 
+                          : 'border-gray-300 text-gray-600 hover:border-gray-400 hover:text-gray-800'
+                      }`}
+                    >
+                      <div className="text-lg mb-1">🥗</div>
+                      <div className="font-medium">Side Dish</div>
+                      {sideIngredients.length > 0 && <div className="text-xs mt-1">{sideIngredients.length} selected</div>}
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => setShowSauceCategory(true)}
+                      className={`p-3 border border-dashed rounded-lg text-xs transition-colors text-center ${
+                        sauceIngredients.length > 0 
+                          ? 'border-green-400 bg-green-50 text-green-700' 
+                          : 'border-gray-300 text-gray-600 hover:border-gray-400 hover:text-gray-800'
+                      }`}
+                    >
+                      <div className="text-lg mb-1">🫙</div>
+                      <div className="font-medium">Sauce/Dip</div>
+                      {sauceIngredients.length > 0 && <div className="text-xs mt-1">{sauceIngredients.length} selected</div>}
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => setShowToppingCategory(true)}
+                      className={`p-3 border border-dashed rounded-lg text-xs transition-colors text-center ${
+                        toppingIngredients.length > 0 
+                          ? 'border-green-400 bg-green-50 text-green-700' 
+                          : 'border-gray-300 text-gray-600 hover:border-gray-400 hover:text-gray-800'
+                      }`}
+                    >
+                      <div className="text-lg mb-1">🌿</div>
+                      <div className="font-medium">Topping</div>
+                      {toppingIngredients.length > 0 && <div className="text-xs mt-1">{toppingIngredients.length} selected</div>}
+                    </button>
                   </div>
-                </>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Summary and Allergens */}
