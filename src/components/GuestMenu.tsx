@@ -19,6 +19,7 @@ export default function GuestMenu() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showMobileFilter, setShowMobileFilter] = useState(false);
   const [showAllergenDisclaimer, setShowAllergenDisclaimer] = useState(false);
+  const [showWelcomeInfo, setShowWelcomeInfo] = useState(true);
   const menuSectionRef = useRef<HTMLDivElement>(null);
 
   // Enhanced touch gestures for mobile filter
@@ -35,6 +36,12 @@ export default function GuestMenu() {
     );
     if (!hasAcceptedDisclaimer) {
       setShowAllergenDisclaimer(true);
+    }
+    
+    // Check if user has seen welcome info before
+    const hasSeenWelcomeInfo = localStorage.getItem("welcome-info-seen");
+    if (hasSeenWelcomeInfo) {
+      setShowWelcomeInfo(false);
     }
   }, []);
 
@@ -482,49 +489,65 @@ export default function GuestMenu() {
 
       {/* Main Content */}
       <main className="flex-1 max-w-7xl mx-auto px-3 py-4" ref={menuSectionRef}>
-        {/* Welcome Information - Only show when no allergens selected */}
-        {selectedAllergens.length === 0 && (
+        {/* Welcome Information - Show once per session */}
+        {showWelcomeInfo && (
           <div className="mb-6 bg-gradient-to-r from-sage-50 to-green-50 border border-sage-200 rounded-lg p-4">
-            <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0">
-                <svg
-                  className="w-6 h-6 text-sage-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-sm font-medium text-sage-800 mb-1">
-                  Welcome to {restaurant?.name || "our"} Allergen-Safe Menu
-                </h3>
-                <p className="text-xs text-sage-700 leading-relaxed">
-                  Select your allergens below to see only dishes that are safe
-                  for you. All ingredient information is carefully maintained
-                  and regularly updated.
-                </p>
-                <div className="flex items-center mt-2 text-xs text-sage-600">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start space-x-3 flex-1">
+                <div className="flex-shrink-0">
                   <svg
-                    className="w-3 h-3 mr-1"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
+                    className="w-6 h-6 text-sage-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
                     <path
-                      fillRule="evenodd"
-                      d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  Always inform your server about severe allergies
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium text-sage-800 mb-1">
+                    Welcome to {restaurant?.name || "our"} Allergen-Safe Menu
+                  </h3>
+                  <p className="text-xs text-sage-700 leading-relaxed">
+                    Select your allergens below to see only dishes that are safe
+                    for you. All ingredient information is carefully maintained
+                    and regularly updated.
+                  </p>
+                  <div className="flex items-center mt-2 text-xs text-sage-600">
+                    <svg
+                      className="w-3 h-3 mr-1"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    Always inform your server about severe allergies
+                  </div>
                 </div>
               </div>
+              
+              {/* Close button */}
+              <button
+                onClick={() => {
+                  setShowWelcomeInfo(false);
+                  localStorage.setItem("welcome-info-seen", "true");
+                }}
+                className="text-sage-400 hover:text-sage-600 transition-colors p-1"
+                aria-label="Close welcome message"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
           </div>
         )}
