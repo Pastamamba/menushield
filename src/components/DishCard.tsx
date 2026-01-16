@@ -94,7 +94,7 @@ export default function DishCard({
 
   return (
     <div
-      className={`bg-white border rounded-lg p-3 transition-all duration-200 hover:shadow-sm hover:border-gray-200 relative cursor-pointer ${getCardStyling()}`}
+      className={`bg-white border rounded-lg p-3 relative ${getCardStyling()}`}
       {...cardGestures}
     >
       {/* Header with name, status, and price in one line */}
