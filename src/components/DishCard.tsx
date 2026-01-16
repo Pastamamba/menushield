@@ -99,8 +99,7 @@ export default function DishCard({
     >
       {/* Header with name, status, and price in one line */}
       <div className="flex items-center justify-between mb-1.5">
-        <div className="flex items-center gap-1.5 flex-1 min-w-0">
-          <span className="text-xs">{getStatusIcon()}</span>
+        <div className="flex-1 min-w-0">
           <h3 className="text-xs font-medium text-gray-900 truncate">
             {dish.name}
           </h3>
