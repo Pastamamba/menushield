@@ -579,25 +579,25 @@ export default function DishManager() {
       {/* Grid View - Mobile First Design */}
       {viewMode === "grid" && (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-6">
             {paginatedDishes.map((dish) => (
               <div key={dish.id} className="bg-white shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all duration-200 border border-gray-100">
               {/* Card Content */}
               <div className="p-5">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1 mr-4">
-                    <h3 className="font-semibold text-gray-900 text-lg line-clamp-1 mb-1" title={dish.name}>
+                    <h3 className="font-semibold text-gray-900 text-lg lg:text-xl line-clamp-2 mb-1" title={dish.name}>
                       {dish.name}
                     </h3>
                     {dish.description && (
-                      <p className="text-sm text-gray-500 line-clamp-2 mb-3">
+                      <p className="text-sm lg:text-base text-gray-500 line-clamp-3 mb-3">
                         {dish.description}
                       </p>
                     )}
                   </div>
                   <button
                     onClick={() => handleToggleActivation(dish)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors shrink-0 ${
+                    className={`px-3 py-1.5 rounded-full text-xs lg:text-sm font-medium transition-colors shrink-0 min-w-[70px] ${
                       dish.is_active
                         ? "bg-green-100 text-green-700"
                         : "bg-gray-100 text-gray-600"
@@ -609,11 +609,11 @@ export default function DishManager() {
                 
                 {/* Price and Category */}
                 <div className="flex items-center justify-between mb-4">
-                  <span className="font-bold text-green-600 text-xl">
+                  <span className="font-bold text-green-600 text-xl lg:text-2xl">
                     {formatPrice(dish.price || 0, restaurant?.currency || 'SEK')}
                   </span>
                   {((dish.category as any)?.name || dish.category) && (
-                    <span className="px-3 py-1.5 bg-sage-50 text-sage-700 rounded-lg text-sm font-medium">
+                    <span className="px-3 py-1.5 bg-sage-50 text-sage-700 rounded-lg text-sm lg:text-base font-medium max-w-[140px] lg:max-w-none truncate" title={(dish.category as any)?.name || dish.category}>
                       {(dish.category as any)?.name || dish.category}
                     </span>
                   )}
@@ -623,21 +623,21 @@ export default function DishManager() {
                 <div className="mb-4">
                   {Array.isArray(dish.ingredients) && dish.ingredients.length > 0 ? (
                     <div className="space-y-2">
-                      <div className="text-xs font-medium text-gray-500 mb-2">
+                      <div className="text-xs lg:text-sm font-medium text-gray-500 mb-2">
                         {dish.ingredients.length} ingredient{dish.ingredients.length !== 1 ? 's' : ''}
                       </div>
                       <div className="flex flex-wrap gap-1.5">
                         {dish.ingredients.slice(0, 5).map((ingredient) => (
                           <span
                             key={ingredient}
-                            className="inline-flex items-center px-2.5 py-1 text-xs bg-blue-50 text-blue-700 rounded-lg border border-blue-200 font-medium"
+                            className="inline-flex items-center px-2.5 py-1 text-xs lg:text-sm bg-blue-50 text-blue-700 rounded-lg border border-blue-200 font-medium"
                             title={ingredient}
                           >
                             {ingredient}
                           </span>
                         ))}
                         {dish.ingredients.length > 5 && (
-                          <span className="text-xs text-gray-500 px-2 py-1">
+                          <span className="text-xs lg:text-sm text-gray-500 px-2 py-1">
                             +{dish.ingredients.length - 5} more
                           </span>
                         )}
@@ -651,12 +651,12 @@ export default function DishManager() {
                 {/* Allergens */}
                 {Array.isArray(dish.allergen_tags) && dish.allergen_tags.length > 0 && (
                   <div className="mb-3">
-                    <div className="text-xs font-medium text-gray-500 mb-1">Allergens</div>
+                    <div className="text-xs lg:text-sm font-medium text-gray-500 mb-1">Allergens</div>
                     <div className="flex flex-wrap gap-1">
                       {dish.allergen_tags.slice(0, 4).map((allergen) => (
                         <span
                           key={allergen}
-                          className="inline-flex items-center px-1.5 py-0.5 text-xs bg-red-50 text-red-700 rounded border border-red-200"
+                          className="inline-flex items-center px-1.5 py-0.5 text-xs lg:text-sm bg-red-50 text-red-700 rounded border border-red-200"
                         >
                           {allergen}
                         </span>
@@ -674,18 +674,18 @@ export default function DishManager() {
                 <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-50">
                   <button
                     onClick={() => setEditingDish(dish)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sage-600 hover:text-sage-700 hover:bg-sage-50 rounded-lg transition-colors font-medium text-sm"
+                    className="flex items-center gap-2 px-4 py-2.5 text-sage-600 hover:text-sage-700 hover:bg-sage-50 rounded-lg transition-colors font-medium text-sm lg:text-base"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                     Edit
                   </button>
                   <button
                     onClick={() => handleDeleteDish(dish.id)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors font-medium text-sm"
+                    className="flex items-center gap-2 px-4 py-2.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors font-medium text-sm lg:text-base"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
                     Delete
@@ -968,17 +968,17 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
     >
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden transform transition-all">
         {/* Modal Header */}
-        <div className="bg-gradient-to-r from-green-600 to-green-700 px-4 py-3">
+        <div className="bg-gradient-to-r from-sage-600 to-sage-700 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-white">Create New Dish</h2>
-              <p className="text-green-100 text-sm">Add a new dish to your menu</p>
+              <h2 className="text-xl font-bold text-white">Create New Dish</h2>
+              <p className="text-sage-100 text-sm">Add a new dish to your menu</p>
             </div>
             <button
               onClick={onCancel}
-              className="text-white hover:text-green-100 transition-colors p-1"
+              className="text-white hover:text-sage-100 transition-colors p-1"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -998,12 +998,12 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
         )}
 
         {/* Modal Content */}
-        <div className="p-4 overflow-y-auto max-h-[calc(90vh-160px)]">
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+          <form id="create-dish-form" onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Dish Name <span className="text-red-500">*</span>
                 </label>
                 <input 
@@ -1011,17 +1011,17 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
                   value={form.name} 
                   onChange={handleChange} 
                   required 
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
-                  placeholder="e.g., Grilled Salmon with Herbs"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-colors" 
+                  placeholder="Enter dish name"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
                 <select
                   name="category"
                   value={form.category}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-colors"
                 >
                   <option value="">Select a category</option>
                   <option value="Appetizer">Appetizer</option>
@@ -1035,44 +1035,43 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
               </div>
             </div>
 
-            {/* Description and Price */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea 
-                  name="description" 
-                  value={form.description} 
-                  onChange={handleChange} 
-                  rows={2}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors resize-none" 
-                  placeholder="Brief description of the dish..."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Price ({getCurrencySymbol(restaurant?.currency || 'SEK')}) <span className="text-gray-500 text-xs">- optional</span>
-                </label>
-                <input 
-                  name="price" 
-                  type="number" 
-                  step="0.01"
-                  min="0"
-                  value={form.price || ''} 
-                  onChange={handleChange} 
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
-                  placeholder="Leave blank to hide price"
-                />
-              </div>
+            {/* Description */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+              <textarea 
+                name="description" 
+                value={form.description} 
+                onChange={handleChange} 
+                rows={3}
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-colors" 
+                placeholder="Describe the dish"
+              />
+            </div>
+
+            {/* Price */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Price ({getCurrencySymbol(restaurant?.currency || 'SEK')}) <span className="text-gray-500 text-xs">- optional</span>
+              </label>
+              <input 
+                name="price" 
+                type="number" 
+                step="0.01"
+                value={form.price} 
+                onChange={handleChange} 
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-colors" 
+                placeholder="Leave blank to hide price"
+              />
             </div>
 
             {/* Ingredient Sections */}
-            <div className="space-y-3">
+            <div className="space-y-6">
               {/* Base Ingredients (Required) */}
-              <div className="border border-gray-200 rounded-lg p-3">
-                <div className="flex items-center gap-2 mb-2">
+              <div className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-3">
                   <span className="text-lg">🍽️</span>
                   <h4 className="font-medium text-gray-900">Base Ingredients</h4>
-                  <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-red-100 text-red-700 border border-red-200">
+                  <span className="px-2 py-1 text-xs rounded-full font-medium bg-red-100 text-red-700 border border-red-200">
                     Required
                   </span>
                 </div>
@@ -1106,11 +1105,11 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
               {showOptionalCategories && (
                 <>
                   {/* Side Dish */}
-                  <div className="border border-gray-200 rounded-lg p-3">
-                    <div className="flex items-center gap-2 mb-2">
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-3">
                       <span className="text-lg">🥗</span>
                       <h4 className="font-medium text-gray-900">Side Dish</h4>
-                      <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-green-100 text-green-700 border border-green-200">
+                      <span className="px-2 py-1 text-xs rounded-full font-medium bg-green-100 text-green-700 border border-green-200">
                         Optional
                       </span>
                     </div>
@@ -1123,11 +1122,11 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
                   </div>
 
                   {/* Sauce/Dip */}
-                  <div className="border border-gray-200 rounded-lg p-3">
-                    <div className="flex items-center gap-2 mb-2">
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-3">
                       <span className="text-lg">🫙</span>
                       <h4 className="font-medium text-gray-900">Sauce/Dip</h4>
-                      <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-green-100 text-green-700 border border-green-200">
+                      <span className="px-2 py-1 text-xs rounded-full font-medium bg-green-100 text-green-700 border border-green-200">
                         Optional
                       </span>
                     </div>
@@ -1140,11 +1139,11 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
                   </div>
 
                   {/* Topping/Garnish */}
-                  <div className="border border-gray-200 rounded-lg p-3">
-                    <div className="flex items-center gap-2 mb-2">
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-3">
                       <span className="text-lg">🌿</span>
                       <h4 className="font-medium text-gray-900">Topping/Garnish</h4>
-                      <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-green-100 text-green-700 border border-green-200">
+                      <span className="px-2 py-1 text-xs rounded-full font-medium bg-green-100 text-green-700 border border-green-200">
                         Optional
                       </span>
                     </div>
@@ -1222,18 +1221,18 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
         </div>
 
         {/* Modal Footer */}
-        <div className="bg-gray-50 px-4 py-3 flex justify-between">
+        <div className="bg-gray-50 px-6 py-4 flex justify-between">
           <button 
             type="button" 
             onClick={onCancel} 
-            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors font-medium"
+            className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors font-medium"
           >
             Cancel
           </button>
           <button 
             type="submit" 
-            onClick={handleSubmit}
-            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center"
+            form="create-dish-form"
+            className="px-8 py-3 bg-sage-600 text-white rounded-lg hover:bg-sage-700 transition-colors font-medium flex items-center shadow-sm"
             disabled={baseIngredients.length === 0}
           >
             <span className="mr-2">✨</span>
@@ -1307,15 +1306,15 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
   return (
     <div className="max-h-[90vh] overflow-hidden">
       {/* Professional Header - Same style as CreateDishModal */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+      <div className="bg-gradient-to-r from-sage-600 to-sage-700 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-white">Edit Dish</h2>
-            <p className="text-blue-100 text-sm">{dish.name}</p>
+            <p className="text-sage-100 text-sm">{dish.name}</p>
           </div>
           <button
             onClick={onCancel}
-            className="text-white hover:text-blue-100 transition-colors p-1"
+            className="text-white hover:text-sage-100 transition-colors p-1"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1346,7 +1345,7 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
               value={form.name ?? ""} 
               onChange={handleChange} 
               required 
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-colors" 
               placeholder="Enter dish name"
             />
           </div>
@@ -1356,7 +1355,7 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
               name="category"
               value={form.category ?? ""}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-colors"
             >
               <option value="">Select a category</option>
               <option value="Appetizer">Appetizer</option>
@@ -1377,7 +1376,7 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
             value={form.description ?? ""} 
             onChange={handleChange} 
             rows={3}
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-colors" 
             placeholder="Describe the dish"
           />
         </div>
@@ -1392,7 +1391,7 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
             step="0.01"
             value={form.price || ''} 
             onChange={handleChange} 
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" 
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-colors" 
             placeholder="Leave blank to hide price"
           />
         </div>
@@ -1447,7 +1446,7 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
         <button
           type="submit"
           form="edit-dish-form"
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          className="px-6 py-2 bg-sage-600 text-white rounded-lg hover:bg-sage-700 transition-colors font-medium"
         >
           Save Changes
         </button>
