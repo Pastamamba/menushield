@@ -574,6 +574,7 @@ export default function GuestMenu() {
                     showPrices={restaurant?.showPrices !== false}
                     currency={restaurant?.currency || "SEK"}
                     language={currentLanguage as any}
+                    hasSelectedAllergens={false}
                     onCardSelect={handleCardSelect}
                     onCardLongPress={handleCardLongPress}
                   />
@@ -598,6 +599,7 @@ export default function GuestMenu() {
                         safetyStatus={safety}
                         showPrices={restaurant?.showPrices !== false}
                         currency={restaurant?.currency || "SEK"}
+                        hasSelectedAllergens={true}
                         onCardSelect={handleCardSelect}
                         onCardLongPress={handleCardLongPress}
                       />
@@ -621,6 +623,7 @@ export default function GuestMenu() {
                         safetyStatus={safety}
                         showPrices={restaurant?.showPrices !== false}
                         currency={restaurant?.currency || "SEK"}
+                        hasSelectedAllergens={true}
                         onCardSelect={handleCardSelect}
                         onCardLongPress={handleCardLongPress}
                       />

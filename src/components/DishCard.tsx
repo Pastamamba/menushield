@@ -11,6 +11,7 @@ interface DishCardProps {
   showPrices?: boolean;
   currency?: string;
   language?: AllergenLanguage;
+  hasSelectedAllergens?: boolean;
   onCardSelect?: (dish: Dish) => void;
   onCardLongPress?: (dish: Dish) => void;
 }
@@ -22,6 +23,7 @@ export default function DishCard({
   showPrices = true,
   currency = "SEK",
   language = "en",
+  hasSelectedAllergens = false,
   onCardSelect,
   onCardLongPress,
 }: DishCardProps) {
@@ -75,7 +77,12 @@ export default function DishCard({
   const userAvoidedAllergens = getUserAvoidedAllergens();
 
   const getCardStyling = () => {
-    if (safetyStatus.status === "safe" && userAvoidedAllergens.length === 0) {
+    // Only show colors when allergens are selected
+    if (!hasSelectedAllergens) {
+      return "border-gray-100";
+    }
+    
+    if (safetyStatus.status === "safe") {
       return "border-green-200 bg-green-50/30";
     } else if (safetyStatus.status === "modifiable") {
       return "border-orange-200 bg-orange-50/30";
