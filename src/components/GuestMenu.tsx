@@ -237,17 +237,9 @@ export default function GuestMenu() {
     );
   }
 
-  // Filter dishes based on search term
+  // Filter dishes based on active status only
   let filteredDishes = dishes.filter((dish) => {
-    if (dish.is_active === false) return false;
-
-    // Search term filter
-    const matchesSearch =
-      !searchTerm ||
-      dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dish.description?.toLowerCase().includes(searchTerm.toLowerCase());
-
-    return matchesSearch;
+    return dish.is_active !== false;
   });
 
   // Categorize dishes by safety level - Keep unsafe dishes visible but clearly marked
@@ -446,6 +438,9 @@ export default function GuestMenu() {
                         : [...prev, allergen]
                     );
                   }}
+                  searchTerm={searchTerm}
+                  onSearchChange={setSearchTerm}
+                  searchPlaceholder="Search ingredients, allergens..."
                   isMobile={true}
                 />
               </div>
@@ -546,6 +541,9 @@ export default function GuestMenu() {
                     : [...prev, allergen]
                 );
               }}
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              searchPlaceholder="Search ingredients, allergens..."
             />
           </div>
         </div>

@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   COMMON_ALLERGENS,
   ALL_ALLERGENS,
@@ -18,6 +19,9 @@ interface AllergenFilterProps {
   onAllergenToggle?: (allergen: string) => void;
   onSelectionChange?: (allergens: string[]) => void; // Add this prop for compatibility
   isMobile?: boolean;
+  searchTerm?: string;
+  onSearchChange?: (term: string) => void;
+  searchPlaceholder?: string;
 }
 
 export default function AllergenFilter({
@@ -27,8 +31,63 @@ export default function AllergenFilter({
   onAllergenToggle,
   onSelectionChange,
   isMobile = false,
+  searchTerm = "",
+  onSearchChange,
+  searchPlaceholder = "Search ingredients, allergens...",
 }: AllergenFilterProps) {
   const { t } = useMenuTranslations();
+  const [ingredientsFromAPI, setIngredientsFromAPI] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+
+  // Fetch ingredients from API
+  useEffect(() => {
+    const fetchIngredients = async () => {
+      try {
+        const response = await fetch('/api/ingredients?lang=en');
+        if (response.ok) {
+          const ingredients = await response.json();
+          setIngredientsFromAPI(ingredients);
+        }
+      } catch (error) {
+        console.error('Failed to fetch ingredients:', error);
+      }
+    };
+    fetchIngredients();
+  }, []);
+
+  // Search through ingredients when search term changes
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    const searchLower = searchTerm.toLowerCase();
+    
+    // Search allergens first
+    const matchingAllergens = ALL_ALLERGENS.filter(allergen =>
+      allergen.name.toLowerCase().includes(searchLower) ||
+      allergen.id.toLowerCase().includes(searchLower)
+    );
+
+    // Search ingredients from API
+    const matchingIngredients = ingredientsFromAPI
+      .filter(ingredient => 
+        ingredient.name.toLowerCase().includes(searchLower)
+      )
+      .slice(0, 10) // Limit to first 10 results
+      .map(ingredient => ({
+        id: ingredient.name, // Use actual ingredient name as ID
+        name: ingredient.name,
+        color: "gray",
+        type: "ingredient"
+      }));
+
+    setSearchResults([
+      ...matchingAllergens.map(a => ({ ...a, type: "allergen" })),
+      ...matchingIngredients
+    ]);
+  }, [searchTerm, ingredientsFromAPI]);
 
   // Use new props if available, fallback to old props
   const currentAllergens = onAllergenToggle ? selectedAllergens : avoid;
@@ -50,7 +109,7 @@ export default function AllergenFilter({
       setAvoid(newAllergens);
     }
   };
-// Show common allergens always
+// Show common allergens always (never change the 14 boxes)
   const displayAllergens = COMMON_ALLERGENS;
 
   const toggleAllergen = (allergenId: string) => {
@@ -63,6 +122,67 @@ export default function AllergenFilter({
   if (isMobile) {
     return (
       <div className="space-y-3">
+        {/* Search Input - Mobile */}
+        {onSearchChange && (
+          <div className="relative">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder={searchPlaceholder}
+              className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent text-sm"
+            />
+            <svg
+              className="w-4 h-4 text-gray-400 absolute left-2.5 top-2.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            
+            {/* Search Results Dropdown - Mobile */}
+            {searchTerm.trim() && searchResults.length > 0 && (
+              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                {searchResults.map((result) => {
+                  const isIngredient = result.type === "ingredient";
+                  const isAlreadySelected = isSelected(result.id);
+                  return (
+                    <button
+                      key={result.id}
+                      onClick={() => {
+                        toggleAllergen(result.id);
+                        // Clear search when selecting from dropdown
+                        if (onSearchChange) {
+                          onSearchChange('');
+                        }
+                      }}
+                      className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 border-b border-gray-100 last:border-b-0 flex items-center justify-between ${
+                        isAlreadySelected ? 'bg-gray-50' : ''
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>{result.name}</span>
+                        {isIngredient && (
+                          <span className="text-xs bg-blue-100 text-blue-600 px-1 rounded">ingredient</span>
+                        )}
+                      </div>
+                      {isAlreadySelected && (
+                        <span className={`text-xs ${isIngredient ? 'text-blue-600' : 'text-red-600'}`}>✓</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+        
         {/* Allergen Grid - Mobile Optimized with refined styling */}
         <div className="grid grid-cols-2 gap-2">
           {displayAllergens.map((allergen) => {
@@ -155,29 +275,98 @@ export default function AllergenFilter({
 
   return (
     <div className="space-y-3">
+      {/* Search Input - Desktop */}
+      {onSearchChange && (
+        <div className="relative">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder={searchPlaceholder}
+            className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent text-sm"
+          />
+          <svg
+            className="w-4 h-4 text-gray-400 absolute left-2.5 top-2.5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          
+          {/* Search Results Dropdown - Desktop */}
+          {searchTerm.trim() && searchResults.length > 0 && (
+            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+              {searchResults.map((result) => {
+                const isIngredient = result.type === "ingredient";
+                const isAlreadySelected = isSelected(result.id);
+                return (
+                  <button
+                    key={result.id}
+                    onClick={() => {
+                      toggleAllergen(result.id);
+                      // Clear search when selecting from dropdown
+                      if (onSearchChange) {
+                        onSearchChange('');
+                      }
+                    }}
+                    className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 border-b border-gray-100 last:border-b-0 flex items-center justify-between ${
+                      isAlreadySelected ? 'bg-gray-50' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>{result.name}</span>
+                      {isIngredient && (
+                        <span className="text-xs bg-blue-100 text-blue-600 px-1 rounded">ingredient</span>
+                      )}
+                    </div>
+                    {isAlreadySelected && (
+                      <span className={`text-xs ${isIngredient ? 'text-blue-600' : 'text-red-600'}`}>✓</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+      
+      {/* EU Mandatory Allergens Title */}
+      <div className="text-sm font-medium text-gray-800 mb-2">
+        EU Mandatory Allergens
+      </div>
+      
       {/* Compact Allergens Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
-        {displayAllergens.map((allergen) => (
-          <button
-            key={allergen.id}
-            onClick={() => toggleAllergen(allergen.id)}
-            className={`
-              p-3 rounded-md border transition-all duration-200 text-left min-h-[40px] flex items-center active:scale-95
-              ${
-                isSelected(allergen.id)
-                  ? "border-red-500 bg-red-50 text-red-800"
-                  : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 text-gray-700"
-              }
-            `}
-          >
-            <div className="flex items-center justify-between w-full">
-              <span className="font-medium text-xs">{allergen.name}</span>
-              {isSelected(allergen.id) && (
-                <span className="text-red-600 ml-2 text-xs">✓</span>
-              )}
-            </div>
-          </button>
-        ))}
+        {displayAllergens.map((allergen) => {
+          const selected = isSelected(allergen.id);
+          return (
+            <button
+              key={allergen.id}
+              onClick={() => toggleAllergen(allergen.id)}
+              className={`
+                p-3 rounded-md border transition-all duration-200 text-left min-h-[40px] flex items-center active:scale-95
+                ${
+                  selected
+                    ? "border-red-500 bg-red-50 text-red-800"
+                    : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 text-gray-700"
+                }
+              `}
+            >
+              <div className="flex items-center justify-between w-full">
+                <span className="font-medium text-xs">{allergen.name}</span>
+                {selected && (
+                  <span className="ml-2 text-xs text-red-600">✓</span>
+                )}
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       {/* Selected Allergens Summary */}
@@ -203,13 +392,28 @@ export default function AllergenFilter({
           </div>
           <div className="flex flex-wrap gap-1">
             {currentAllergens.map((allergenId) => {
-              const allergen = ALL_ALLERGENS.find((a) => a.id === allergenId);
+              // Check if it's an allergen first
+              let allergen = ALL_ALLERGENS.find((a) => a.id === allergenId);
+              let isIngredient = false;
+              
+              // If not found in allergens, it might be an ingredient name
+              if (!allergen) {
+                const ingredient = ingredientsFromAPI.find(ing => ing.name === allergenId);
+                if (ingredient) {
+                  allergen = { id: ingredient.name, name: ingredient.name, color: "gray", type: "ingredient" };
+                  isIngredient = true;
+                }
+              }
+              
               return allergen ? (
                 <span
                   key={allergenId}
-                  className="inline-flex items-center gap-1 bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs"
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs ${
+                    isIngredient ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
+                  }`}
                 >
                   <span>{allergen.name}</span>
+                  {isIngredient && <span className="text-xs bg-blue-200 text-blue-600 px-1 rounded">ingredient</span>}
                   <button
                     onClick={() => toggleAllergen(allergenId)}
                     className="text-red-600 hover:text-red-800 ml-0.5"

@@ -2,27 +2,28 @@
 import type { Dish, DishSafetyStatus, AllergenInfo } from "../types";
 import { calculateAllergensFromIngredients } from "./allergenCalculator";
 
-// Top 8 most common allergens for main display
+// 14 EU Mandatory Allergens (always shown by default)
 export const COMMON_ALLERGENS = [
-  { id: "dairy", name: "Dairy", color: "blue" },
-  { id: "gluten", name: "Gluten", color: "yellow" },
-  { id: "nuts", name: "Tree Nuts", color: "brown" },
-  { id: "peanuts", name: "Peanuts", color: "orange" },
-  { id: "shellfish", name: "Shellfish", color: "red" },
+  { id: "gluten", name: "Cereals containing gluten", color: "yellow" },
+  { id: "crustaceans", name: "Crustaceans", color: "red" },
+  { id: "eggs", name: "Eggs", color: "orange" },
   { id: "fish", name: "Fish", color: "cyan" },
-  { id: "eggs", name: "Eggs", color: "yellow" },
-  { id: "soy", name: "Soy", color: "green" },
-];
-
-// Extended allergen list for search
-export const ALL_ALLERGENS = [
-  ...COMMON_ALLERGENS,
-  { id: "sesame", name: "Sesame", color: "tan" },
-  { id: "sulfites", name: "Sulfites", color: "purple" },
-  { id: "mustard", name: "Mustard", color: "yellow" },
+  { id: "peanuts", name: "Peanuts", color: "orange" },
+  { id: "soy", name: "Soybeans", color: "green" },
+  { id: "dairy", name: "Milk (including lactose)", color: "blue" },
+  { id: "nuts", name: "Tree Nuts", color: "brown" },
   { id: "celery", name: "Celery", color: "green" },
+  { id: "mustard", name: "Mustard", color: "yellow" },
+  { id: "sesame", name: "Sesame seeds", color: "tan" },
+  { id: "sulfites", name: "Sulphur dioxide/sulphites", color: "purple" },
   { id: "lupin", name: "Lupin", color: "pink" },
   { id: "molluscs", name: "Molluscs", color: "teal" },
+];
+
+// All allergens include EU mandatory + additional ones for backward compatibility
+export const ALL_ALLERGENS = [
+  ...COMMON_ALLERGENS,
+  { id: "shellfish", name: "Shellfish", color: "red" }, // Legacy compatibility
   { id: "corn", name: "Corn", color: "yellow" },
   { id: "coconut", name: "Coconut", color: "white" },
   { id: "nightshades", name: "Nightshades", color: "red" },

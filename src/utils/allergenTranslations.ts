@@ -5,7 +5,8 @@ export const allergenTranslations = {
     'dairy': 'Milk/Dairy',
     'eggs': 'Eggs',
     'fish': 'Fish',
-    'shellfish': 'Crustaceans',
+    'crustaceans': 'Crustaceans',
+    'shellfish': 'Crustaceans', // Legacy compatibility
     'nuts': 'Tree Nuts',
     'peanuts': 'Peanuts',
     'soy': 'Soy',
@@ -43,7 +44,8 @@ export const allergenTranslations = {
     'dairy': 'Mjölk/Mejeriprodukter',
     'eggs': 'Ägg',
     'fish': 'Fisk',
-    'shellfish': 'Kräftdjur',
+    'crustaceans': 'Kräftdjur',
+    'shellfish': 'Kräftdjur', // Legacy compatibility
     'nuts': 'Nötter',
     'peanuts': 'Jordnötter',
     'soy': 'Soja',
@@ -117,13 +119,13 @@ export const allergenTranslations = {
 export type AllergenLanguage = keyof typeof allergenTranslations;
 export type AllergenKey = keyof typeof allergenTranslations.en;
 
-// Normalize allergen IDs (convert legacy terms to standard)
+// Normalize allergen IDs (convert legacy terms to EU standard)
 export const normalizeAllergenId = (id: string): string => {
   const normalizeMap: Record<string, string> = {
     'milk': 'dairy',
     'tree_nuts': 'nuts',
     'tree nuts': 'nuts',
-    'crustaceans': 'shellfish',
+    'shellfish': 'crustaceans', // Map legacy shellfish to EU term crustaceans
     'sulphites': 'sulfites',
   };
   
