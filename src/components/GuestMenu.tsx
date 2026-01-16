@@ -242,7 +242,7 @@ export default function GuestMenu() {
   );
 
   return (
-    <div className="min-h-screen bg-warm-gray-50">
+    <div className="min-h-screen bg-warm-gray-50 flex flex-col">
       {/* Allergen Disclaimer Modal */}
       <AllergenDisclaimer
         isOpen={showAllergenDisclaimer}
@@ -432,7 +432,7 @@ export default function GuestMenu() {
       )}
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-3 py-4" ref={menuSectionRef}>
+      <main className="flex-1 max-w-7xl mx-auto px-3 py-4" ref={menuSectionRef}>
         {/* Welcome Information - Only show when no allergens selected */}
         {selectedAllergens.length === 0 && (
           <div className="mb-6 bg-gradient-to-r from-sage-50 to-green-50 border border-sage-200 rounded-lg p-4">

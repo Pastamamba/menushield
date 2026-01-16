@@ -66,7 +66,7 @@ export default function RestaurantList() {
   }
 
   return (
-    <div className="min-h-screen bg-warm-gray-50">
+    <div className="min-h-screen bg-warm-gray-50 flex flex-col">
       {/* Header */}
       <div className="bg-gradient-to-r from-sage-600 to-sage-500 shadow-md">
         <div className="max-w-4xl mx-auto px-4 py-8">
@@ -78,7 +78,7 @@ export default function RestaurantList() {
       </div>
 
       {/* Restaurant Grid */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="flex-1 max-w-4xl mx-auto px-4 py-8">
         {restaurants.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-gray-400 mb-4">
