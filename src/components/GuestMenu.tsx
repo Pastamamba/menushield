@@ -124,8 +124,18 @@ export default function GuestMenu() {
               <div>
                 <h1 className="text-base font-medium text-white">MenuShield</h1>
                 <p className="text-sage-100 text-xs flex items-center">
-                  <svg className="w-3 h-3 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  <svg
+                    className="w-3 h-3 mr-1 animate-spin"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
                   </svg>
                   Loading menu...
                 </p>
@@ -152,8 +162,11 @@ export default function GuestMenu() {
             <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
               <div className="h-4 bg-gray-200 rounded w-32 mb-3 animate-pulse"></div>
               <div className="flex flex-wrap gap-2">
-                {[1,2,3,4,5,6].map(i => (
-                  <div key={i} className="h-8 bg-gray-100 rounded-full w-20 animate-pulse"></div>
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div
+                    key={i}
+                    className="h-8 bg-gray-100 rounded-full w-20 animate-pulse"
+                  ></div>
                 ))}
               </div>
             </div>
@@ -161,8 +174,11 @@ export default function GuestMenu() {
 
           {/* Dish Grid Skeleton */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {[1,2,3,4,5,6,7,8].map(i => (
-              <div key={i} className="bg-white border border-gray-100 rounded-lg p-3">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div
+                key={i}
+                className="bg-white border border-gray-100 rounded-lg p-3"
+              >
                 <div className="h-3 bg-gray-200 rounded w-3/4 mb-2 animate-pulse"></div>
                 <div className="h-2 bg-gray-100 rounded w-full mb-1 animate-pulse"></div>
                 <div className="h-2 bg-gray-100 rounded w-2/3 mb-2 animate-pulse"></div>
@@ -183,15 +199,26 @@ export default function GuestMenu() {
       <div className="min-h-screen bg-warm-gray-50 flex items-center justify-center p-4">
         <div className="text-center max-w-md bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
-            <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="w-6 h-6 text-red-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
           </div>
           <h3 className="text-sm font-medium text-gray-900 mb-2">
             Menu Temporarily Unavailable
           </h3>
           <p className="text-xs text-gray-600 mb-4">
-            We're having trouble loading the menu right now. This is usually temporary and will be resolved shortly.
+            We're having trouble loading the menu right now. This is usually
+            temporary and will be resolved shortly.
           </p>
           <div className="space-y-2">
             <button
@@ -201,7 +228,8 @@ export default function GuestMenu() {
               Try Again
             </button>
             <p className="text-xs text-gray-500">
-              If the problem persists, please ask restaurant staff for assistance.
+              If the problem persists, please ask restaurant staff for
+              assistance.
             </p>
           </div>
         </div>
@@ -257,10 +285,20 @@ export default function GuestMenu() {
             <div className="flex-1">
               {restaurant?.name && (
                 <>
-                  <h1 className="text-base font-medium text-white">{restaurant.name}</h1>
+                  <h1 className="text-base font-medium text-white">
+                    {restaurant.name}
+                  </h1>
                   <p className="text-sage-100 text-xs flex items-center">
-                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    <svg
+                      className="w-3 h-3 mr-1"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                     {t("safeDining")}
                   </p>
@@ -304,8 +342,16 @@ export default function GuestMenu() {
           <div className="flex items-center justify-between">
             <div className="flex-1 flex items-center">
               <div className="flex items-center text-sage-100 text-xs">
-                <svg className="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                <svg
+                  className="w-4 h-4 mr-1.5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 Secure Allergen Menu
               </div>
@@ -317,8 +363,16 @@ export default function GuestMenu() {
                     {restaurant.name}
                   </h1>
                   <div className="flex items-center justify-center text-sage-100 text-xs">
-                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    <svg
+                      className="w-3 h-3 mr-1"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                     {t("safeDining")}
                   </div>
@@ -438,20 +492,40 @@ export default function GuestMenu() {
           <div className="mb-6 bg-gradient-to-r from-sage-50 to-green-50 border border-sage-200 rounded-lg p-4">
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0">
-                <svg className="w-6 h-6 text-sage-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-6 h-6 text-sage-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
               </div>
               <div className="flex-1">
                 <h3 className="text-sm font-medium text-sage-800 mb-1">
-                  Welcome to {restaurant?.name || 'our'} Allergen-Safe Menu
+                  Welcome to {restaurant?.name || "our"} Allergen-Safe Menu
                 </h3>
                 <p className="text-xs text-sage-700 leading-relaxed">
-                  Select your allergens below to see only dishes that are safe for you. All ingredient information is carefully maintained and regularly updated.
+                  Select your allergens below to see only dishes that are safe
+                  for you. All ingredient information is carefully maintained
+                  and regularly updated.
                 </p>
                 <div className="flex items-center mt-2 text-xs text-sage-600">
-                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  <svg
+                    className="w-3 h-3 mr-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                   Always inform your server about severe allergies
                 </div>
@@ -459,7 +533,7 @@ export default function GuestMenu() {
             </div>
           </div>
         )}
-        
+
         {/* Desktop Allergen Filter */}
         <div className="hidden lg:block mb-6">
           <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
@@ -485,7 +559,9 @@ export default function GuestMenu() {
                 <span className="w-2.5 h-2.5 bg-gray-500 rounded-full mr-2"></span>
                 {`${t("allDishes")} (${filteredDishes.length})`}
               </h2>
-              <p className="text-gray-600 mb-3 text-sm">{t("selectAllergensHelp")}</p>
+              <p className="text-gray-600 mb-3 text-sm">
+                {t("selectAllergensHelp")}
+              </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                 {filteredDishes.map((dish) => (
                   <DishCard
@@ -535,8 +611,7 @@ export default function GuestMenu() {
                 <section>
                   <h2 className="text-lg font-semibold text-red-700 mb-3 flex items-center">
                     <span className="w-2.5 h-2.5 bg-red-500 rounded-full mr-2"></span>
-                    ❌ Contains Your Allergens (
-                    {categorizedDishes.unsafe.length})
+                    Contains Your Allergens ({categorizedDishes.unsafe.length})
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 opacity-75">
                     {categorizedDishes.unsafe.map(({ dish, safety }) => (
@@ -584,36 +659,58 @@ export default function GuestMenu() {
           </div>
         )}
       </main>
-      
+
       {/* Footer - Trust & Information */}
       <footer className="bg-white border-t border-gray-100 mt-8">
         <div className="max-w-7xl mx-auto px-3 py-6">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-6 text-xs text-gray-500 mb-3">
               <div className="flex items-center">
-                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                <svg
+                  className="w-3 h-3 mr-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 Secure & Private
               </div>
               <div className="flex items-center">
-                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                <svg
+                  className="w-3 h-3 mr-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 Verified Ingredients
               </div>
               <div className="flex items-center">
-                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <svg
+                  className="w-3 h-3 mr-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
                   <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Real-time Updates
               </div>
             </div>
             <p className="text-xs text-gray-400 mb-2">
-              MenuShield helps you dine safely. Information is provided by {restaurant?.name || 'the restaurant'} and updated regularly.
+              MenuShield helps you dine safely. Information is provided by{" "}
+              {restaurant?.name || "the restaurant"} and updated regularly.
             </p>
             <p className="text-xs text-gray-400">
-              For severe allergies, always confirm with restaurant staff. We prioritize your safety above all.
+              For severe allergies, always confirm with restaurant staff. We
+              prioritize your safety above all.
             </p>
           </div>
         </div>

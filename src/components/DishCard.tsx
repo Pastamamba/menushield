@@ -26,14 +26,7 @@ export default function DishCard({
   onCardLongPress,
 }: DishCardProps) {
   const getStatusIcon = () => {
-    switch (safetyStatus.status) {
-      case "safe":
-        return "";
-      case "modifiable":
-        return "⚠️";
-      case "unsafe":
-        return "❌";
-    }
+    return ""; // No icons, using color-coded borders instead
   };
 
   // Get only the allergens that the user is avoiding and are present in this dish
@@ -81,9 +74,20 @@ export default function DishCard({
 
   const userAvoidedAllergens = getUserAvoidedAllergens();
 
+  const getCardStyling = () => {
+    if (safetyStatus.status === "safe" && userAvoidedAllergens.length === 0) {
+      return "border-green-200 bg-green-50/30";
+    } else if (safetyStatus.status === "modifiable") {
+      return "border-orange-200 bg-orange-50/30";
+    } else if (safetyStatus.status === "unsafe") {
+      return "border-red-200 bg-red-50/30";
+    }
+    return "border-gray-100";
+  };
+
   return (
     <div
-      className="bg-white border border-gray-100 rounded-lg p-3 transition-all duration-200 hover:shadow-sm hover:border-gray-200 relative cursor-pointer"
+      className={`bg-white border rounded-lg p-3 transition-all duration-200 hover:shadow-sm hover:border-gray-200 relative cursor-pointer ${getCardStyling()}`}
       {...cardGestures}
     >
       {/* Header with name, status, and price in one line */}
@@ -128,30 +132,18 @@ export default function DishCard({
           {/* Status message - compact */}
           {safetyStatus.status === "modifiable" && (
             <div className="text-xs text-orange-700 bg-orange-50 px-2 py-0.5 rounded">
-              💡 May be modifiable - ask server
+              May be modifiable - ask server
             </div>
           )}
         </div>
       )}
 
       {/* Category tag - inline at bottom - only show if there's content */}
-      {(dish.category ||
-        (safetyStatus.status === "safe" &&
-          userAvoidedAllergens.length === 0)) && (
+      {dish.category && (
         <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-gray-50">
-          {dish.category && (
-            <span className="text-xs text-gray-400 uppercase tracking-wide">
-              {dish.category}
-            </span>
-          )}
-
-          {/* Safe status - minimal */}
-          {safetyStatus.status === "safe" &&
-            userAvoidedAllergens.length === 0 && (
-              <span className="text-xs text-green-600 font-medium">
-                ✅ Safe
-              </span>
-            )}
+          <span className="text-xs text-gray-400 uppercase tracking-wide">
+            {dish.category}
+          </span>
         </div>
       )}
 
