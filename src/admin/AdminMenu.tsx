@@ -90,7 +90,7 @@ export default function AdminMenu() {
 
       {/* Sidebar - Minimalistic design */}
       <aside className={`
-        fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white transform transition-transform duration-300 ease-in-out border-r border-gray-100
+        fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white transform transition-transform duration-300 ease-in-out border-r border-gray-100 flex flex-col
         lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Desktop Header - Clean and minimal */}
@@ -126,32 +126,34 @@ export default function AdminMenu() {
           </button>
         </div>
         
-        <nav className="mt-2 flex-1">
-          {menuItems.map((item) => (
+        <nav className="mt-2 flex-1 flex flex-col">
+          <div className="flex-1">
+            {menuItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => handleMenuClick(item.id)}
+                className={`w-full flex items-center px-6 py-4 text-left hover:bg-gray-50 transition-all duration-200 ${
+                  activeTab === item.id
+                    ? "bg-gray-50 text-gray-900 border-r-2 border-gray-900 font-medium"
+                    : "text-gray-600 hover:text-gray-800"
+                }`}
+              >
+                <span className="mr-4 text-lg opacity-60">{item.icon}</span>
+                <span className="font-medium text-sm">{item.label}</span>
+              </button>
+            ))}
+          </div>
+          
+          {/* Logout Button - At bottom of sidebar */}
+          <div className="p-6 border-t border-gray-100">
             <button
-              key={item.id}
-              onClick={() => handleMenuClick(item.id)}
-              className={`w-full flex items-center px-6 py-4 text-left hover:bg-gray-50 transition-all duration-200 ${
-                activeTab === item.id
-                  ? "bg-gray-50 text-gray-900 border-r-2 border-gray-900 font-medium"
-                  : "text-gray-600 hover:text-gray-800"
-              }`}
+              onClick={logout}
+              className="w-full bg-gray-900 text-white px-4 py-3 rounded-md hover:bg-gray-800 transition-all duration-200 font-medium text-sm"
             >
-              <span className="mr-4 text-lg opacity-60">{item.icon}</span>
-              <span className="font-medium text-sm">{item.label}</span>
+              {t('logout')}
             </button>
-          ))}
+          </div>
         </nav>
-
-        {/* Logout Button - Minimal */}
-        <div className="p-6 border-t border-gray-100">
-          <button
-            onClick={logout}
-            className="w-full bg-gray-900 text-white px-4 py-3 rounded-md hover:bg-gray-800 transition-all duration-200 font-medium text-sm"
-          >
-            {t('logout')}
-          </button>
-        </div>
       </aside>
 
       {/* Main Content - Consistent with profile page */}
