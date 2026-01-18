@@ -921,18 +921,60 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
     }
     setError("");
     
+    console.log('DEBUG handleSubmit - baseIngredients:', baseIngredients);
+    console.log('DEBUG handleSubmit - form.ingredients:', form.ingredients);
+    console.log('DEBUG handleSubmit - form.category:', form.category);
+    
     try {
-      // Ensure ingredients and components are up to date before submission
-      updateAllIngredients();
+      // Build current components array from optional ingredients
+      const components = [];
       
-      // Wait a tick to ensure state is updated, then submit
-      await new Promise(resolve => setTimeout(resolve, 0));
+      if (sideIngredients.length > 0) {
+        components.push({
+          name: "Side Dish",
+          category: "side_dish",
+          ingredients: sideIngredients,
+          allergen_tags: calculateAllergensFromIngredients(sideIngredients, availableIngredients),
+          is_optional: true,
+          additional_cost: 0
+        });
+      }
+      
+      if (sauceIngredients.length > 0) {
+        components.push({
+          name: "Sauce/Dip", 
+          category: "sauce",
+          ingredients: sauceIngredients,
+          allergen_tags: calculateAllergensFromIngredients(sauceIngredients, availableIngredients),
+          is_optional: true,
+          additional_cost: 0
+        });
+      }
+      
+      if (toppingIngredients.length > 0) {
+        components.push({
+          name: "Topping/Garnish",
+          category: "topping", 
+          ingredients: toppingIngredients,
+          allergen_tags: calculateAllergensFromIngredients(toppingIngredients, availableIngredients),
+          is_optional: true,
+          additional_cost: 0
+        });
+      }
+      
+      // Build complete submission data
+      const allIngredients = [...baseIngredients, ...sideIngredients, ...sauceIngredients, ...toppingIngredients];
+      const allAllergens = calculateAllergensFromIngredients(allIngredients, availableIngredients);
       
       const submitData = {
         ...form,
-        price: form.price || 0 // Convert undefined to 0 for backend
+        price: form.price || 0, // Convert undefined to 0 for backend
+        ingredients: baseIngredients, // Main ingredients only 
+        allergen_tags: allAllergens, // All allergens combined
+        components: components // Optional ingredient components
       };
 
+      console.log('Submitting dish with components:', submitData);
       await onSubmit(submitData);
     } catch (error) {
       console.error('Submission error:', error);
@@ -1080,7 +1122,17 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
                 <IngredientSelector 
                   selectedIngredients={baseIngredients}
                   availableIngredients={availableIngredients}
-                  onChange={setBaseIngredients}
+                  onChange={(ingredients) => {
+                    setBaseIngredients(ingredients);
+                    // Auto-update allergens and form when base ingredients change
+                    const allIngredients = [...ingredients, ...sideIngredients, ...sauceIngredients, ...toppingIngredients];
+                    const allergens = calculateAllergensFromIngredients(allIngredients, availableIngredients);
+                    setForm(prev => ({
+                      ...prev,
+                      ingredients: ingredients,
+                      allergen_tags: allergens
+                    }));
+                  }}
                   placeholder="Select base ingredients (required)..."
                 />
                 {baseIngredients.length === 0 && (
@@ -1172,6 +1224,13 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
                             if (ingredients.length > sideIngredients.length) {
                               setTimeout(() => setShowSideCategory(false), 1500);
                             }
+                            // Update allergens
+                            const allIngredients = [...baseIngredients, ...ingredients, ...sauceIngredients, ...toppingIngredients];
+                            const allergens = calculateAllergensFromIngredients(allIngredients, availableIngredients);
+                            setForm(prev => ({
+                              ...prev,
+                              allergen_tags: allergens
+                            }));
                           }}
                           placeholder="Select side ingredients..."
                         />
@@ -1222,6 +1281,13 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
                             if (ingredients.length > sauceIngredients.length) {
                               setTimeout(() => setShowSauceCategory(false), 1500);
                             }
+                            // Update allergens
+                            const allIngredients = [...baseIngredients, ...sideIngredients, ...ingredients, ...toppingIngredients];
+                            const allergens = calculateAllergensFromIngredients(allIngredients, availableIngredients);
+                            setForm(prev => ({
+                              ...prev,
+                              allergen_tags: allergens
+                            }));
                           }}
                           placeholder="Select sauce ingredients..."
                         />
@@ -1272,6 +1338,13 @@ function CreateDishModal({ onSubmit, onCancel, availableIngredients, restaurant 
                             if (ingredients.length > toppingIngredients.length) {
                               setTimeout(() => setShowToppingCategory(false), 1500);
                             }
+                            // Update allergens
+                            const allIngredients = [...baseIngredients, ...sideIngredients, ...sauceIngredients, ...ingredients];
+                            const allergens = calculateAllergensFromIngredients(allIngredients, availableIngredients);
+                            setForm(prev => ({
+                              ...prev,
+                              allergen_tags: allergens
+                            }));
                           }}
                           placeholder="Select topping ingredients..."
                         />
@@ -1432,6 +1505,24 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
     allergen_tags: dish.allergen_tags,
     is_modifiable: dish.is_modifiable,
   });
+  
+  // Optional ingredients states - load from dish.components if available
+  const [baseIngredients, setBaseIngredients] = useState<string[]>(dish.ingredients || []);
+  const [sideIngredients, setSideIngredients] = useState<string[]>(
+    dish.components?.find(c => c.category === 'side_dish')?.ingredients || []
+  );
+  const [sauceIngredients, setSauceIngredients] = useState<string[]>(
+    dish.components?.find(c => c.category === 'sauce')?.ingredients || []
+  );
+  const [toppingIngredients, setToppingIngredients] = useState<string[]>(
+    dish.components?.find(c => c.category === 'topping')?.ingredients || []
+  );
+  
+  // Individual category visibility states
+  const [showSideCategory, setShowSideCategory] = useState(false);
+  const [showSauceCategory, setShowSauceCategory] = useState(false); 
+  const [showToppingCategory, setShowToppingCategory] = useState(false);
+  
   const [error, setError] = useState("");
 
   // Debug logging
@@ -1451,11 +1542,15 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
   };
 
   const handleIngredientsChange = (ingredients: string[]) => {
-    const allergens = calculateAllergensFromIngredients(ingredients, availableIngredients);
+    setBaseIngredients(ingredients);
+    
+    // Calculate allergens from all ingredients (base + optional)
+    const allIngredients = [...ingredients, ...sideIngredients, ...sauceIngredients, ...toppingIngredients];
+    const allergens = calculateAllergensFromIngredients(allIngredients, availableIngredients);
     setForm(prev => ({ 
       ...prev, 
       ingredients,
-      allergen_tags: allergens // Auto-update allergens
+      allergen_tags: allergens
     }));
   };
 
@@ -1466,10 +1561,56 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
       return;
     }
     setError("");
-    console.log('🔍 EditDishForm submitting form data:', JSON.stringify(form, null, 2));
-    console.log('🔍 EditDishForm ingredients specifically:', form.ingredients);
-    console.log('🔍 EditDishForm allergen_tags specifically:', form.allergen_tags);
-    onSubmit(form);
+    
+    // Build components array from optional ingredients
+    const components = [];
+    
+    if (sideIngredients.length > 0) {
+      components.push({
+        name: "Side Dish",
+        category: "side_dish",
+        ingredients: sideIngredients,
+        allergen_tags: calculateAllergensFromIngredients(sideIngredients, availableIngredients),
+        is_optional: true,
+        additional_cost: 0
+      });
+    }
+    
+    if (sauceIngredients.length > 0) {
+      components.push({
+        name: "Sauce/Dip", 
+        category: "sauce",
+        ingredients: sauceIngredients,
+        allergen_tags: calculateAllergensFromIngredients(sauceIngredients, availableIngredients),
+        is_optional: true,
+        additional_cost: 0
+      });
+    }
+    
+    if (toppingIngredients.length > 0) {
+      components.push({
+        name: "Topping/Garnish",
+        category: "topping", 
+        ingredients: toppingIngredients,
+        allergen_tags: calculateAllergensFromIngredients(toppingIngredients, availableIngredients),
+        is_optional: true,
+        additional_cost: 0
+      });
+    }
+    
+    // Calculate all allergens
+    const allIngredients = [...baseIngredients, ...sideIngredients, ...sauceIngredients, ...toppingIngredients];
+    const allAllergens = calculateAllergensFromIngredients(allIngredients, availableIngredients);
+    
+    const submitData = {
+      ...form,
+      ingredients: baseIngredients, // Main ingredients only
+      allergen_tags: allAllergens, // All allergens combined
+      components: components // Optional ingredient components
+    };
+    
+    console.log('🔍 EditDishForm submitting with components:', submitData);
+    onSubmit(submitData);
   };
 
   return (
@@ -1565,13 +1706,268 @@ function EditDishForm({ dish, onSubmit, onCancel, availableIngredients, restaura
           />
         </div>
 
+        {/* Base Ingredients */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Ingredients</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Base Ingredients</label>
           <IngredientSelector 
-            selectedIngredients={Array.isArray(form.ingredients) ? form.ingredients : []}
+            selectedIngredients={baseIngredients}
             availableIngredients={availableIngredients}
             onChange={handleIngredientsChange}
           />
+        </div>
+
+        {/* Optional Categories - Same as CreateDishModal */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium text-gray-800">Optional Categories</h4>
+            <button
+              type="button"
+              onClick={() => {
+                const anyExpanded = showSideCategory || showSauceCategory || showToppingCategory;
+                if (anyExpanded) {
+                  setShowSideCategory(false);
+                  setShowSauceCategory(false);
+                  setShowToppingCategory(false);
+                } else {
+                  setShowSideCategory(true);
+                  setShowSauceCategory(true);
+                  setShowToppingCategory(true);
+                }
+              }}
+              className="flex items-center gap-1 text-xs text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              {(showSideCategory || showSauceCategory || showToppingCategory) ? 'Collapse All' : 'Expand All'}
+              <svg 
+                className={`w-4 h-4 transition-transform ${(showSideCategory || showSauceCategory || showToppingCategory) ? 'rotate-180' : ''}`}
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+          </div>
+
+          {(showSideCategory || showSauceCategory || showToppingCategory) ? (
+            // Expanded view - individual boxes based on state
+            <>
+              {/* Side Dish */}
+              {showSideCategory && (
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">🥗</span>
+                      <h4 className="font-medium text-gray-900">Side Dish</h4>
+                      <span className="px-2 py-1 text-xs rounded-full font-medium bg-green-100 text-green-700 border border-green-200">
+                        Optional
+                      </span>
+                      {sideIngredients.length > 0 && (
+                        <span className="px-2 py-1 text-xs rounded-full font-medium bg-blue-100 text-blue-700 border border-blue-200">
+                          {sideIngredients.length} selected
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {sideIngredients.length > 0 && (
+                        <button 
+                          type="button"
+                          onClick={() => setSideIngredients([])}
+                          className="px-2 py-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                        >
+                          Clear
+                        </button>
+                      )}
+                      <button 
+                        type="button"
+                        onClick={() => setShowSideCategory(false)}
+                        className="px-2 py-1 text-xs text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                      >
+                        Done
+                      </button>
+                    </div>
+                  </div>
+                  <IngredientSelector 
+                    selectedIngredients={sideIngredients}
+                    availableIngredients={availableIngredients}
+                    onChange={(ingredients) => {
+                      setSideIngredients(ingredients);
+                      // Auto-collapse after selection if ingredients were added
+                      if (ingredients.length > sideIngredients.length) {
+                        setTimeout(() => setShowSideCategory(false), 1500);
+                      }
+                      // Update allergens
+                      const allIngredients = [...baseIngredients, ...ingredients, ...sauceIngredients, ...toppingIngredients];
+                      const allergens = calculateAllergensFromIngredients(allIngredients, availableIngredients);
+                      setForm(prev => ({
+                        ...prev,
+                        allergen_tags: allergens
+                      }));
+                    }}
+                    placeholder="Select side ingredients..."
+                  />
+                </div>
+              )}
+
+              {/* Sauce/Dip */}
+              {showSauceCategory && (
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">🫙</span>
+                      <h4 className="font-medium text-gray-900">Sauce/Dip</h4>
+                      <span className="px-2 py-1 text-xs rounded-full font-medium bg-green-100 text-green-700 border border-green-200">
+                        Optional
+                      </span>
+                      {sauceIngredients.length > 0 && (
+                        <span className="px-2 py-1 text-xs rounded-full font-medium bg-blue-100 text-blue-700 border border-blue-200">
+                          {sauceIngredients.length} selected
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {sauceIngredients.length > 0 && (
+                        <button 
+                          type="button"
+                          onClick={() => setSauceIngredients([])}
+                          className="px-2 py-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                        >
+                          Clear
+                        </button>
+                      )}
+                      <button 
+                        type="button"
+                        onClick={() => setShowSauceCategory(false)}
+                        className="px-2 py-1 text-xs text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                      >
+                        Done
+                      </button>
+                    </div>
+                  </div>
+                  <IngredientSelector 
+                    selectedIngredients={sauceIngredients}
+                    availableIngredients={availableIngredients}
+                    onChange={(ingredients) => {
+                      setSauceIngredients(ingredients);
+                      // Auto-collapse after selection if ingredients were added
+                      if (ingredients.length > sauceIngredients.length) {
+                        setTimeout(() => setShowSauceCategory(false), 1500);
+                      }
+                      // Update allergens
+                      const allIngredients = [...baseIngredients, ...sideIngredients, ...ingredients, ...toppingIngredients];
+                      const allergens = calculateAllergensFromIngredients(allIngredients, availableIngredients);
+                      setForm(prev => ({
+                        ...prev,
+                        allergen_tags: allergens
+                      }));
+                    }}
+                    placeholder="Select sauce ingredients..."
+                  />
+                </div>
+              )}
+
+              {/* Topping/Garnish */}
+              {showToppingCategory && (
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">🌿</span>
+                      <h4 className="font-medium text-gray-900">Topping/Garnish</h4>
+                      <span className="px-2 py-1 text-xs rounded-full font-medium bg-green-100 text-green-700 border border-green-200">
+                        Optional
+                      </span>
+                      {toppingIngredients.length > 0 && (
+                        <span className="px-2 py-1 text-xs rounded-full font-medium bg-blue-100 text-blue-700 border border-blue-200">
+                          {toppingIngredients.length} selected
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {toppingIngredients.length > 0 && (
+                        <button 
+                          type="button"
+                          onClick={() => setToppingIngredients([])}
+                          className="px-2 py-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                        >
+                          Clear
+                        </button>
+                      )}
+                      <button 
+                        type="button"
+                        onClick={() => setShowToppingCategory(false)}
+                        className="px-2 py-1 text-xs text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                      >
+                        Done
+                      </button>
+                    </div>
+                  </div>
+                  <IngredientSelector 
+                    selectedIngredients={toppingIngredients}
+                    availableIngredients={availableIngredients}
+                    onChange={(ingredients) => {
+                      setToppingIngredients(ingredients);
+                      // Auto-collapse after selection if ingredients were added
+                      if (ingredients.length > toppingIngredients.length) {
+                        setTimeout(() => setShowToppingCategory(false), 1500);
+                      }
+                      // Update allergens
+                      const allIngredients = [...baseIngredients, ...sideIngredients, ...sauceIngredients, ...ingredients];
+                      const allergens = calculateAllergensFromIngredients(allIngredients, availableIngredients);
+                      setForm(prev => ({
+                        ...prev,
+                        allergen_tags: allergens
+                      }));
+                    }}
+                    placeholder="Select topping ingredients..."
+                  />
+                </div>
+              )}
+            </>
+          ) : (
+            // Collapsed view - compact buttons
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => setShowSideCategory(true)}
+                className={`p-3 border border-dashed rounded-lg text-xs transition-colors text-center ${
+                  sideIngredients.length > 0 
+                    ? 'border-green-400 bg-green-50 text-green-700' 
+                    : 'border-gray-300 text-gray-600 hover:border-gray-400 hover:text-gray-800'
+                }`}
+              >
+                <div className="text-lg mb-1">🥗</div>
+                <div className="font-medium">Side Dish</div>
+                {sideIngredients.length > 0 && <div className="text-xs mt-1">{sideIngredients.length} selected</div>}
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => setShowSauceCategory(true)}
+                className={`p-3 border border-dashed rounded-lg text-xs transition-colors text-center ${
+                  sauceIngredients.length > 0 
+                    ? 'border-green-400 bg-green-50 text-green-700' 
+                    : 'border-gray-300 text-gray-600 hover:border-gray-400 hover:text-gray-800'
+                }`}
+              >
+                <div className="text-lg mb-1">🫙</div>
+                <div className="font-medium">Sauce/Dip</div>
+                {sauceIngredients.length > 0 && <div className="text-xs mt-1">{sauceIngredients.length} selected</div>}
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => setShowToppingCategory(true)}
+                className={`p-3 border border-dashed rounded-lg text-xs transition-colors text-center ${
+                  toppingIngredients.length > 0 
+                    ? 'border-green-400 bg-green-50 text-green-700' 
+                    : 'border-gray-300 text-gray-600 hover:border-gray-400 hover:text-gray-800'
+                }`}
+              >
+                <div className="text-lg mb-1">🌿</div>
+                <div className="font-medium">Topping</div>
+                {toppingIngredients.length > 0 && <div className="text-xs mt-1">{toppingIngredients.length} selected</div>}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Auto-calculated Allergens Display */}
