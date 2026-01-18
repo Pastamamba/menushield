@@ -1360,7 +1360,21 @@ app.post(
 app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    let updateData = req.body;
+    
+    // Parse updateData if it's a string (JSON stringified)
+    if (typeof updateData === 'string') {
+      try {
+        updateData = JSON.parse(updateData);
+      } catch (e) {
+        return res.status(400).json({
+          error: "Invalid request body",
+          message: "updateData must be valid JSON or an object",
+          details: e.message
+        });
+      }
+    }
+    
     const userId = req.user.userId || req.user.id; // Handle both userId and id fields
 
     console.log("PUT /api/admin/menu/:id - Update dish request:", {
