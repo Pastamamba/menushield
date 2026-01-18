@@ -27,6 +27,56 @@ async function main() {
   const categories = await Promise.all([
     prisma.category.create({
       data: {
+        name: "Appetizer",
+        description: "Starter dishes",
+        color: "#f97316",
+      },
+    }),
+    prisma.category.create({
+      data: {
+        name: "Main Course",
+        description: "Main dishes",
+        color: "#ef4444",
+      },
+    }),
+    prisma.category.create({
+      data: {
+        name: "Dessert",
+        description: "Sweet dishes",
+        color: "#ec4899",
+      },
+    }),
+    prisma.category.create({
+      data: {
+        name: "Beverage",
+        description: "Drinks",
+        color: "#3b82f6",
+      },
+    }),
+    prisma.category.create({
+      data: {
+        name: "Salad",
+        description: "Salads",
+        color: "#22c55e",
+      },
+    }),
+    prisma.category.create({
+      data: {
+        name: "Soup",
+        description: "Soups",
+        color: "#f59e0b",
+      },
+    }),
+    prisma.category.create({
+      data: {
+        name: "Side Dish",
+        description: "Side dishes",
+        color: "#8b5cf6",
+      },
+    }),
+    // Ingredient categories
+    prisma.category.create({
+      data: {
         name: "Proteins",
         description: "Meat, fish, and plant-based proteins",
         color: "#ef4444",
