@@ -1360,6 +1360,24 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
       updateData: JSON.stringify(updateData, null, 2),
     });
 
+    // Check if this is a local dish ID (from frontend fallback)
+    if (id.startsWith("local-")) {
+      return res.status(400).json({
+        error: "Cannot update local dishes",
+        message: "This dish was created locally. Please refresh the page and recreate it.",
+        dishId: id,
+      });
+    }
+
+    // Validate MongoDB ObjectID format
+    if (!id.match(/^[0-9a-f]{24}$/i)) {
+      return res.status(400).json({
+        error: "Invalid dish ID format",
+        message: "Dish ID must be a valid MongoDB ObjectID",
+        dishId: id,
+      });
+    }
+
     console.log("PUT /api/admin/menu/:id - req.user:", req.user);
     console.log("PUT /api/admin/menu/:id - userId extracted:", userId);
 
@@ -1561,6 +1579,24 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
 app.delete("/api/admin/menu/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Check if this is a local dish ID (from frontend fallback)
+    if (id.startsWith("local-")) {
+      return res.status(400).json({
+        error: "Cannot delete local dishes",
+        message: "This dish was created locally. Please refresh the page.",
+        dishId: id,
+      });
+    }
+
+    // Validate MongoDB ObjectID format
+    if (!id.match(/^[0-9a-f]{24}$/i)) {
+      return res.status(400).json({
+        error: "Invalid dish ID format",
+        message: "Dish ID must be a valid MongoDB ObjectID",
+        dishId: id,
+      });
+    }
 
     await prisma.dish.delete({
       where: { id },
