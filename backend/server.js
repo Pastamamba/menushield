@@ -1269,13 +1269,22 @@ app.post(
       console.log("🔍 Creating dish with user:", req.user);
       console.log("🔍 Request body:", req.body);
 
+      // If category name is provided, find or use it by name
+      let categoryId = null;
+      if (category) {
+        const categoryRecord = await prisma.category.findFirst({
+          where: { name: category }
+        });
+        categoryId = categoryRecord?.id || null;
+      }
+
       const newDish = await prisma.dish.create({
         data: {
           name,
           description: description || "",
           price:
             typeof price === "string" ? parseFloat(price) || 0 : price || 0,
-          category: category || "", // Add category field
+          categoryId: categoryId, // Use categoryId instead of category string
           allergenTags: JSON.stringify(allergen_tags),
           modificationNote: modification_note || null,
           isModifiable: is_modifiable || false,
@@ -1433,7 +1442,13 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
     if (updateData.description !== undefined)
       prismaData.description = updateData.description;
     if (updateData.price !== undefined) prismaData.price = updateData.price;
-    if (updateData.category !== undefined) prismaData.category = updateData.category;
+    if (updateData.category !== undefined) {
+      // If category name is provided, find the category ID
+      const categoryRecord = await prisma.category.findFirst({
+        where: { name: updateData.category }
+      });
+      prismaData.categoryId = categoryRecord?.id || null;
+    }
     if (updateData.allergen_tags !== undefined)
       prismaData.allergenTags = JSON.stringify(updateData.allergen_tags || []);
     if (updateData.modification_note !== undefined)
