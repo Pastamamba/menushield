@@ -1273,7 +1273,12 @@ app.post(
       let categoryId = null;
       if (category) {
         const categoryRecord = await prisma.category.findFirst({
-          where: { name: category }
+          where: { 
+            name: {
+              equals: category,
+              mode: 'insensitive'
+            }
+          }
         });
         categoryId = categoryRecord?.id || null;
       }
@@ -1457,9 +1462,14 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
       prismaData.description = updateData.description;
     if (updateData.price !== undefined) prismaData.price = updateData.price;
     if (updateData.category !== undefined) {
-      // If category name is provided, find the category ID
+      // If category name is provided, find the category ID (case-insensitive)
       const categoryRecord = await prisma.category.findFirst({
-        where: { name: updateData.category }
+        where: { 
+          name: {
+            equals: updateData.category,
+            mode: 'insensitive'
+          }
+        }
       });
       prismaData.categoryId = categoryRecord?.id || null;
     }
