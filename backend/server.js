@@ -1275,6 +1275,7 @@ app.post(
           description: description || "",
           price:
             typeof price === "string" ? parseFloat(price) || 0 : price || 0,
+          category: category || "", // Add category field
           allergenTags: JSON.stringify(allergen_tags),
           modificationNote: modification_note || null,
           isModifiable: is_modifiable || false,
