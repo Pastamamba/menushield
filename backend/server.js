@@ -1433,6 +1433,7 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
     if (updateData.description !== undefined)
       prismaData.description = updateData.description;
     if (updateData.price !== undefined) prismaData.price = updateData.price;
+    if (updateData.category !== undefined) prismaData.category = updateData.category;
     if (updateData.allergen_tags !== undefined)
       prismaData.allergenTags = JSON.stringify(updateData.allergen_tags || []);
     if (updateData.modification_note !== undefined)
