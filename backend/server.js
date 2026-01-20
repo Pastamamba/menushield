@@ -1225,7 +1225,7 @@ app.get("/api/admin/menu", requireAuth, async (req, res) => {
           modification_note: dish.modificationNote,
           is_modifiable: dish.isModifiable,
           is_active: dish.isActive !== undefined ? dish.isActive : true,
-          components: [],
+          components: JSON.parse(dish.components || "[]"),
           created_at: dish.createdAt,
           updated_at: dish.updatedAt,
         };
@@ -1291,6 +1291,7 @@ app.post(
             typeof price === "string" ? parseFloat(price) || 0 : price || 0,
           categoryId: categoryId, // Use categoryId instead of category string
           allergenTags: JSON.stringify(allergen_tags),
+          components: JSON.stringify(components || []),
           modificationNote: modification_note || null,
           isModifiable: is_modifiable || false,
           isActive: is_active !== undefined ? is_active : true,
@@ -1487,6 +1488,8 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
       prismaData.displayOrder = updateData.display_order;
     if (updateData.image_url !== undefined)
       prismaData.imageUrl = updateData.image_url;
+    if (updateData.components !== undefined)
+      prismaData.components = JSON.stringify(updateData.components || []);
 
     console.log(
       "PUT /api/admin/menu/:id - Prisma update data:",
@@ -1596,6 +1599,7 @@ app.put("/api/admin/menu/:id", requireAuth, async (req, res) => {
       category: updatedDish.category,
       ingredients: ingredientsList,
       allergen_tags: JSON.parse(updatedDish.allergenTags || "[]"),
+      components: JSON.parse(updatedDish.components || "[]"),
       modification_note: updatedDish.modificationNote,
       is_modifiable: updatedDish.isModifiable,
       is_active: updatedDish.isActive,

@@ -113,6 +113,7 @@ model Dish {
   description      String?
   price            Float?
   allergenTags     String   @map("allergen_tags")
+  components       String?  @map("components")
   modificationNote String?  @map("modification_note")
   isModifiable     Boolean  @default(false) @map("is_modifiable")
   isActive         Boolean  @default(true) @map("is_active")
