@@ -16,6 +16,7 @@ export default function GuestMenu() {
   const { restaurant } = useRestaurant();
   const { t, currentLanguage } = useMenuTranslations();
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [showMobileFilter, setShowMobileFilter] = useState(false);
   const [showAllergenDisclaimer, setShowAllergenDisclaimer] = useState(false);
@@ -244,9 +245,26 @@ export default function GuestMenu() {
     );
   }
 
-  // Filter dishes based on active status only
+  // Get unique categories from dishes
+  const availableCategories = Array.from(new Set(
+    dishes.map(dish => dish.category || "Other").filter(Boolean)
+  )).sort();
+
+  // Filter dishes based on search term, category and active status
   let filteredDishes = dishes.filter((dish) => {
-    return dish.is_active !== false;
+    const matchesSearch =
+      searchTerm === "" ||
+      dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      dish.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      dish.ingredients.some((ingredient) =>
+        ingredient.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    
+    const matchesCategory = selectedCategory === "all" || 
+      (dish.category || "Other") === selectedCategory;
+    
+    // Only show active dishes
+    return dish.is_active !== false && matchesSearch && matchesCategory;
   });
 
   // Categorize dishes by safety level - Keep unsafe dishes visible but clearly marked
@@ -324,9 +342,9 @@ export default function GuestMenu() {
                   />
                 </svg>
                 <span className="font-medium text-xs">{t("filter")}</span>
-                {selectedAllergens.length > 0 && (
+                {(selectedAllergens.length > 0 || selectedCategory !== "all") && (
                   <span className="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[18px] font-semibold">
-                    {selectedAllergens.length}
+                    {selectedAllergens.length + (selectedCategory !== "all" ? 1 : 0)}
                   </span>
                 )}
               </button>
@@ -435,21 +453,43 @@ export default function GuestMenu() {
               </div>
 
               {/* Drawer Content */}
-              <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
-                <AllergenFilter
-                  selectedAllergens={selectedAllergens}
-                  onAllergenToggle={(allergen) => {
-                    setSelectedAllergens((prev) =>
-                      prev.includes(allergen)
-                        ? prev.filter((a) => a !== allergen)
-                        : [...prev, allergen]
-                    );
-                  }}
-                  searchTerm={searchTerm}
-                  onSearchChange={setSearchTerm}
-                  searchPlaceholder="Search ingredients, allergens..."
-                  isMobile={true}
-                />
+              <div className="flex-1 overflow-y-auto p-4 bg-gray-50 space-y-6">
+                {/* Category Filter */}
+                <div className="bg-white rounded-lg p-4 border border-gray-100">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    {t("category") || "Category"}
+                  </label>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-colors text-sm"
+                  >
+                    <option value="all">{t("allCategories") || "All Categories"} ({dishes.length})</option>
+                    {availableCategories.map(category => (
+                      <option key={category} value={category}>
+                        {category} ({dishes.filter(d => (d.category || "Other") === category).length})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Allergen Filter */}
+                <div className="bg-white rounded-lg border border-gray-100">
+                  <AllergenFilter
+                    selectedAllergens={selectedAllergens}
+                    onAllergenToggle={(allergen) => {
+                      setSelectedAllergens((prev) =>
+                        prev.includes(allergen)
+                          ? prev.filter((a) => a !== allergen)
+                          : [...prev, allergen]
+                      );
+                    }}
+                    searchTerm={searchTerm}
+                    onSearchChange={setSearchTerm}
+                    searchPlaceholder="Search ingredients, allergens..."
+                    isMobile={true}
+                  />
+                </div>
               </div>
 
               {/* Drawer Footer - Clean design matching admin */}
@@ -473,9 +513,12 @@ export default function GuestMenu() {
                   </svg>
                   <span className="text-sm">{t("showSafeDishes")}</span>
                 </button>
-                {selectedAllergens.length > 0 && (
+                {(selectedAllergens.length > 0 || selectedCategory !== "all") && (
                   <button
-                    onClick={() => setSelectedAllergens([])}
+                    onClick={() => {
+                      setSelectedAllergens([]);
+                      setSelectedCategory("all");
+                    }}
                     className="w-full mt-3 text-gray-600 py-2 text-sm hover:text-gray-800 font-medium transition-colors"
                   >
                     Clear all filters
@@ -552,8 +595,51 @@ export default function GuestMenu() {
           </div>
         )}
 
-        {/* Desktop Allergen Filter */}
-        <div className="hidden lg:block mb-6">
+        {/* Desktop Filters - Elegant and minimal */}
+        <div className="hidden lg:block mb-6 space-y-4">
+          {/* Category Filter */}
+          <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-gray-700">
+                {t("filterByCategory") || "Filter by Category"}
+              </h3>
+              {selectedCategory !== "all" && (
+                <button
+                  onClick={() => setSelectedCategory("all")}
+                  className="text-xs text-sage-600 hover:text-sage-700 font-medium"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setSelectedCategory("all")}
+                className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+                  selectedCategory === "all"
+                    ? "bg-sage-100 text-sage-800 border border-sage-300"
+                    : "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200"
+                }`}
+              >
+                All ({dishes.length})
+              </button>
+              {availableCategories.map(category => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+                    selectedCategory === category
+                      ? "bg-sage-100 text-sage-800 border border-sage-300"
+                      : "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200"
+                  }`}
+                >
+                  {category} ({dishes.filter(d => (d.category || "Other") === category).length})
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Allergen Filter */}
           <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
             <AllergenFilter
               selectedAllergens={selectedAllergens}

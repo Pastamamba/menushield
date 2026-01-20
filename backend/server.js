@@ -468,6 +468,12 @@ app.get("/api/menu", async (req, res) => {
           isActive: true,
         },
         include: {
+          category: {
+            select: {
+              name: true,
+              color: true,
+            },
+          },
           dishIngredients: {
             include: {
               ingredient: true
@@ -573,7 +579,7 @@ app.get("/api/menu", async (req, res) => {
         name: translatedDish.name,
         description: translatedDish.description,
         price: dish.price,
-        category: dish.category,
+        category: dish.category?.name || null,
         ingredients: ingredients,
         allergen_tags: allergenTags,
         modification_note: translatedDish.modificationNote,
@@ -2177,6 +2183,14 @@ app.get("/api/menu/by-slug/:slug", async (req, res) => {
         restaurantId: restaurant.id,
         isActive: true,
       },
+      include: {
+        category: {
+          select: {
+            name: true,
+            color: true,
+          },
+        },
+      },
       orderBy: { displayOrder: "asc" },
     });
 
@@ -2190,6 +2204,7 @@ app.get("/api/menu/by-slug/:slug", async (req, res) => {
         name: translatedDish.name,
         description: translatedDish.description,
         modificationNote: translatedDish.modificationNote,
+        category: dish.category?.name || null,
         allergen_tags: JSON.parse(dish.allergenTags || "[]"),
         modification_note: translatedDish.modificationNote,
         is_modifiable: dish.isModifiable,

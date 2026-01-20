@@ -15,6 +15,7 @@ export default function GuestMenuMultilingual() {
   const { data: restaurant } = useRestaurant();
   const { currentLanguage } = useLanguage();
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [showMobileFilter, setShowMobileFilter] = useState(false);
   const menuSectionRef = useRef<HTMLDivElement>(null);
@@ -54,12 +55,17 @@ export default function GuestMenuMultilingual() {
     }, 300);
   };
 
-  // Filter dishes based on search term (now searches in current language)
+  // Get unique categories from dishes
+  const availableCategories = Array.from(new Set(
+    dishes.map(dish => dish.category || "Other").filter(Boolean)
+  )).sort();
+
+  // Filter dishes based on search term and category (now searches in current language)
   const filteredDishes = dishes.filter(dish => {
     const translatedDish = getTranslatedDish(dish, currentLanguage);
     const searchLower = searchTerm.toLowerCase();
     
-    return (
+    const matchesSearch = (
       translatedDish.name.toLowerCase().includes(searchLower) ||
       translatedDish.description.toLowerCase().includes(searchLower) ||
       (dish.ingredients || []).some(ingredient => 
@@ -67,6 +73,11 @@ export default function GuestMenuMultilingual() {
           .toLowerCase().includes(searchLower)
       )
     );
+    
+    const matchesCategory = selectedCategory === "all" || 
+      (dish.category || "Other") === selectedCategory;
+    
+    return matchesSearch && matchesCategory;
   });
 
   // Analyze dish safety and categorize
@@ -278,12 +289,17 @@ export default function GuestMenuMultilingual() {
               {/* Mobile filter toggle */}
               <button
                 onClick={() => setShowMobileFilter(true)}
-                className="md:hidden flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium"
+                className="md:hidden flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium relative"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z" />
                 </svg>
                 Filter
+                {(selectedAllergens.length > 0 || selectedCategory !== "all") && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[18px] font-semibold">
+                    {selectedAllergens.length + (selectedCategory !== "all" ? 1 : 0)}
+                  </span>
+                )}
               </button>
             </div>
           </div>
@@ -294,14 +310,49 @@ export default function GuestMenuMultilingual() {
         <div className="lg:grid lg:grid-cols-4 lg:gap-8">
           {/* Desktop Filter Sidebar */}
           <div className="hidden lg:block lg:col-span-1">
-            <div className="sticky top-24">
-              <AllergenFilter
-                selectedAllergens={selectedAllergens}
-                onSelectionChange={setSelectedAllergens}
-                searchTerm={searchTerm}
-                onSearchChange={setSearchTerm}
-                searchPlaceholder={getLocalizedText('search_placeholder')}
-              />
+            <div className="sticky top-24 space-y-4">
+              {/* Category Filter */}
+              <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">
+                  {getLocalizedText('filter_by_category') || 'Filter by Category'}
+                </h3>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => setSelectedCategory("all")}
+                    className={`w-full text-left px-3 py-2 text-sm rounded-md transition-colors ${
+                      selectedCategory === "all"
+                        ? "bg-blue-100 text-blue-800 border border-blue-300"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    All Categories ({dishes.length})
+                  </button>
+                  {availableCategories.map(category => (
+                    <button
+                      key={category}
+                      onClick={() => setSelectedCategory(category)}
+                      className={`w-full text-left px-3 py-2 text-sm rounded-md transition-colors ${
+                        selectedCategory === category
+                          ? "bg-blue-100 text-blue-800 border border-blue-300"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      {category} ({dishes.filter(d => (d.category || "Other") === category).length})
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Allergen Filter */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-100">
+                <AllergenFilter
+                  selectedAllergens={selectedAllergens}
+                  onSelectionChange={setSelectedAllergens}
+                  searchTerm={searchTerm}
+                  onSearchChange={setSearchTerm}
+                  searchPlaceholder={getLocalizedText('search_placeholder')}
+                />
+              </div>
             </div>
           </div>
 
@@ -371,23 +422,56 @@ export default function GuestMenuMultilingual() {
               </button>
             </div>
             
-            <div className="p-4 overflow-y-auto">
-              <AllergenFilter
-                selectedAllergens={selectedAllergens}
-                onSelectionChange={setSelectedAllergens}
-                searchTerm={searchTerm}
-                onSearchChange={setSearchTerm}
-                searchPlaceholder={getLocalizedText('search_placeholder')}
-              />
+            <div className="p-4 overflow-y-auto space-y-6">
+              {/* Category Filter */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-gray-700 mb-3">
+                  {getLocalizedText('filter_by_category') || 'Filter by Category'}
+                </h4>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm"
+                >
+                  <option value="all">All Categories ({dishes.length})</option>
+                  {availableCategories.map(category => (
+                    <option key={category} value={category}>
+                      {category} ({dishes.filter(d => (d.category || "Other") === category).length})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Allergen Filter */}
+              <div className="bg-white rounded-lg border border-gray-200">
+                <AllergenFilter
+                  selectedAllergens={selectedAllergens}
+                  onSelectionChange={setSelectedAllergens}
+                  searchTerm={searchTerm}
+                  onSearchChange={setSearchTerm}
+                  searchPlaceholder={getLocalizedText('search_placeholder')}
+                />
+              </div>
             </div>
             
-            <div className="p-4 border-t bg-gray-50">
+            <div className="p-4 border-t bg-gray-50 space-y-3">
               <button
                 onClick={scrollToMenu}
                 className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium"
               >
                 Show Results ({filteredDishes.length})
               </button>
+              {(selectedAllergens.length > 0 || selectedCategory !== "all") && (
+                <button
+                  onClick={() => {
+                    setSelectedAllergens([]);
+                    setSelectedCategory("all");
+                  }}
+                  className="w-full text-gray-600 py-2 text-sm hover:text-gray-800 font-medium transition-colors"
+                >
+                  Clear all filters
+                </button>
+              )}
             </div>
           </div>
         </div>
