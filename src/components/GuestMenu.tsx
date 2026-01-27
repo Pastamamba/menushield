@@ -27,18 +27,18 @@ export default function GuestMenu() {
   const swipeRef = useSwipeNavigation(
     () => setShowMobileFilter(false), // Swipe left to close
     undefined,
-    75
+    75,
   );
 
   // Check if user has accepted the allergen disclaimer
   useEffect(() => {
     const hasAcceptedDisclaimer = localStorage.getItem(
-      "allergen-disclaimer-accepted"
+      "allergen-disclaimer-accepted",
     );
     if (!hasAcceptedDisclaimer) {
       setShowAllergenDisclaimer(true);
     }
-    
+
     // Check if user has seen welcome info before
     const hasSeenWelcomeInfo = localStorage.getItem("welcome-info-seen");
     if (hasSeenWelcomeInfo) {
@@ -50,7 +50,7 @@ export default function GuestMenu() {
   useEffect(() => {
     if (selectedAllergens.length > 0) {
       const hasSeenAllergenDisclaimer = localStorage.getItem(
-        "allergen-disclaimer-seen"
+        "allergen-disclaimer-seen",
       );
       if (!hasSeenAllergenDisclaimer) {
         setShowAllergenDisclaimer(true);
@@ -246,9 +246,9 @@ export default function GuestMenu() {
   }
 
   // Get unique categories from dishes
-  const availableCategories = Array.from(new Set(
-    dishes.map(dish => dish.category || "Other").filter(Boolean)
-  )).sort();
+  const availableCategories = Array.from(
+    new Set(dishes.map((dish) => dish.category || "Other").filter(Boolean)),
+  ).sort();
 
   // Filter dishes based on search term, category and active status
   let filteredDishes = dishes.filter((dish) => {
@@ -257,12 +257,13 @@ export default function GuestMenu() {
       dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       dish.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       dish.ingredients.some((ingredient) =>
-        ingredient.toLowerCase().includes(searchTerm.toLowerCase())
+        ingredient.toLowerCase().includes(searchTerm.toLowerCase()),
       );
-    
-    const matchesCategory = selectedCategory === "all" || 
+
+    const matchesCategory =
+      selectedCategory === "all" ||
       (dish.category || "Other") === selectedCategory;
-    
+
     // Only show active dishes
     return dish.is_active !== false && matchesSearch && matchesCategory;
   });
@@ -283,7 +284,7 @@ export default function GuestMenu() {
         dish: Dish;
         safety: ReturnType<typeof analyzeDishSafety>;
       }>,
-    }
+    },
   );
 
   return (
@@ -342,9 +343,11 @@ export default function GuestMenu() {
                   />
                 </svg>
                 <span className="font-medium text-xs">{t("filter")}</span>
-                {(selectedAllergens.length > 0 || selectedCategory !== "all") && (
+                {(selectedAllergens.length > 0 ||
+                  selectedCategory !== "all") && (
                   <span className="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[18px] font-semibold">
-                    {selectedAllergens.length + (selectedCategory !== "all" ? 1 : 0)}
+                    {selectedAllergens.length +
+                      (selectedCategory !== "all" ? 1 : 0)}
                   </span>
                 )}
               </button>
@@ -421,22 +424,22 @@ export default function GuestMenu() {
           >
             <div className="flex flex-col h-full">
               {/* Drawer Header - Clean minimal design matching admin */}
-              <div className="p-4 border-b border-gray-100 bg-white">
+              <div className="p-4 border-b border-sage-200 bg-gradient-to-r from-sage-600 to-sage-500">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-lg font-medium text-gray-900">
+                    <h2 className="text-lg font-medium text-white">
                       {t("filterMenu")}
                     </h2>
-                    <p className="text-sm text-gray-500 mt-0.5">
+                    <p className="text-sage-100 mt-0.5 text-sm">
                       {t("findSafeDishes")}
                     </p>
                   </div>
                   <button
                     onClick={() => setShowMobileFilter(false)}
-                    className="p-2 rounded-md hover:bg-gray-100 transition-colors"
+                    className="p-2 rounded-md hover:bg-white/20 transition-colors"
                   >
                     <svg
-                      className="w-5 h-5 text-gray-600"
+                      className="w-5 h-5 text-white"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -453,7 +456,7 @@ export default function GuestMenu() {
               </div>
 
               {/* Drawer Content */}
-              <div className="flex-1 overflow-y-auto p-4 bg-gray-50 space-y-6">
+              <div className="flex-1 overflow-y-auto p-4 bg-warm-gray-50 space-y-6">
                 {/* Category Filter */}
                 <div className="bg-white rounded-lg p-4 border border-gray-100">
                   <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -464,10 +467,18 @@ export default function GuestMenu() {
                     onChange={(e) => setSelectedCategory(e.target.value)}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-colors text-sm"
                   >
-                    <option value="all">{t("allCategories") || "All Categories"} ({dishes.length})</option>
-                    {availableCategories.map(category => (
+                    <option value="all">
+                      {t("All") || "All"} ({dishes.length})
+                    </option>
+                    {availableCategories.map((category) => (
                       <option key={category} value={category}>
-                        {category} ({dishes.filter(d => (d.category || "Other") === category).length})
+                        {category} (
+                        {
+                          dishes.filter(
+                            (d) => (d.category || "Other") === category,
+                          ).length
+                        }
+                        )
                       </option>
                     ))}
                   </select>
@@ -481,7 +492,7 @@ export default function GuestMenu() {
                       setSelectedAllergens((prev) =>
                         prev.includes(allergen)
                           ? prev.filter((a) => a !== allergen)
-                          : [...prev, allergen]
+                          : [...prev, allergen],
                       );
                     }}
                     searchTerm={searchTerm}
@@ -493,10 +504,10 @@ export default function GuestMenu() {
               </div>
 
               {/* Drawer Footer - Clean design matching admin */}
-              <div className="border-t border-gray-100 p-4 bg-white">
+              <div className="border-t border-sage-200 p-4 bg-gradient-to-r from-sage-600 to-sage-500">
                 <button
                   onClick={scrollToMenu}
-                  className="w-full bg-gray-900 text-white py-3 rounded-md font-medium hover:bg-gray-800 transition-all duration-200 flex items-center justify-center min-h-[44px]"
+                  className="w-full bg-white text-sage-700 py-3 rounded-md font-medium hover:bg-sage-50 transition-all duration-200 flex items-center justify-center min-h-[44px] shadow-sm"
                 >
                   <svg
                     className="w-4 h-4 mr-2"
@@ -513,13 +524,14 @@ export default function GuestMenu() {
                   </svg>
                   <span className="text-sm">{t("showSafeDishes")}</span>
                 </button>
-                {(selectedAllergens.length > 0 || selectedCategory !== "all") && (
+                {(selectedAllergens.length > 0 ||
+                  selectedCategory !== "all") && (
                   <button
                     onClick={() => {
                       setSelectedAllergens([]);
                       setSelectedCategory("all");
                     }}
-                    className="w-full mt-3 text-gray-600 py-2 text-sm hover:text-gray-800 font-medium transition-colors"
+                    className="w-full mt-3 text-sage-100 py-2 text-sm hover:text-white font-medium transition-colors"
                   >
                     Clear all filters
                   </button>
@@ -531,7 +543,11 @@ export default function GuestMenu() {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 max-w-7xl mx-auto px-3 py-4" ref={menuSectionRef}>
+      <main
+        className="flex-1 w-full max-w-7xl mx-auto px-3 py-4 lg:w-[1200px]"
+        style={{ minHeight: "calc(100vh - 180px)" }}
+        ref={menuSectionRef}
+      >
         {/* Welcome Information - Show once per session */}
         {showWelcomeInfo && (
           <div className="mb-6 bg-gradient-to-r from-sage-50 to-green-50 border border-sage-200 rounded-lg p-4">
@@ -577,7 +593,7 @@ export default function GuestMenu() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Close button */}
               <button
                 onClick={() => {
@@ -587,8 +603,18 @@ export default function GuestMenu() {
                 className="text-sage-400 hover:text-sage-600 transition-colors p-1"
                 aria-label="Close welcome message"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
@@ -601,7 +627,7 @@ export default function GuestMenu() {
           <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-medium text-gray-700">
-                {t("filterByCategory") || "Filter by Category"}
+                {t("Category") || "Category"}
               </h3>
               {selectedCategory !== "all" && (
                 <button
@@ -623,7 +649,7 @@ export default function GuestMenu() {
               >
                 All ({dishes.length})
               </button>
-              {availableCategories.map(category => (
+              {availableCategories.map((category) => (
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
@@ -633,7 +659,12 @@ export default function GuestMenu() {
                       : "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200"
                   }`}
                 >
-                  {category} ({dishes.filter(d => (d.category || "Other") === category).length})
+                  {category} (
+                  {
+                    dishes.filter((d) => (d.category || "Other") === category)
+                      .length
+                  }
+                  )
                 </button>
               ))}
             </div>
@@ -647,7 +678,7 @@ export default function GuestMenu() {
                 setSelectedAllergens((prev) =>
                   prev.includes(allergen)
                     ? prev.filter((a) => a !== allergen)
-                    : [...prev, allergen]
+                    : [...prev, allergen],
                 );
               }}
               searchTerm={searchTerm}
@@ -658,7 +689,7 @@ export default function GuestMenu() {
         </div>
 
         {/* Dishes by Safety Level */}
-        <div className="space-y-6">
+        <div className="space-y-6" style={{ minHeight: "70vh" }}>
           {selectedAllergens.length === 0 ? (
             /* Show all dishes when no allergens selected */
             <section>
