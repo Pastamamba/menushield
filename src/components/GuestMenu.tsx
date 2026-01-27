@@ -544,8 +544,7 @@ export default function GuestMenu() {
 
       {/* Main Content */}
       <main
-        className="flex-1 w-full max-w-7xl mx-auto px-3 py-4 lg:w-[1200px]"
-        style={{ minHeight: "calc(100vh - 180px)" }}
+        className="flex-1 w-full mx-auto px-3 py-4 lg:max-w-[90vw] xl:max-w-[1200px] pb-8"
         ref={menuSectionRef}
       >
         {/* Welcome Information - Show once per session */}
@@ -689,7 +688,7 @@ export default function GuestMenu() {
         </div>
 
         {/* Dishes by Safety Level */}
-        <div className="space-y-6" style={{ minHeight: "70vh" }}>
+        <div className="space-y-6">
           {selectedAllergens.length === 0 ? (
             /* Show all dishes when no allergens selected */
             <section>
@@ -802,8 +801,8 @@ export default function GuestMenu() {
       </main>
 
       {/* Footer - Trust & Information */}
-      <footer className="bg-white border-t border-gray-100 mt-8">
-        <div className="max-w-7xl mx-auto px-3 py-6">
+      <footer className="bg-white border-t border-gray-100 lg:sticky lg:bottom-0 mt-auto">
+        <div className="max-w-7xl mx-auto px-3 py-3 lg:py-4">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-6 text-xs text-gray-500 mb-3">
               <div className="flex items-center">
