@@ -16,7 +16,6 @@ interface PasswordChangeForm {
 
 interface ProfileUpdateForm {
   email: string;
-  username: string;
   restaurantName: string;
 }
 
@@ -32,7 +31,6 @@ export default function ProfileInformation() {
   // Profile form state
   const [profileForm, setProfileForm] = useState<ProfileUpdateForm>({
     email: '',
-    username: '',
     restaurantName: ''
   });
   
@@ -104,7 +102,6 @@ export default function ProfileInformation() {
         const userData = await response.json();
         setProfileForm({
           email: userData.email || '',
-          username: userData.username || '',
           restaurantName: userData.restaurantName || ''
         });
       }

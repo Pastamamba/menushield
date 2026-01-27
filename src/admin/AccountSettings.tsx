@@ -13,7 +13,6 @@ interface PasswordChangeForm {
 
 interface ProfileUpdateForm {
   email: string;
-  username: string;
   restaurantName: string;
 }
 
@@ -26,7 +25,6 @@ export default function AccountSettings() {
   // Profile form state
   const [profileForm, setProfileForm] = useState<ProfileUpdateForm>({
     email: '',
-    username: '',
     restaurantName: ''
   });
   
@@ -64,7 +62,6 @@ export default function AccountSettings() {
         const userData = await response.json();
         setProfileForm({
           email: userData.email || '',
-          username: userData.username || '',
           restaurantName: userData.restaurantName || ''
         });
       }
@@ -232,18 +229,7 @@ export default function AccountSettings() {
                 />
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Username
-                </label>
-                <input
-                  type="text"
-                  value={profileForm.username}
-                  onChange={(e) => setProfileForm(prev => ({ ...prev, username: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
-                  placeholder="@username"
-                />
-              </div>
+
               
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
