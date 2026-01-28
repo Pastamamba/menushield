@@ -15,20 +15,32 @@ export default defineConfig(() => ({
         changeOrigin: true,
         secure: true,
         headers: {
-          'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization',
+          "Access-Control-Allow-Headers":
+            "Origin, X-Requested-With, Content-Type, Accept, Authorization",
         },
         configure: (proxy, options) => {
-          proxy.on('error', (err) => {
-            console.log('🚨 Proxy error:', err);
+          proxy.on("error", (err) => {
+            console.log("🚨 Proxy error:", err);
           });
-          proxy.on('proxyReq', (proxyReq, req) => {
-            console.log('📤 Proxying:', req.method, req.url || '', '→', (options.target || '') + (req.url || ''));
-            console.log('📤 Headers being sent:', proxyReq.getHeaders());
+          proxy.on("proxyReq", (proxyReq, req) => {
+            console.log(
+              "📤 Proxying:",
+              req.method,
+              req.url || "",
+              "→",
+              (options.target || "") + (req.url || ""),
+            );
+            console.log("📤 Headers being sent:", proxyReq.getHeaders());
           });
-          proxy.on('proxyRes', (proxyRes, req) => {
-            console.log('📥 Proxy response:', proxyRes.statusCode, 'for', req.url || '');
+          proxy.on("proxyRes", (proxyRes, req) => {
+            console.log(
+              "📥 Proxy response:",
+              proxyRes.statusCode,
+              "for",
+              req.url || "",
+            );
           });
-        }
+        },
       },
     },
   },

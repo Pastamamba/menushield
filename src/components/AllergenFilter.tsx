@@ -4,6 +4,7 @@ import {
   ALL_ALLERGENS,
 } from "../utils/dishAnalyzer";
 import { useMenuTranslations } from '../hooks/useMenuTranslations';
+import { getAllergenTranslation } from '../utils/allergenTranslations';
 
 // Mobile haptic feedback helper
 const handleTouchFeedback = () => {
@@ -35,7 +36,7 @@ export default function AllergenFilter({
   onSearchChange,
   searchPlaceholder = "Search ingredients, allergens...",
 }: AllergenFilterProps) {
-  const { t } = useMenuTranslations();
+  const { t, currentLanguage } = useMenuTranslations();
   const [ingredientsFromAPI, setIngredientsFromAPI] = useState<any[]>([]);
   const [searchResults, setSearchResults] = useState<any[]>([]);
 
@@ -43,7 +44,8 @@ export default function AllergenFilter({
   useEffect(() => {
     const fetchIngredients = async () => {
       try {
-        const response = await fetch('/api/ingredients?lang=en');
+        // Use current language parameter to get translated ingredients
+        const response = await fetch(`/api/ingredients?lang=${currentLanguage}`);
         if (response.ok) {
           const ingredients = await response.json();
           setIngredientsFromAPI(ingredients);
@@ -53,7 +55,7 @@ export default function AllergenFilter({
       }
     };
     fetchIngredients();
-  }, []);
+  }, [currentLanguage]);
 
   // Search through ingredients when search term changes
   useEffect(() => {
@@ -64,11 +66,16 @@ export default function AllergenFilter({
 
     const searchLower = searchTerm.toLowerCase();
     
-    // Search allergens first
-    const matchingAllergens = ALL_ALLERGENS.filter(allergen =>
-      allergen.name.toLowerCase().includes(searchLower) ||
-      allergen.id.toLowerCase().includes(searchLower)
-    );
+    // Search allergens first - include both English and translated names
+    const matchingAllergens = ALL_ALLERGENS.filter(allergen => {
+      const englishName = allergen.name.toLowerCase();
+      const translatedName = getAllergenTranslation(allergen.id, currentLanguage as any).toLowerCase();
+      const allergerId = allergen.id.toLowerCase();
+      
+      return englishName.includes(searchLower) ||
+             translatedName.includes(searchLower) ||
+             allergerId.includes(searchLower);
+    });
 
     // Search ingredients from API
     const matchingIngredients = ingredientsFromAPI
@@ -83,11 +90,13 @@ export default function AllergenFilter({
         type: "ingredient"
       }));
 
-    setSearchResults([
+    const finalResults = [
       ...matchingAllergens.map(a => ({ ...a, type: "allergen" })),
       ...matchingIngredients
-    ]);
-  }, [searchTerm, ingredientsFromAPI]);
+    ];
+    
+    setSearchResults(finalResults);
+  }, [searchTerm, ingredientsFromAPI, currentLanguage]);
 
   // Use new props if available, fallback to old props
   const currentAllergens = onAllergenToggle ? selectedAllergens : avoid;
@@ -167,7 +176,12 @@ export default function AllergenFilter({
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <span>{result.name}</span>
+                        <span>
+                          {result.type === "allergen" 
+                            ? getAllergenTranslation(result.id, currentLanguage as any)
+                            : result.name
+                          }
+                        </span>
                         {isIngredient && (
                           <span className="text-xs bg-blue-100 text-blue-600 px-1 rounded">ingredient</span>
                         )}
@@ -206,7 +220,7 @@ export default function AllergenFilter({
                       selected ? "text-white" : "text-gray-900"
                     }`}
                   >
-                    {allergen.name}
+                    {getAllergenTranslation(allergen.id, currentLanguage as any)}
                   </span>
                   {selected && (
                     <svg
@@ -245,7 +259,7 @@ export default function AllergenFilter({
                 }}
                 className="text-xs text-red-600 hover:text-red-800 font-medium"
               >
-                Clear All
+                {t('clearAll') || 'Clear All'}
               </button>
             </div>
             <div className="flex flex-wrap gap-1">
@@ -256,7 +270,7 @@ export default function AllergenFilter({
                     key={allergenId}
                     className="inline-flex items-center gap-1 bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs font-medium"
                   >
-                    <span>{allergen.name}</span>
+                    <span>{getAllergenTranslation(allergen.id, currentLanguage as any)}</span>
                     <button
                       onClick={() => toggleAllergen(allergenId)}
                       className="text-red-600 hover:text-red-800 ml-0.5 w-3 h-3 flex items-center justify-center"
@@ -320,7 +334,12 @@ export default function AllergenFilter({
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <span>{result.name}</span>
+                      <span>
+                        {result.type === "allergen" 
+                          ? getAllergenTranslation(result.id, currentLanguage as any)
+                          : result.name
+                        }
+                      </span>
                       {isIngredient && (
                         <span className="text-xs bg-blue-100 text-blue-600 px-1 rounded">ingredient</span>
                       )}
@@ -338,7 +357,7 @@ export default function AllergenFilter({
       
       {/* EU Mandatory Allergens Title */}
       <div className="text-sm font-medium text-gray-800 mb-2">
-        EU Mandatory Allergens
+        {t('mandatoryAllergens') || 'EU Mandatory Allergens'}
       </div>
       
       {/* Compact Allergens Grid */}
@@ -359,7 +378,7 @@ export default function AllergenFilter({
               `}
             >
               <div className="flex items-center justify-between w-full">
-                <span className="font-medium text-xs">{allergen.name}</span>
+                <span className="font-medium text-xs">{getAllergenTranslation(allergen.id, currentLanguage as any)}</span>
                 {selected && (
                   <span className="ml-2 text-xs text-red-600">✓</span>
                 )}
@@ -374,7 +393,7 @@ export default function AllergenFilter({
         <div className="bg-red-50 border border-red-200 rounded-md p-3">
           <div className="flex items-center justify-between mb-2">
             <h4 className="text-xs font-medium text-red-800">
-              Avoiding allergens ({currentAllergens.length})
+              {t('containsYourAllergens') || `Avoiding allergens`} ({currentAllergens.length})
             </h4>
             <button
               onClick={() => {
@@ -387,7 +406,7 @@ export default function AllergenFilter({
               }}
               className="text-xs text-red-600 hover:text-red-800"
             >
-              Clear All
+              {t('clearAll') || 'Clear All'}
             </button>
           </div>
           <div className="flex flex-wrap gap-1">

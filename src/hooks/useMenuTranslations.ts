@@ -80,6 +80,11 @@ export function useMenuTranslations() {
       fi: "Etsi allergeeneja...",
       sv: "Sök allergener...",
     },
+    searchIngredientsAllergens: {
+      en: "Search ingredients, allergens...",
+      fi: "Etsi aineksia, allergeeneja...",
+      sv: "Sök ingredienser, allergener...",
+    },
     avoidingAllergensCount: {
       en: "Avoiding allergens",
       fi: "Vältät allergeeneja",
@@ -169,6 +174,70 @@ export function useMenuTranslations() {
       en: "Show only modifiable dishes",
       fi: "Näytä vain muokattavat ruoat",
       sv: "Visa endast modificerbara rätter",
+    },
+    // Allergen translations
+    mandatoryAllergens: {
+      en: "EU Mandatory Allergens",
+      fi: "EU:n pakolliset allergeenit",
+      sv: "EU:s obligatoriska allergener",
+    },
+    containsYourAllergens: {
+      en: "Avoiding allergens",
+      fi: "Välttää allergeeneja",
+      sv: "Undviker allergener",
+    },
+    clearAll: {
+      en: "Clear All",
+      fi: "Tyhjennä kaikki",
+      sv: "Rensa alla",
+    },
+    // Category translations
+    category: {
+      en: "Category",
+      fi: "Kategoria",
+      sv: "Kategori",
+    },
+    all: {
+      en: "All",
+      fi: "Kaikki",
+      sv: "Alla",
+    },
+    // Header translations
+    secureAllergenMenu: {
+      en: "Secure Allergen Menu",
+      fi: "Turvallinen allergeenimenu",
+      sv: "Säker allergenmeny",
+    },
+    // Footer translations
+    securePrivate: {
+      en: "Secure & Private",
+      fi: "Turvallinen ja yksityinen",
+      sv: "Säker och privat",
+    },
+    verifiedIngredients: {
+      en: "Verified Ingredients",
+      fi: "Tarkastetut aineet",
+      sv: "Verifierade ingredienser",
+    },
+    realTimeUpdates: {
+      en: "Real-time Updates",
+      fi: "Reaaliaikaiset päivitykset",
+      sv: "Realtidsuppdateringar",
+    },
+    menuShieldHelps: {
+      en: "MenuShield helps you dine safely. Information is provided by",
+      fi: "MenuShield auttaa sinua ruokailemaan turvallisesti. Tiedot on toimittanut",
+      sv: "MenuShield hjälper dig att äta säkert. Information tillhandahålls av",
+    },
+    andUpdatedRegularly: {
+      en: "and updated regularly.",
+      fi: "ja päivitetään säännöllisesti.",
+      sv: "och uppdateras regelbundet.",
+    },
+    severeAllergiesWarning: {
+      en: "For severe allergies, always confirm with restaurant staff. We prioritize your safety above all.",
+      fi: "Vakavien allergioiden kohdalla varmista aina ravintolan henkilökunnalta. Turvallisuutesi on meille tärkeintä.",
+      sv: "För allvarliga allergier, bekräfta alltid med restaurangpersonalen. Vi prioriterar din säkerhet framför allt.",
     },
   };
 

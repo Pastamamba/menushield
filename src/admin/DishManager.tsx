@@ -6,6 +6,7 @@ import { calculateAllergensFromIngredients, getAllergenChips } from "../utils/al
 import { formatPrice, getCurrencySymbol } from "../utils/currency";
 import { useAdminTranslations } from "../hooks/useAdminTranslations";
 import { getDishTranslatedName, getDishTranslatedDescription } from "../utils/translationHelpers";
+import { getCategoryTranslation } from "../utils/categoryTranslations";
 
 import type { Dish, CreateDishRequest } from "../types";
 import type { AllergenLanguage } from "../utils/allergenTranslations";
@@ -134,8 +135,8 @@ export default function DishManager() {
           bVal = b.price || 0;
           break;
         case "category":
-          aVal = ((a.category as any)?.name || a.category || "").toLowerCase();
-          bVal = ((b.category as any)?.name || b.category || "").toLowerCase();
+          aVal = getCategoryTranslation((a.category as any)?.name || a.category || "", currentLanguage as any).toLowerCase();
+          bVal = getCategoryTranslation((b.category as any)?.name || b.category || "", currentLanguage as any).toLowerCase();
           break;
         case "ingredients":
           aVal = Array.isArray(a.ingredients) ? a.ingredients.length : 0;
@@ -161,10 +162,6 @@ export default function DishManager() {
   const allCategories = ["all", ...Array.from(new Set(dishes.map(d => {
     return (d.category as any)?.name || d.category || "Uncategorized";
   })))];
-
-  const getCategoryDisplayName = (dish: Dish) => {
-    return (dish.category as any)?.name || dish.category || "Uncategorized";
-  };
 
   const handleSort = (field: string) => {
     if (sortBy === field) {
@@ -289,7 +286,7 @@ export default function DishManager() {
               <option value="all">All Categories ({dishes.length})</option>
               {allCategories.slice(1).map(category => (
                 <option key={category} value={category}>
-                  {category} ({dishes.filter(d => ((d.category as any)?.name || d.category) === category).length})
+                  {getCategoryTranslation(category, currentLanguage as any)} ({dishes.filter(d => ((d.category as any)?.name || d.category) === category).length})
                 </option>
               ))}
             </select>
@@ -433,7 +430,7 @@ export default function DishManager() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       {((dish.category as any)?.name || dish.category) && (
                         <span className="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
-                          {(dish.category as any)?.name || dish.category}
+                          {getCategoryTranslation((dish.category as any)?.name || dish.category, currentLanguage as any)}
                         </span>
                       )}
                     </td>
@@ -627,8 +624,8 @@ export default function DishManager() {
                     {formatPrice(dish.price || 0, restaurant?.currency || 'SEK')}
                   </span>
                   {((dish.category as any)?.name || dish.category) && (
-                    <span className="px-3 py-1.5 bg-sage-50 text-sage-700 rounded-lg text-sm lg:text-base font-medium max-w-[140px] lg:max-w-none truncate" title={(dish.category as any)?.name || dish.category}>
-                      {(dish.category as any)?.name || dish.category}
+                    <span className="px-3 py-1.5 bg-sage-50 text-sage-700 rounded-lg text-sm lg:text-base font-medium max-w-[140px] lg:max-w-none truncate" title={getCategoryTranslation((dish.category as any)?.name || dish.category, currentLanguage as any)}>
+                      {getCategoryTranslation((dish.category as any)?.name || dish.category, currentLanguage as any)}
                     </span>
                   )}
                 </div>

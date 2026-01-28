@@ -5,6 +5,7 @@ import { analyzeDishSafety } from "../utils/dishAnalyzer";
 import { useSwipeNavigation } from "../hooks/useEnhancedTouchGestures";
 import { useMenuTranslations } from "../hooks/useMenuTranslations";
 import { getDishTranslatedName, getDishTranslatedDescription } from "../utils/translationHelpers";
+import { getCategoryTranslation } from "../utils/categoryTranslations";
 import LanguageSelector from "./LanguageSelector";
 import AllergenFilter from "./AllergenFilter";
 import DishCard from "./DishCard";
@@ -19,9 +20,11 @@ export default function GuestMenu() {
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [allergenSearchTerm, setAllergenSearchTerm] = useState("");
   const [showMobileFilter, setShowMobileFilter] = useState(false);
   const [showAllergenDisclaimer, setShowAllergenDisclaimer] = useState(false);
   const [showWelcomeInfo, setShowWelcomeInfo] = useState(true);
+  const [, forceUpdate] = useState(0);
   const menuSectionRef = useRef<HTMLDivElement>(null);
 
   // Enhanced touch gestures for mobile filter
@@ -59,6 +62,13 @@ export default function GuestMenu() {
       }
     }
   }, [selectedAllergens]);
+
+  // Force component re-render when language changes
+  useEffect(() => {
+    console.log('🔄 Language changed to:', currentLanguage);
+    // Force re-render
+    forceUpdate(prev => prev + 1);
+  }, [currentLanguage]);
 
   const handleAllergenDisclaimerAccept = () => {
     localStorage.setItem("allergen-disclaimer-accepted", "true");
@@ -378,7 +388,7 @@ export default function GuestMenu() {
                     clipRule="evenodd"
                   />
                 </svg>
-                Secure Allergen Menu
+                {t("secureAllergenMenu")}
               </div>
             </div>
             <div className="text-center">
@@ -463,27 +473,22 @@ export default function GuestMenu() {
               {/* Drawer Content */}
               <div className="flex-1 overflow-y-auto p-4 bg-warm-gray-50 space-y-6">
                 {/* Category Filter */}
-                <div className="bg-white rounded-lg p-4 border border-gray-100">
+                <div key={`category-filter-${currentLanguage}`} className="bg-white rounded-lg p-4 border border-gray-100">
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    {t("category") || "Category"}
+                    {getCategoryTranslation("Category", currentLanguage as any)}
                   </label>
                   <select
+                    key={`category-select-${currentLanguage}`}
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-colors text-sm"
                   >
                     <option value="all">
-                      {t("All") || "All"} ({dishes.length})
+                      {getCategoryTranslation("All", currentLanguage as any)} ({dishes.length})
                     </option>
                     {availableCategories.map((category) => (
                       <option key={category} value={category}>
-                        {category} (
-                        {
-                          dishes.filter(
-                            (d) => (d.category || "Other") === category,
-                          ).length
-                        }
-                        )
+                        {getCategoryTranslation(category, currentLanguage as any)} ({dishes.filter((d) => (d.category || "Other") === category).length})
                       </option>
                     ))}
                   </select>
@@ -500,9 +505,9 @@ export default function GuestMenu() {
                           : [...prev, allergen],
                       );
                     }}
-                    searchTerm={searchTerm}
-                    onSearchChange={setSearchTerm}
-                    searchPlaceholder="Search ingredients, allergens..."
+                    searchTerm={allergenSearchTerm}
+                    onSearchChange={setAllergenSearchTerm}
+                    searchPlaceholder={t("searchIngredientsAllergens")}
                     isMobile={true}
                   />
                 </div>
@@ -628,10 +633,10 @@ export default function GuestMenu() {
         {/* Desktop Filters - Elegant and minimal */}
         <div className="hidden lg:block mb-6 space-y-4">
           {/* Category Filter */}
-          <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+          <div key={`desktop-category-filter-${currentLanguage}`} className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-medium text-gray-700">
-                {t("Category") || "Category"}
+                {getCategoryTranslation("Category", currentLanguage as any)}
               </h3>
               {selectedCategory !== "all" && (
                 <button
@@ -644,6 +649,7 @@ export default function GuestMenu() {
             </div>
             <div className="flex flex-wrap gap-2">
               <button
+                key={`desktop-all-${currentLanguage}`}
                 onClick={() => setSelectedCategory("all")}
                 className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
                   selectedCategory === "all"
@@ -651,11 +657,11 @@ export default function GuestMenu() {
                     : "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200"
                 }`}
               >
-                All ({dishes.length})
+                {getCategoryTranslation("All", currentLanguage as any)} ({dishes.length})
               </button>
               {availableCategories.map((category) => (
                 <button
-                  key={category}
+                  key={`desktop-${category}-${currentLanguage}`}
                   onClick={() => setSelectedCategory(category)}
                   className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
                     selectedCategory === category
@@ -663,7 +669,7 @@ export default function GuestMenu() {
                       : "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200"
                   }`}
                 >
-                  {category} (
+                  {getCategoryTranslation(category, currentLanguage as any)} (
                   {
                     dishes.filter((d) => (d.category || "Other") === category)
                       .length
@@ -685,9 +691,9 @@ export default function GuestMenu() {
                     : [...prev, allergen],
                 );
               }}
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              searchPlaceholder="Search ingredients, allergens..."
+              searchTerm={allergenSearchTerm}
+              onSearchChange={setAllergenSearchTerm}
+              searchPlaceholder={t("searchIngredientsAllergens")}
             />
           </div>
         </div>
@@ -822,7 +828,7 @@ export default function GuestMenu() {
                     clipRule="evenodd"
                   />
                 </svg>
-                Secure & Private
+                {t("securePrivate")}
               </div>
               <div className="flex items-center">
                 <svg
@@ -836,7 +842,7 @@ export default function GuestMenu() {
                     clipRule="evenodd"
                   />
                 </svg>
-                Verified Ingredients
+                {t("verifiedIngredients")}
               </div>
               <div className="flex items-center">
                 <svg
@@ -846,16 +852,15 @@ export default function GuestMenu() {
                 >
                   <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Real-time Updates
+                {t("realTimeUpdates")}
               </div>
             </div>
             <p className="text-xs text-gray-400 mb-2">
-              MenuShield helps you dine safely. Information is provided by{" "}
-              {restaurant?.name || "the restaurant"} and updated regularly.
+              {t("menuShieldHelps")}{" "}
+              {restaurant?.name || "the restaurant"} {t("andUpdatedRegularly")}
             </p>
             <p className="text-xs text-gray-400">
-              For severe allergies, always confirm with restaurant staff. We
-              prioritize your safety above all.
+              {t("severeAllergiesWarning")}
             </p>
           </div>
         </div>

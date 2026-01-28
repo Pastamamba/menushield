@@ -3,6 +3,7 @@ import { getAllergenChips } from "../utils/allergenCalculator";
 import { formatPrice } from "../utils/currency";
 import { useCardGestures } from "../hooks/useEnhancedTouchGestures";
 import { getDishTranslatedName, getDishTranslatedDescription } from "../utils/translationHelpers";
+import { getCategoryTranslation } from "../utils/categoryTranslations";
 import type { AllergenLanguage } from "../utils/allergenTranslations";
 
 interface DishCardProps {
@@ -153,7 +154,7 @@ export default function DishCard({
       {dish.category && (
         <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-gray-50">
           <span className="text-xs text-gray-400 uppercase tracking-wide">
-            {dish.category}
+            {getCategoryTranslation(dish.category, language as any)}
           </span>
         </div>
       )}
