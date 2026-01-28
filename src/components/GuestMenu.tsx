@@ -4,6 +4,7 @@ import { useRestaurant } from "../contexts/RestaurantContext";
 import { analyzeDishSafety } from "../utils/dishAnalyzer";
 import { useSwipeNavigation } from "../hooks/useEnhancedTouchGestures";
 import { useMenuTranslations } from "../hooks/useMenuTranslations";
+import { getDishTranslatedName, getDishTranslatedDescription } from "../utils/translationHelpers";
 import LanguageSelector from "./LanguageSelector";
 import AllergenFilter from "./AllergenFilter";
 import DishCard from "./DishCard";
@@ -252,10 +253,14 @@ export default function GuestMenu() {
 
   // Filter dishes based on search term, category and active status
   let filteredDishes = dishes.filter((dish) => {
+    // Get translated content for search
+    const translatedName = getDishTranslatedName(dish, currentLanguage);
+    const translatedDescription = getDishTranslatedDescription(dish, currentLanguage);
+    
     const matchesSearch =
       searchTerm === "" ||
-      dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dish.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      translatedName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      translatedDescription?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       dish.ingredients.some((ingredient) =>
         ingredient.toLowerCase().includes(searchTerm.toLowerCase()),
       );

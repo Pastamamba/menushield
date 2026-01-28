@@ -2,6 +2,7 @@ import type { Dish, DishSafetyStatus } from "../types";
 import { getAllergenChips } from "../utils/allergenCalculator";
 import { formatPrice } from "../utils/currency";
 import { useCardGestures } from "../hooks/useEnhancedTouchGestures";
+import { getDishTranslatedName, getDishTranslatedDescription } from "../utils/translationHelpers";
 import type { AllergenLanguage } from "../utils/allergenTranslations";
 
 interface DishCardProps {
@@ -92,6 +93,10 @@ export default function DishCard({
     return "border-gray-100";
   };
 
+  // Get translated content
+  const translatedName = getDishTranslatedName(dish, language);
+  const translatedDescription = getDishTranslatedDescription(dish, language);
+
   return (
     <div
       className={`bg-white border rounded-lg p-3 relative ${getCardStyling()}`}
@@ -101,7 +106,7 @@ export default function DishCard({
       <div className="flex items-center justify-between mb-1.5">
         <div className="flex-1 min-w-0">
           <h3 className="text-xs font-medium text-gray-900 truncate">
-            {dish.name}
+            {translatedName}
           </h3>
         </div>
         {showPrices && dish.price && dish.price > 0 && (
@@ -113,9 +118,9 @@ export default function DishCard({
 
       {/* Description - Very compact with consistent spacing */}
       <div className="mb-2 min-h-[2rem] flex items-start">
-        {dish.description && (
+        {translatedDescription && (
           <p className="text-xs text-gray-500 line-clamp-2 leading-snug">
-            {dish.description}
+            {translatedDescription}
           </p>
         )}
       </div>

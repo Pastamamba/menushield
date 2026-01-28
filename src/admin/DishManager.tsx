@@ -5,6 +5,7 @@ import { useRestaurant } from "../utils/restaurantApi";
 import { calculateAllergensFromIngredients, getAllergenChips } from "../utils/allergenCalculator";
 import { formatPrice, getCurrencySymbol } from "../utils/currency";
 import { useAdminTranslations } from "../hooks/useAdminTranslations";
+import { getDishTranslatedName, getDishTranslatedDescription } from "../utils/translationHelpers";
 
 import type { Dish, CreateDishRequest } from "../types";
 import type { AllergenLanguage } from "../utils/allergenTranslations";
@@ -106,8 +107,12 @@ export default function DishManager() {
   // Advanced filtering and sorting
   const filteredAndSortedDishes = dishes
     .filter(dish => {
-      const matchesSearch = dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           dish.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      // Use translated names for search
+      const translatedName = getDishTranslatedName(dish, currentLanguage);
+      const translatedDescription = getDishTranslatedDescription(dish, currentLanguage);
+      
+      const matchesSearch = translatedName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           translatedDescription?.toLowerCase().includes(searchTerm.toLowerCase());
       
       const categoryName = (dish.category as any)?.name || dish.category || "Uncategorized";
       const matchesCategory = selectedCategory === "all" || categoryName === selectedCategory;
@@ -121,8 +126,8 @@ export default function DishManager() {
       let aVal, bVal;
       switch (sortBy) {
         case "name":
-          aVal = a.name.toLowerCase();
-          bVal = b.name.toLowerCase();
+          aVal = getDishTranslatedName(a, currentLanguage).toLowerCase();
+          bVal = getDishTranslatedName(b, currentLanguage).toLowerCase();
           break;
         case "price":
           aVal = a.price || 0;
@@ -137,8 +142,8 @@ export default function DishManager() {
           bVal = Array.isArray(b.ingredients) ? b.ingredients.length : 0;
           break;
         default:
-          aVal = a.name.toLowerCase();
-          bVal = b.name.toLowerCase();
+          aVal = getDishTranslatedName(a, currentLanguage).toLowerCase();
+          bVal = getDishTranslatedName(b, currentLanguage).toLowerCase();
       }
       
       if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
@@ -404,18 +409,22 @@ export default function DishManager() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedDishes.map((dish, index) => (
+                {paginatedDishes.map((dish, index) => {
+                  const translatedName = getDishTranslatedName(dish, currentLanguage);
+                  const translatedDescription = getDishTranslatedDescription(dish, currentLanguage);
+                  
+                  return (
                   <tr key={dish.id} className={`hover:bg-gray-50 transition-colors ${dish.is_active === false ? 'bg-gray-25 opacity-75' : ''} ${index % 2 === 0 ? '' : 'bg-gray-25'}`}>
                     <td className="px-6 py-4">
                       <div className="max-w-xs">
                         <div className="flex items-center">
                           <h4 className={`text-sm font-semibold truncate ${dish.is_active === false ? 'text-gray-500' : 'text-gray-900'}`}>
-                            {dish.name}
+                            {translatedName}
                           </h4>
                         </div>
-                        {dish.description && (
+                        {translatedDescription && (
                           <p className="text-sm text-gray-500 truncate mt-1 max-w-xs">
-                            {dish.description}
+                            {translatedDescription}
                           </p>
                         )}
                       </div>
@@ -512,7 +521,8 @@ export default function DishManager() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -580,18 +590,22 @@ export default function DishManager() {
       {viewMode === "grid" && (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-6">
-            {paginatedDishes.map((dish) => (
+            {paginatedDishes.map((dish) => {
+              const translatedName = getDishTranslatedName(dish, currentLanguage);
+              const translatedDescription = getDishTranslatedDescription(dish, currentLanguage);
+              
+              return (
               <div key={dish.id} className="bg-white shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all duration-200 border border-gray-100">
               {/* Card Content */}
               <div className="p-5">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1 mr-4">
-                    <h3 className="font-semibold text-gray-900 text-lg lg:text-xl line-clamp-2 mb-1" title={dish.name}>
-                      {dish.name}
+                    <h3 className="font-semibold text-gray-900 text-lg lg:text-xl line-clamp-2 mb-1" title={translatedName}>
+                      {translatedName}
                     </h3>
-                    {dish.description && (
+                    {translatedDescription && (
                       <p className="text-sm lg:text-base text-gray-500 line-clamp-3 mb-3">
-                        {dish.description}
+                        {translatedDescription}
                       </p>
                     )}
                   </div>
@@ -693,7 +707,8 @@ export default function DishManager() {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
         
         {/* Grid Pagination */}
