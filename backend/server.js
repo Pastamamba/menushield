@@ -11,6 +11,7 @@ import { PrismaClient } from "@prisma/client";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { TemplateTranslationService } from "./services/TemplateTranslationService.js";
 
 // Get __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -27,6 +28,9 @@ console.log("🎯 MenuShield v2.1 - Using MongoDB ingredient database");
 
 const prisma = new PrismaClient();
 const app = express();
+
+// Initialize template translation service
+const templateTranslationService = new TemplateTranslationService();
 
 // Helper to safely parse allergenTags as array
 function safeParseArray(val) {
@@ -2329,6 +2333,231 @@ app.post("/api/emergency/create-admin", async (req, res) => {
   } catch (error) {
     console.error('❌ Error creating emergency admin:', error);
     res.status(500).json({ error: 'Failed to create emergency admin' });
+  }
+});
+
+// =============================================================================
+// Template Translation API endpoints
+// =============================================================================
+
+// Single dish template translation
+app.post('/api/admin/dishes/template-translate', requireAuth, async (req, res) => {
+  try {
+    const { dishName, targetLanguage } = req.body;
+    
+    if (!dishName || !targetLanguage) {
+      return res.status(400).json({ 
+        error: 'dishName and targetLanguage are required' 
+      });
+    }
+
+    const result = await templateTranslationService.translateDishName(dishName, targetLanguage);
+    res.json(result);
+    
+  } catch (error) {
+    console.error('Template translation error:', error);
+    res.status(500).json({ error: 'Translation failed' });
+  }
+});
+
+// Bulk template translation for all dishes
+app.post('/api/admin/dishes/bulk-template-translate', requireAuth, async (req, res) => {
+  try {
+    const { targetLanguages = ['fi', 'sv'], overwrite = false } = req.body;
+    
+    // Get all dishes for the user's restaurant
+    const dishes = await prisma.dish.findMany({
+      where: {
+        restaurantId: req.user.restaurantId
+      }
+    });
+
+    let translated = 0;
+    let skipped = 0;
+
+    for (const dish of dishes) {
+      try {
+        // Parse existing translations and translated languages
+        let existingTranslations = {};
+        let existingTranslatedLanguages = [];
+
+        if (dish.translations) {
+          try {
+            existingTranslations = typeof dish.translations === 'string' 
+              ? JSON.parse(dish.translations) 
+              : dish.translations;
+          } catch (e) {
+            existingTranslations = {};
+          }
+        }
+
+        if (dish.translatedLanguages) {
+          try {
+            existingTranslatedLanguages = typeof dish.translatedLanguages === 'string'
+              ? JSON.parse(dish.translatedLanguages)
+              : dish.translatedLanguages;
+            
+            if (!Array.isArray(existingTranslatedLanguages)) {
+              existingTranslatedLanguages = [];
+            }
+          } catch (e) {
+            existingTranslatedLanguages = [];
+          }
+        }
+
+        let hasUpdates = false;
+        let translations = { ...existingTranslations };
+        let translatedLanguages = [...existingTranslatedLanguages];
+
+        // Translate to each target language
+        for (const targetLanguage of targetLanguages) {
+          if (!overwrite && translatedLanguages.includes(targetLanguage)) {
+            continue; // Skip if already translated and not overwriting
+          }
+
+          const result = await templateTranslationService.translateDishName(dish.name, targetLanguage);
+          
+          if (result.success && result.translation !== dish.name) {
+            if (!translations[targetLanguage]) translations[targetLanguage] = {};
+            translations[targetLanguage].name = result.translation;
+            translations[targetLanguage].confidence = result.confidence;
+            translations[targetLanguage].method = result.method;
+            
+            if (!translatedLanguages.includes(targetLanguage)) {
+              translatedLanguages.push(targetLanguage);
+            }
+            
+            hasUpdates = true;
+          }
+        }
+
+        // Update database if there are changes
+        if (hasUpdates) {
+          await prisma.dish.update({
+            where: { id: dish.id },
+            data: {
+              translations: JSON.stringify(translations),
+              translatedLanguages: JSON.stringify(translatedLanguages)
+            }
+          });
+          translated++;
+        } else {
+          skipped++;
+        }
+
+      } catch (error) {
+        console.error(`Error translating dish ${dish.id}:`, error);
+        skipped++;
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Successfully processed ${dishes.length} dishes`,
+      statistics: {
+        totalDishes: dishes.length,
+        translated,
+        skipped,
+        overwrite
+      }
+    });
+
+  } catch (error) {
+    console.error('Bulk translation error:', error);
+    res.status(500).json({ error: 'Bulk translation failed' });
+  }
+});
+
+// Get translation statistics
+app.get('/api/admin/translation/stats', requireAuth, async (req, res) => {
+  try {
+    // Get dishes for user's restaurant
+    const dishes = await prisma.dish.findMany({
+      where: {
+        restaurantId: req.user.restaurantId
+      },
+      select: {
+        id: true,
+        name: true,
+        translatedLanguages: true
+      }
+    });
+
+    // Calculate statistics
+    let dishesWithTranslations = 0;
+    let dishesWithoutTranslations = 0;
+
+    dishes.forEach(dish => {
+      let hasTranslations = false;
+      
+      if (dish.translatedLanguages) {
+        try {
+          const langs = typeof dish.translatedLanguages === 'string'
+            ? JSON.parse(dish.translatedLanguages)
+            : dish.translatedLanguages;
+            
+          if (Array.isArray(langs) && langs.length > 0) {
+            hasTranslations = true;
+          }
+        } catch (e) {
+          // Invalid JSON, no translations
+        }
+      }
+
+      if (hasTranslations) {
+        dishesWithTranslations++;
+      } else {
+        dishesWithoutTranslations++;
+      }
+    });
+
+    // Get template service stats
+    const templateStats = templateTranslationService.getStats();
+
+    res.json({
+      restaurant: {
+        totalDishes: dishes.length,
+        dishesWithTranslations,
+        dishesWithoutTranslations,
+        translationCoverage: dishes.length > 0 
+          ? Math.round((dishesWithTranslations / dishes.length) * 100) 
+          : 0
+      },
+      templateService: {
+        totalTemplates: templateStats.totalTemplates,
+        cacheSize: templateStats.cacheSize,
+        categories: templateStats.supportedCategories
+      }
+    });
+
+  } catch (error) {
+    console.error('Translation stats error:', error);
+    res.status(500).json({ error: 'Failed to get translation statistics' });
+  }
+});
+
+// Translation preview (test specific dish without saving)
+app.post('/api/admin/translation/preview', requireAuth, async (req, res) => {
+  try {
+    const { dishName, targetLanguages = ['fi', 'sv'] } = req.body;
+    
+    if (!dishName) {
+      return res.status(400).json({ error: 'dishName is required' });
+    }
+
+    const results = {};
+    for (const language of targetLanguages) {
+      results[language] = await templateTranslationService.translateDishName(dishName, language);
+    }
+
+    res.json({
+      originalName: dishName,
+      translations: results
+    });
+
+  } catch (error) {
+    console.error('Translation preview error:', error);
+    res.status(500).json({ error: 'Preview failed' });
   }
 });
 

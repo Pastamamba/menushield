@@ -73,6 +73,10 @@ model Category {
   displayOrder Int      @default(0) @map("display_order")
   isActive     Boolean  @default(true) @map("is_active")
   
+  // Translation fields
+  translations     String?  @map("translations")  // JSON string of translations
+  translatedLanguages String? @map("translated_languages") // JSON array of language codes
+  
   restaurantId String   @map("restaurant_id") @db.ObjectId
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   
@@ -91,6 +95,10 @@ model Ingredient {
   description  String?
   allergenTags Json?     @map("allergenTags")  // MongoDB field name is allergenTags (not allergen_tags)
   isActive     Boolean   @default(true) @map("is_active")
+  
+  // Translation fields
+  translations     String?  @map("translations")  // JSON string of translations
+  translatedLanguages String? @map("translated_languages") // JSON array of language codes
   
   // Make restaurantId optional - ingredients can be global
   restaurantId String?   @map("restaurant_id") @db.ObjectId
@@ -120,6 +128,10 @@ model Dish {
   isFeatured       Boolean  @default(false) @map("is_featured")
   displayOrder     Int      @default(0) @map("display_order")
   imageUrl         String?  @map("image_url")
+  
+  // Translation fields
+  translations     String?  @map("translations")  // JSON string of translations
+  translatedLanguages String? @map("translated_languages") // JSON array of language codes
   
   restaurantId     String   @map("restaurant_id") @db.ObjectId
   restaurant       Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
