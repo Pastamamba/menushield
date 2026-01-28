@@ -19,7 +19,9 @@ export const foodTemplates = {
       'vegetarian': { fi: 'Kasvis', sv: 'Vegetarisk' },
       'meat lovers': { fi: 'Lihanystävän', sv: 'Köttalskares' },
       'supreme': { fi: 'Supreme', sv: 'Supreme' },
-      'bbq chicken': { fi: 'BBQ-kana', sv: 'BBQ-kyckling' }
+      'bbq chicken': { fi: 'BBQ-kana', sv: 'BBQ-kyckling' },
+      'mac and cheese': { fi: 'Mac and cheese', sv: 'Mac and cheese' },
+      'macaroni and cheese': { fi: 'Makaroni ja juusto', sv: 'Makaroni och ost' }
     },
     components: {
       'tomato sauce': { fi: 'tomaattikastike', sv: 'tomatsås' },
@@ -37,7 +39,7 @@ export const foodTemplates = {
 
   pasta: {
     patterns: [
-      'pasta', 'spaghetti', 'penne', 'linguine', 'fettuccine', 'carbonara', 'bolognese', 'arrabiata'
+      'pasta', 'spaghetti', 'penne', 'linguine', 'fettuccine', 'carbonara', 'bolognese', 'arrabiata', 'mac', 'macaroni'
     ],
     translations: {
       'carbonara': { fi: 'Carbonara', sv: 'Carbonara' },

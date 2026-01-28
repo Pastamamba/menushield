@@ -36,7 +36,7 @@ export const ingredientTemplates = {
 
   // Vegetables
   vegetables: {
-    patterns: ['tomato', 'onion', 'garlic', 'carrot', 'potato', 'mushroom', 'pepper', 'spinach', 'lettuce'],
+    patterns: ['tomato', 'onion', 'garlic', 'carrot', 'potato', 'mushroom', 'pepper', 'spinach', 'lettuce', 'leeks', 'parsnips', 'rutabaga', 'brussels sprouts', 'cabbage', 'bok choy', 'watercress', 'swiss chard', 'eggplant', 'green beans', 'snow peas', 'sugar snap peas', 'okra', 'beets'],
     translations: {
       'tomato': { fi: 'tomaatti', sv: 'tomat' },
       'tomatoes': { fi: 'tomaatit', sv: 'tomater' },
@@ -52,7 +52,22 @@ export const ingredientTemplates = {
       'bell pepper': { fi: 'paprika', sv: 'paprika' },
       'pepper': { fi: 'pippuri', sv: 'peppar' },
       'spinach': { fi: 'pinaatti', sv: 'spenat' },
-      'lettuce': { fi: 'salaatti', sv: 'sallad' }
+      'lettuce': { fi: 'salaatti', sv: 'sallad' },
+      'mixed greens': { fi: 'sekalehtiö', sv: 'blandad sallad' },
+      'leeks': { fi: 'purjosipuli', sv: 'purjolök' },
+      'parsnips': { fi: 'palsternakka', sv: 'palsternacka' },
+      'rutabaga': { fi: 'lanttu', sv: 'kålrot' },
+      'brussels sprouts': { fi: 'ruusukaali', sv: 'brysselkål' },
+      'cabbage': { fi: 'kaali', sv: 'kål' },
+      'bok choy': { fi: 'paksoi', sv: 'pak choi' },
+      'watercress': { fi: 'vesikrassi', sv: 'vattenkrasse' },
+      'swiss chard': { fi: 'lehtijuurikas', sv: 'mangold' },
+      'eggplant': { fi: 'munakoiso', sv: 'aubergine' },
+      'green beans': { fi: 'vihreät pavut', sv: 'haricots verts' },
+      'snow peas': { fi: 'lumiherneenherne', sv: 'sockerärtor' },
+      'sugar snap peas': { fi: 'sokeriherne', sv: 'sockerärtor' },
+      'okra': { fi: 'okra', sv: 'okra' },
+      'beets': { fi: 'punajuuret', sv: 'rödbetor' }
     }
   },
 
@@ -84,13 +99,78 @@ export const ingredientTemplates = {
       'cilantro': { fi: 'korianteri', sv: 'koriander' },
       'mint': { fi: 'minttu', sv: 'mynta' }
     }
+  },
+
+  // Fruits
+  fruits: {
+    patterns: ['apple', 'pear', 'apricot', 'cherry', 'blackberry', 'elderberry', 'fruit'],
+    translations: {
+      'apples': { fi: 'omenat', sv: 'äpplen' },
+      'apple': { fi: 'omena', sv: 'äpple' },
+      'pears': { fi: 'päärynät', sv: 'päron' },
+      'pear': { fi: 'päärynä', sv: 'päron' },
+      'apricots': { fi: 'aprikoosit', sv: 'aprikoser' },
+      'apricot': { fi: 'aprikoosin', sv: 'aprikos' },
+      'cherries': { fi: 'kirsikat', sv: 'körsbär' },
+      'cherry': { fi: 'kirsikka', sv: 'körsbär' },
+      'blackberries': { fi: 'karhunvatamat', sv: 'björnbär' },
+      'blackberry': { fi: 'karhunvatukka', sv: 'björnbär' },
+      'elderberries': { fi: 'selja marjat', sv: 'fläderbär' },
+      'elderberry': { fi: 'seljamarja', sv: 'fläderbär' }
+    }
+  },
+
+  // Grains and cereals
+  grains: {
+    patterns: ['rice', 'oats', 'wheat', 'flour', 'grain'],
+    translations: {
+      'rice': { fi: 'riisi', sv: 'ris' },
+      'brown rice': { fi: 'ruskea riisi', sv: 'brunt ris' },
+      'oats': { fi: 'kaura', sv: 'havre' },
+      'wheat': { fi: 'vehnä', sv: 'vete' },
+      'wheat flour': { fi: 'vehnäjauho', sv: 'vetemjöl' },
+      'flour': { fi: 'jauho', sv: 'mjöl' }
+    }
+  },
+
+  // Specialty seafood
+  specialty_seafood: {
+    patterns: ['haddock', 'halibut', 'sole', 'sea bass', 'langostino', 'scallops', 'flounder', 'sea bream', 'king prawns', 'clams', 'cockles', 'abalone'],
+    translations: {
+      'haddock': { fi: 'kolja', sv: 'kolja' },
+      'halibut': { fi: 'pallas', sv: 'hälleflundra' },
+      'sole': { fi: 'kampela', sv: 'sjötunga' },
+      'sea bass': { fi: 'meribassi', sv: 'havsabborre' },
+      'langostino': { fi: 'langustiini', sv: 'langustin' },
+      'scallops': { fi: 'kampavieras', sv: 'kammusslor' },
+      'flounder': { fi: 'kampela', sv: 'fläckig kampela' },
+      'sea bream': { fi: 'kultakala', sv: 'dorada' },
+      'king prawns': { fi: 'jattikatkaravut', sv: 'kungsräkor' },
+      'clams': { fi: 'simpukat', sv: 'musslor' },
+      'cockles': { fi: 'sydänsimpukat', sv: 'hjärtmusslor' },
+      'abalone': { fi: 'merikorva', sv: 'havssnigel' }
+    }
+  },
+
+  // Specialty items
+  specialty: {
+    patterns: ['chorizo', 'creme fraiche', 'mascarpone', 'halloumi', 'quail'],
+    translations: {
+      'chorizo': { fi: 'chorizo', sv: 'chorizo' },
+      'creme fraiche': { fi: 'creme fraiche', sv: 'creme fraiche' },
+      'crème fraîche': { fi: 'creme fraiche', sv: 'creme fraiche' },
+      'mascarpone': { fi: 'mascarpone', sv: 'mascarpone' },
+      'halloumi': { fi: 'halloumi', sv: 'halloumi' },
+      'quail eggs': { fi: 'viiriaisen munat', sv: 'ägg från vaktel' },
+      'quail': { fi: 'viiriäinen', sv: 'vaktel' }
+    }
   }
 };
 
 export const categoryTemplates = {
-  // Main categories
+  // Main categories with enhanced translations
   main: {
-    patterns: ['appetizer', 'starter', 'main', 'dessert', 'beverage', 'drink', 'salad', 'soup', 'pasta', 'pizza'],
+    patterns: ['appetizer', 'starter', 'main', 'dessert', 'beverage', 'drink', 'salad', 'soup', 'pasta', 'pizza', 'side dish'],
     translations: {
       'appetizers': { fi: 'Alkuruoat', sv: 'Förrätter' },
       'appetizer': { fi: 'Alkuruoka', sv: 'Förrätt' },
@@ -113,7 +193,23 @@ export const categoryTemplates = {
       'soup': { fi: 'Keitto', sv: 'Soppa' },
       'pasta': { fi: 'Pasta', sv: 'Pasta' },
       'pizzas': { fi: 'Pizzat', sv: 'Pizzor' },
-      'pizza': { fi: 'Pizza', sv: 'Pizza' }
+      'pizza': { fi: 'Pizza', sv: 'Pizza' },
+      'side dishes': { fi: 'Lisukkeet', sv: 'Tillbehör' },
+      'side dish': { fi: 'Lisuke', sv: 'Tillbehör' }
+    }
+  },
+
+  // Food type categories
+  food_types: {
+    patterns: ['dairy', 'vegetables', 'fruits', 'grains', 'spices', 'nuts', 'proteins'],
+    translations: {
+      'dairy': { fi: 'Maitotuotteet', sv: 'Mejeriprodukter' },
+      'vegetables': { fi: 'Vihannekset', sv: 'Grönsaker' },
+      'fruits': { fi: 'Hedelmät', sv: 'Frukter' },
+      'grains': { fi: 'Viljat', sv: 'Spannmål' },
+      'spices': { fi: 'Mausteet', sv: 'Kryddor' },
+      'nuts': { fi: 'Pähkinät', sv: 'Nötter' },
+      'proteins': { fi: 'Proteiinit', sv: 'Proteiner' }
     }
   },
 
