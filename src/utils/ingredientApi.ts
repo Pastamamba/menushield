@@ -24,8 +24,7 @@ async function fetchIngredients(token: string, language = 'en'): Promise<Ingredi
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('🔍 fetchIngredients - error response:', errorText);
-      console.error('🔍 fetchIngredients - full response object:', response);
+
       throw new Error(`Failed to fetch ingredients: ${response.statusText}`);
     }
     

@@ -13,18 +13,12 @@ class PerformanceMonitor {
   endTimer(name: string): number {
     const startTime = this.startTimes.get(name);
     if (!startTime) {
-      console.warn(`Performance timer '${name}' was not started`);
       return 0;
     }
 
     const duration = performance.now() - startTime;
     this.metrics.set(name, duration);
     this.startTimes.delete(name);
-
-    // Log performance in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`⚡ Performance: ${name} took ${duration.toFixed(2)}ms`);
-    }
 
     return duration;
   }

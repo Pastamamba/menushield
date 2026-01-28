@@ -21,17 +21,9 @@ dotenv.config();
 
 // Only log in development
 const isDev = process.env.NODE_ENV !== "production";
-if (isDev) {
-  console.log("🔧 Environment check:");
-  console.log("NODE_ENV:", process.env.NODE_ENV);
-  console.log("PORT:", process.env.PORT);
-  console.log("DATABASE_URL exists:", !!process.env.DATABASE_URL);
-  console.log("JWT_SECRET exists:", !!process.env.JWT_SECRET);
-}
 
 // Force production to use MongoDB ingredients - v2.1
 console.log("🎯 MenuShield v2.1 - Using MongoDB ingredient database");
-console.log("🔗 DATABASE_URL:", process.env.DATABASE_URL?.slice(0, 50) + "...");
 
 const prisma = new PrismaClient();
 const app = express();
@@ -238,10 +230,8 @@ app.use(
 // Health check endpoint
 app.get("/health", async (req, res) => {
   try {
-    if (isDev) console.log("Health check requested");
     // Test database connection with MongoDB
     await prisma.$connect();
-    if (isDev) console.log("Database connection OK");
     res.status(200).json({
       status: "ok",
       timestamp: new Date().toISOString(),
@@ -261,7 +251,6 @@ app.get("/health", async (req, res) => {
 
 // Simple test endpoint that doesn't need database
 app.get("/ping", (req, res) => {
-  if (isDev) console.log("Ping received");
   res.status(200).json({
     message: "pong",
     timestamp: new Date().toISOString(),

@@ -76,7 +76,7 @@ export function getTranslatedText(
     // Return default field as last resort
     return field === 'name' ? entity.name : entity.description || '';
   } catch (error) {
-    console.warn('Failed to parse translations:', error);
+    // Silently fail and use fallback
     return field === 'name' ? entity.name : entity.description || '';
   }
 }
@@ -122,7 +122,7 @@ export function getTranslatedDish(
       modificationNote: translation.modificationNote || dish.modification_note || '',
     };
   } catch (error) {
-    console.warn('Failed to parse dish translations:', error);
+    // Silently fail and use fallbacks
     return {
       name: dish.name,
       description: dish.description || '',
@@ -167,7 +167,7 @@ export function updateTranslations(
     try {
       translations = JSON.parse(currentTranslations);
     } catch (error) {
-      console.warn('Failed to parse existing translations:', error);
+      // Use empty translations if parsing fails
     }
   }
 

@@ -27,7 +27,6 @@ const api = {
   getMenuBySlug: async (slug: string, language = 'en'): Promise<Dish[]> => {
     // Using Vite proxy now
     const url = `/api/menu/by-slug/${slug}?lang=${language}`;
-    console.log('🔍 PROXY MENU URL:', url);
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`Failed to fetch menu: ${response.status}`);
@@ -125,8 +124,6 @@ const api = {
 
   // Create dish
   createDish: async (dish: CreateDishRequest, token: string): Promise<Dish> => {
-    console.log('🍽️ Creating dish with data:', dish);
-    console.log('🔑 Using token:', token ? 'Token present' : 'No token');
     
     // Create a clean payload that matches backend expectations
     const payload = {
@@ -142,8 +139,6 @@ const api = {
       components: Array.isArray(dish.components) ? dish.components : []
     };
     
-    console.log('📤 Clean payload being sent:', JSON.stringify(payload, null, 2));
-    
     try {
       const response = await fetch("/api/admin/menu", {
         method: "POST",
@@ -154,30 +149,21 @@ const api = {
         body: JSON.stringify(payload),
       });
       
-      console.log('📡 Create dish response status:', response.status);
-      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
-      
       if (!response.ok) {
         let errorMessage = `Failed to create dish: ${response.status}`;
         try {
           const errorData = await response.json();
-          console.log('🚨 Error response data:', errorData);
           errorMessage = errorData.error || errorData.message || errorMessage;
         } catch (e) {
-          console.log('🚨 Could not parse error response as JSON');
           const textError = await response.text();
-          console.log('🚨 Error response text:', textError);
           errorMessage = textError || errorMessage;
         }
         throw new Error(errorMessage);
       }
       
       const result = await response.json();
-      console.log('✅ Create dish success:', result);
       return result;
     } catch (error) {
-      console.log('🚨 Backend create failed, falling back to local mock:', error);
-      
       // Fallback: Create mock dish and store locally
       const mockDish: Dish = {
         id: `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -204,7 +190,6 @@ const api = {
       existingDishes.push(mockDish);
       localStorage.setItem('localDishes', JSON.stringify(existingDishes));
       
-      console.log('💾 Dish saved locally:', mockDish);
       return mockDish;
     }
   },
