@@ -240,9 +240,14 @@ export function useMenuTranslations() {
       sv: "För allvarliga allergier, bekräfta alltid med restaurangpersonalen. Vi prioriterar din säkerhet framför allt.",
     },
     // Welcome message translations
+    welcomeToRestaurant: {
+      en: "Welcome to {restaurantName} Allergen-Safe Menu",
+      fi: "Tervetuloa {restaurantName} allergeeniturva menuun",
+      sv: "Välkommen till {restaurantName} allergensäkra meny",
+    },
     welcomeToAllergenMenu: {
       en: "Allergen-Safe Menu",
-      fi: "Allergeeniturva menu",
+      fi: "Allergeeniturva menu", 
       sv: "Allergensäker meny",
     },
     welcomeDescription: {

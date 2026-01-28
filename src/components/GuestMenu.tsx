@@ -579,7 +579,7 @@ export default function GuestMenu() {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-sm font-medium text-sage-800 mb-1">
-                    {t('welcomeToAllergenMenu') ? `Welcome to ${restaurant?.name || "our"} ${t('welcomeToAllergenMenu')}` : `Welcome to ${restaurant?.name || "our"} Allergen-Safe Menu`}
+                    {t('welcomeToRestaurant').replace('{restaurantName}', restaurant?.name || "our")}
                   </h3>
                   <p className="text-xs text-sage-700 leading-relaxed">
                     {t('welcomeDescription')}
