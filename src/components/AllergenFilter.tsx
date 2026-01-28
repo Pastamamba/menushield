@@ -77,15 +77,57 @@ export default function AllergenFilter({
              allergerId.includes(searchLower);
     });
 
-    // Search ingredients from API
+    // Search ingredients from API - search both translated name and original English name
     const matchingIngredients = ingredientsFromAPI
-      .filter(ingredient => 
-        ingredient.name.toLowerCase().includes(searchLower)
-      )
+      .filter(ingredient => {
+        const translatedName = ingredient.name.toLowerCase();
+        const searchTerm = searchLower;
+        
+        // Search in the translated name
+        if (translatedName.includes(searchTerm)) {
+          return true;
+        }
+        
+        // Search in original English name from translations field
+        if (ingredient.translations) {
+          try {
+            const translations = typeof ingredient.translations === 'string' 
+              ? JSON.parse(ingredient.translations) 
+              : ingredient.translations;
+            
+            // Try to find the original English name
+            let originalName = '';
+            if (translations.name?.en) {
+              originalName = translations.name.en;
+            } else if (translations.en?.name) {
+              originalName = translations.en.name;
+            }
+            
+            if (originalName && originalName.toLowerCase().includes(searchTerm)) {
+              return true;
+            }
+            
+            // Also search in all available translations
+            for (const lang in translations) {
+              if (typeof translations[lang] === 'object' && translations[lang].name) {
+                if (translations[lang].name.toLowerCase().includes(searchTerm)) {
+                  return true;
+                }
+              } else if (typeof translations[lang] === 'string' && translations[lang].toLowerCase().includes(searchTerm)) {
+                return true;
+              }
+            }
+          } catch (e) {
+            // Ignore JSON parsing errors
+          }
+        }
+        
+        return false;
+      })
       .slice(0, 10) // Limit to first 10 results
       .map(ingredient => ({
         id: ingredient.name, // Use actual ingredient name as ID
-        name: ingredient.name,
+        name: ingredient.name, // Use translated name for display
         color: "gray",
         type: "ingredient"
       }));
