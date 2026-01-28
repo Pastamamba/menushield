@@ -221,7 +221,7 @@ export default function AllergenFilter({
                         <span>
                           {result.type === "allergen" 
                             ? getAllergenTranslation(result.id, currentLanguage as any)
-                            : result.name
+                            : result.name.charAt(0).toUpperCase() + result.name.slice(1)
                           }
                         </span>
                         {isIngredient && (
@@ -379,7 +379,7 @@ export default function AllergenFilter({
                       <span>
                         {result.type === "allergen" 
                           ? getAllergenTranslation(result.id, currentLanguage as any)
-                          : result.name
+                          : result.name.charAt(0).toUpperCase() + result.name.slice(1)
                         }
                       </span>
                       {isIngredient && (
@@ -473,7 +473,7 @@ export default function AllergenFilter({
                     isIngredient ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
                   }`}
                 >
-                  <span>{allergen.name}</span>
+                  <span>{isIngredient ? allergen.name.charAt(0).toUpperCase() + allergen.name.slice(1) : allergen.name}</span>
                   {isIngredient && <span className="text-xs bg-blue-200 text-blue-600 px-1 rounded">ingredient</span>}
                   <button
                     onClick={() => toggleAllergen(allergenId)}

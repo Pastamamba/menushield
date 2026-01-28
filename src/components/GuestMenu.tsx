@@ -579,12 +579,10 @@ export default function GuestMenu() {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-sm font-medium text-sage-800 mb-1">
-                    Welcome to {restaurant?.name || "our"} Allergen-Safe Menu
+                    {t('welcomeToAllergenMenu') ? `Welcome to ${restaurant?.name || "our"} ${t('welcomeToAllergenMenu')}` : `Welcome to ${restaurant?.name || "our"} Allergen-Safe Menu`}
                   </h3>
                   <p className="text-xs text-sage-700 leading-relaxed">
-                    Select your allergens below to see only dishes that are safe
-                    for you. All ingredient information is carefully maintained
-                    and regularly updated.
+                    {t('welcomeDescription')}
                   </p>
                   <div className="flex items-center mt-2 text-xs text-sage-600">
                     <svg
@@ -598,7 +596,7 @@ export default function GuestMenu() {
                         clipRule="evenodd"
                       />
                     </svg>
-                    Always inform your server about severe allergies
+                    {t('informServerAboutAllergies')}
                   </div>
                 </div>
               </div>

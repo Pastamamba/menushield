@@ -239,6 +239,22 @@ export function useMenuTranslations() {
       fi: "Vakavien allergioiden kohdalla varmista aina ravintolan henkilökunnalta. Turvallisuutesi on meille tärkeintä.",
       sv: "För allvarliga allergier, bekräfta alltid med restaurangpersonalen. Vi prioriterar din säkerhet framför allt.",
     },
+    // Welcome message translations
+    welcomeToAllergenMenu: {
+      en: "Allergen-Safe Menu",
+      fi: "Allergeeniturva menu",
+      sv: "Allergensäker meny",
+    },
+    welcomeDescription: {
+      en: "Select your allergens below to see only dishes that are safe for you. All ingredient information is carefully maintained and regularly updated.",
+      fi: "Valitse allergeenisi alta nähdäksesi vain sinulle turvallisia ruokia. Kaikki ainestiedot pidetään huolellisesti yllä ja päivitetään säännöllisesti.",
+      sv: "Välj dina allergener nedan för att se endast rätter som är säkra för dig. All ingrediensinformation underhålls noggrant och uppdateras regelbundet.",
+    },
+    informServerAboutAllergies: {
+      en: "Always inform your server about severe allergies",
+      fi: "Kerro aina tarjoilijalle vakavista allergioistasi",
+      sv: "Informera alltid din servitör om allvarliga allergier",
+    },
   };
 
   const t = (key: keyof typeof translations): string => {
